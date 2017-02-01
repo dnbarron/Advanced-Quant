@@ -1,0 +1,524 @@
+---
+title: "Event Analysis"
+subtitle: "Event Counts and Event History Analysis"
+author: "David Barron"
+date: "Hilary Term 2017"
+fontsize: 10pt
+output: 
+  beamer_presentation:
+    theme: "Madrid"
+    toc: false
+    slide_level: 3
+    keep_tex: false
+    df_print: kable
+    fig_caption: false
+---
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_knit$set(width = 100)
+knitr::opts_chunk$set(comment =  '', echo=FALSE)
+knitr::opts_chunk$set(fig.width = 6, fig.asp = 0.618, fig.align = 'center', out.width = '90%')
+options('show.signif.stars'=FALSE)
+options('digits' = 3)
+#options(scipen=5)
+library(car)
+library(ggplot2)
+library(foreign)
+library(effects)
+library(descr)
+library(eha)
+library(dplyr)
+```
+
+# Introduction
+
+### Outline
+
+- Count data methods
+    - Contingency tables
+    - Poisson regression
+    - Negative binomial regression
+- Event History Analysis
+    - Basic Concepts
+    - Continuous time models
+    - Discrete time models
+    
+# Contingency Tables
+
+### 2-dimensional contingency tables
+
+The simplest way of dealing with counts is to create a _contingency table_.  Here is a very simple example:
+
+\tiny
+```{r}
+lfs <- haven::read_dta("C:/Users/dbarron/Dropbox/Teaching/MSc teaching/Advanced Quant/data/lfs2002.dta")
+lfs$numchild.a <- car::recode(lfs$numchild, "4:5=3")
+lfs$ptime <- car::recode(lfs$ptime, "''=NA")
+
+CrossTable(lfs$ptime, lfs$numchild.a, expected = TRUE, 
+           prop.r = FALSE, prop.c = FALSE, prop.t = FALSE, chisq = TRUE,
+           dnn = c('Works part time', 'Number of children'))
+```
+
+### Tests for association
+
+If there is no association between the two variables (i.e., they are independent), then the probability of a case falling into category row $i$ and category column $j$ is just determined by the probability of being in category $i$ multiplied by the probability of being in category $j$.
+$$
+\pi_{ij} = \pi_{i+}\pi_{+j}.
+$$
+
+### Testing independence
+
+We can convert this to a count by multiplying by the total number of cases in the table, $n.$ We can test the goodness of fit of this model, the null hypothesis being that any divergence from a perfect fit is due only to sampling error. Pearson's chi-squared statistic is:
+$$
+\chi^2 = \sum\sum \frac{(m_{ij} - \hat{m}_{ij})^2}{\hat{m}_{ij}},
+$$
+where $m_{ij}$ is the observed count in cell $ij$, and $\hat{m}_{ij}$ is the expected count under the null hypothesis.
+
+Alternatively, one can use a likelihood ratio chi-square ($G^2$):
+$$
+G^2 = 2 \sum\sum m_{ij} \log (m_{ij}/\hat{m}_{ij}).
+$$
+
+In both cases there are $(I-1)(J-1)$ degrees of freedom, where $I$ is the number of rows and $J$ is the number of columns in the table, respectively.
+
+
+### Extensions
+
+It is possible to extend this basic idea to higher dimensions of tables.  There are also methods that can be used for ordinal variables.  Graphical methods are often useful for showing more detail about the nature of the association.
+
+```{r, fig.asp=.7}
+xt2a <- xtabs(~ptime + numchild.a, lfs)
+
+mosaicplot(xt2a, shade=TRUE, main=NULL, xlab = 'Works part time', ylab = 'Number of children')
+
+```
+
+# Count regression methods
+
+## Poisson regression
+
+### Counts of events
+
+It is quite common to be faced with a requirement to analyse data that are _counts_ of the occurrence of some event.  Typical examples are number of new entries in a market, number of new rules created in an organization, number of job titles, visits to the doctor, number of complaints received, and many more. This implies that the variable can take only non-negative integer values.
+
+The most common starting point for analysing such data is by means of _Poisson regression_.  This is a GLM with a Poisson probability distribution.  This distribution is 
+$$
+\Pr(Y = y) = \frac{\exp(-\lambda) \lambda^y}{y!},
+$$
+$y = 0, 1, 2, \dots.$  The parameter of interest is $\lambda,$ which is interpreted as the _rate_ of occurrence of events in a given unit of time.  Because a rate must be non-negative, the most common link function is the exponential function
+$$
+\begin{aligned}
+\eta(x) &= \beta_0 + \beta_1 x_{i1} + \beta_2 x_{i2} + \dots + \beta_k x_{ik}; \\
+\lambda_i &= \exp(\eta(x)).
+\end{aligned}.
+$$
+
+### Poisson distribution
+
+```{r}
+pois.dta <- data.frame(x = 0:12, f = dpois(0:12, 3))
+ggplot(pois.dta, aes(x = x, y = f)) + geom_bar(stat = 'identity') + theme_bw() +
+  ylab('Pr(X = x)') + ggtitle(expression(lambda == 3))
+```
+
+### Example: labour unions
+
+Number of labour unions founded each year in the United States, 1837--1985.  
+
+```{r}
+union <- read.dta('C:/Users/dbarron/Dropbox/Teaching/MSc teaching/Advanced Quant/data/union2.dta')
+#ggplot(union, aes(x=YEAR,y=N)) + geom_line() + ylab('Number of unions') + xlab('Year')
+
+ggplot(union, aes(x=YEAR, y=FND)) + geom_bar(stat='identity') + theme_bw() +
+  ylab('Nunmber founded') + xlab('Year')
+
+# Outcome variable is number of unions founded per year
+# First, try OLS
+p1 <- glm(FND ~ poly(N, 2, raw = TRUE) + LAGF + AFL + NEWDEAL + TAFTH + AFLCIO + DEP, data = union, 
+          family = poisson)
+
+```
+
+### Poisson regression results
+
+\tiny
+```{r, out.width="40%"}
+summary(p1)
+```
+\normalsize
+The results are reasonably straightforward to interpret.  Each parameter and variable pair constitute a _multiplier_ of the rate.  So, for example, when there had been 10 foundings the previous year, the rate in the current year would be multiplied by $e^{0.462}=$ `r exp(0.462)`.
+
+
+### Effect plot
+
+```{r}
+plot(Effect('N', p1), rug = FALSE, ci.style = 'none', ylab = 'Multiplier of the rate',
+     main = 'Effect plot', type = 'response')
+```
+
+### Residuals, outliers, etc.
+
+As with linear and logistic regressions, it is possible to plot residuals and do various outlier tests.
+
+```{r, out.width=".5\\linewidth", fig.align='default', fig.asp = 0.8}
+residualPlot(p1)
+influencePlot(p1)
+```
+## Negative binomial regression
+
+### Overdispersion
+
+The Poisson model is based on quite stringent assumptions.  In our example, for instance, we are implicitly assuming that the rate of occurrence of foundings is constant during each year.  However, given that our model asserts that the rate depends on $N$ (which varies during the year), that seems implausible.  If it is not in fact true, we in effect have additional sources of variation in the rate that are unmodelled, leading to **overdispersion**.  The main problem caused by overdispersion is that estimated standard errors will be biased, usually downwards.  That is, we are at risk of rejecting the null hypothesis even when it is true.  We can solve this problem quite easily by using a method known as **negative binomial regression** as it has a negative binomial probability distribution.  The link function is the same as in the case of Poisson regression.  You can think of negative binomial regression as being Poisson regression with an additional parameter to model the overdispersion.
+
+### Negative binomial regression example
+
+\tiny
+```{r}
+n1 <- MASS::glm.nb(FND ~ poly(N, 2, raw = TRUE) + LAGF + AFL + NEWDEAL + TAFTH + AFLCIO + DEP, 
+                   data = union)
+summary(n1)
+```
+
+### Effect plot
+
+```{r}
+plot(Effect('N', n1), ci.style = 'none', type = 'response', main = 'Effect plot', 
+     ylab = 'Multiplier of the rate', rug = FALSE)
+```
+
+### Residuals, outliers, etc.
+
+```{r, out.width=".5\\linewidth", fig.align='default', fig.asp=0.8}
+residualPlot(n1)
+influencePlot(n1)
+
+#n1a <- update(n1, data = union[-61, ])
+#summary(n1a)
+```
+
+# Event history analysis
+
+## Basic principles
+
+### Analysis of time to events
+
+Methods known as _event history analysis_, _survival analysis_, or _duration analysis_ are used when we are interested in the length of time until an event occurs, known as an **episode** or **spell**.  We generally need at least two pieces of information: how long the spell lasts and how it ended.  We may also need to know the actual (calendar) time at which it started and ended, rather than just the duration.  Generally, some spells will end with the event of interest and some will not.  It is possible for there to be multiple possible outcomes, but we will not deal with these more complex cases.
+
+An example would be the lifespan of organizations.  If we know when they are founded and when they fail, then we can calculate the duration until they fail.  In addition, most likely there will be some that have not (yet) failed at the time of our observation.  These are called **censored** cases, and their existence is one of the main reasons we have to use special methods for the analysis of this type of data.  We can't just ignore censored cases, but on the other hand we can't treat them as being the same as cases that have actually ended; both of these would introduce bias into regression parameter estimates.
+
+
+### Basic concepts
+
+
+**Hazard rate**  The instantaneous rate at which events occur:
+$$
+r(t) = \lim_{\Delta t\rightarrow 0}\frac{\Pr(t \le T < t + \Delta t | T \ge t)}
+{\Delta t}
+$$
+**Survivor function.** The probability that a unit doesn't experience an event before time $t$.
+$$
+G(t) = 1 - F(t) = \Pr(T \ge t).
+$$
+From this, we can define the hazard rate as
+$$
+r(t) = \frac{f(t)}{G(t)}.
+$$
+
+
+### Survival data in R
+The most commonly used package is `survival`, but I also use the package `eha`.  Example data: duration of jobs.
+
+```{r}
+rrdat <- read.dta('C:/Users/dbarron/Dropbox/Teaching/MSc teaching/Advanced Quant/data/rrdat1.dta')
+
+rrdat1 <- mutate(rrdat, des = tfin != ti, 
+                 dur = tfin - tstart + 1,
+                 coho = factor(ifelse(tb >= 468 & tb <= 504,'coho2',
+                          ifelse(tb >= 588 & tb <= 624,'coho3','coho1'))),
+                 lfx = tstart - te,
+                 pnoj = noj - 1,
+                 sex = factor(sex, labels = c('man','woman'))
+)
+```
+
+```{r, echo=TRUE}
+rr.s <- Surv(rrdat1$dur, rrdat1$des)
+```
+
+The first variable is the duration and the second is the indicator of how the episode ended (0/1 or TRUE/FALSE).  This will be the outcome variable in our regression analyses.
+
+
+### Kaplan-Meier estimator
+
+There are $q$ points in time at which at least one event occurs. There are $l$ intervals between these $q$ points. Then the Kaplan-Meier (or product limit) estimate of the survivor function is
+$$
+\widehat{G}(t) = \prod_{l:\tau_l<t} \left(1 - \frac{E_l}{R_l}\right).
+$$
+From this we can also calculate the cumulative hazard:
+$$
+\widehat{H}(t) = -\log\left(\widehat{G}(t)\right).
+$$
+
+### Example
+
+\tiny
+
+```{r}
+s1 <- survfit(rr.s ~ 1)
+summary(s1, times = 1:20)
+```
+
+
+
+### Estimates of G and H
+
+```{r, out.width="45%", fig.align='default', fig.asp = .8}
+plot.Surv(rr.s)
+plot.Surv(rr.s, fn='surv')
+```
+
+
+### Stratified survivor functions
+
+```{r}
+plot(ss2 <- survfit(rr.s ~ sex, data = rrdat1), col = c('blue','red'), mark.time = FALSE)
+ss2
+#legend(300,.9,legend=c('Men','Women'),lty=1,col=c('blue','red'), bty='n')
+
+```
+
+## Continuous time models
+
+### Parametric rate models
+
+Parametric rate models are used for events that occur in continuous time and where we are interested in finding out something about the nature of duration dependence on the rate.  Define $c_i = 0$ for episodes that end in an event and $c_i=1$ for those that are censored. The likelihood can then be written:
+$$
+\mathcal{L} = \prod_{i=1}^n f(t_i)^{1-c_i} G(t_i)^c_i.
+$$
+
+The basic model is $r_1(t) = r_0(t) \exp(X\beta).$
+
+### Exponential distribution
+
+The simplest distribution that we can use is the exponential distribution.
+
+$$
+\begin{aligned}
+r &= \exp(X\beta)\\
+G(t) &= \exp(-r t)\\
+f(t) &= r \exp(-r t)
+\end{aligned}
+$$
+If events occur during some interval with an exponential distribution at a rate $r$, then a count of events during the same interval will have a Poisson distribution with mean $1/r$.  Notice that this is the only model in which there is no time-dependence in the hazard rate.
+
+
+### Example
+
+\scriptsize
+```{r}
+ct1 <- phreg(rr.s ~ edu + coho + lfx + pnoj + pres, data = rrdat1, shape = 1)
+summary(ct1)
+```
+
+
+### Estimated survivor and hazard functions
+
+```{r, out.width="45%", fig.align='default', fig.asp = 0.8}
+plot(ct1, 'haz', main = 'Exponential hazard function')
+plot(ct1, 'sur', main = 'Exponential survivor function')
+
+```
+
+
+### Interpretation
+
+\small
+The baseline hazard rate ($h_0(t)$) is multiplied by the estimated effects.  For example, the variable `edu` has a minimum value of 9 and a maximum of 19. At its minimum, the multiplier of the baseline hazard is $\exp(0.077 \times 9) = 2.00$, while at the maximum the multiplier is $\exp(0.077 \times 19) = 4.32$.  The multiplier can be plotted:
+
+```{r}
+plot(9:19, exp(.077 * 9:19), type = 'l', xlab = 'Education', ylab = 'Hazard multiplier')
+
+```
+
+
+### Piece-wise exponential
+
+A very flexible alternative is to specify durations that will have the same rate, but allow the rate to differ across these periods.  Suppose we hypothesize that the hazard rate differs for survival times less than 100 months, between 100 and 200 months, 200 and 300 months, and over 300 months, but is constant within these periods.
+
+
+### Example
+
+\scriptsize
+```{r}
+ct2 <- phreg(rr.s ~ edu + coho + lfx + pnoj + pres, data = rrdat1, dist = 'pch',
+             cuts = c(100, 200, 300))
+summary(ct2)
+```
+
+
+### Piecewise constant hazard
+
+```{r}
+plot(ct2, 'haz', main = 'Piecewise constant hazard function')
+```
+
+
+### Goodness of fit test
+
+The exponential and piecewise exponential are nested models, so can be tested against each other using a simple likelihood ratio test.
+$$
+LR = -2 (L_0 - L_1)
+$$
+where $L_0$ is the maximum log likelihood from the simpler model, and $L_1$ is the equivalent for the more complex model. The test statistic has a chi-square distribution with degrees of freedom equal to the number of extra parameters in the second model.
+$$
+LR = -2 \times (-2466 - -2439) = 54
+$$
+with 3 degrees of freedom, which is highly significant, so we can conclude that the piecewise model fits better than the simple exponential model.
+
+
+### Weibull hazard rate
+
+$$
+r(t) = \frac{p}{\lambda} \left( \frac{t}{\lambda} \right)^{(p-1)} \exp(Xb)
+$$
+The exponential model is obtained when $p = 1,$ so it is straightforward to do a hypothesis test of Weibull against exponential.  Therefore $r = 1/\lambda.$
+
+
+### Example
+
+\scriptsize
+```{r}
+ct3 <- phreg(rr.s ~ edu + coho + lfx + pnoj + pres, data = rrdat1, x = TRUE)
+summary(ct3)
+```
+
+### Rate plots
+
+```{r, out.width="45%", fig.align='default', fig.asp = 0.8}
+plot(ct3, 'haz', main = 'Weibull hazard rate')
+plot(ct3, 'sur', main = 'Weibull survivor function')
+```
+
+
+### Predicted hazard
+
+```{r}
+basehaz.weib <- function(obj, new.data){
+  if (is.null(obj$x))
+    stop('Need x, rerun phreg with x = TRUE')
+  dist <- obj$dist
+  nvar <- length(obj$coefficients)
+  b <- obj$coefficients
+  if (dist == 'weibull' & !obj$pfixed){
+    scale <- exp(b[nvar - 1])
+    shape <- exp(b[nvar])
+    b <- b[1:(nvar - 2)]
+    t <- obj$y[,'time']
+    ix <- obj$y[,'status'] == 1
+    t <- sort(t[ix])
+    basehaz <- (shape / scale) * (t / scale)^(shape - 1)
+    list(t = t, basehaz = basehaz)
+  }
+}
+
+effect.weib <- function(obj, var, new.data=NULL){
+ # bh <- basehaz.weib(obj, NULL)
+  b <- obj$coefficients
+  nvar <- length(b) - 2
+  b <- b[1:nvar]
+  xnm <- names(b)
+  x <- obj$means
+  ix <- match(var, xnm)
+  x <- x[-ix]
+  bb <- b[-ix]
+  haz <- exp(x %*% bb)
+  xx.min <- min(obj$x[, var], na.rm = TRUE)
+  xx.max <- max(obj$x[, var], na.rm = TRUE)
+  xx <- seq(xx.min, xx.max, length.out = 20)
+  haz <- haz * exp(b[ix] * xx)
+  return(list(x = xx, hazard = haz))
+}
+
+ed.ef <- effect.weib(ct3,'edu')
+
+bh3 <- basehaz.weib(ct3, NULL)
+#plot(bh3[[1]],bh3[[2]], type='l')
+
+plot(bh3[[1]], bh3[[2]]*ed.ef[['hazard']][1], type = 'l', ylim=c(0,.03), xlab='Time',ylab='Hazard rate')
+lines(bh3[[1]], bh3[[2]]*ed.ef[['hazard']][20])
+text(100,.020,'edu=19')
+text(100,.010,'edu=9')
+```
+
+
+### Lognormal distribution
+
+\tiny
+```{r}
+ct4 <- phreg(rr.s ~ edu + coho + lfx + pnoj + pres, data = rrdat1, dist = 'lognormal')
+summary(ct4)
+```
+
+### Lognormal hazard
+
+```{r}
+plot(ct4, 'haz', main = 'Lognormal hazard rate')
+```
+
+### Cox regression
+
+This model may be written
+$$
+\log[r(t)] = \beta_0(t) + \beta_1 x_1(t) + \beta_2 x_2(t) + \cdots,
+$$
+When the covariates are constant over time, the ratio of the hazard rates for any pair of individuals will not depend on time. The partial likelihood estimator discards information about time, using
+only the order in which events occurred. This means some loss of efficiency, but it is typically very small. Also, we cannot obtain estimates of the dependence of the hazard on time. In many applications this doesn't matter; we are only interested in the effects of covariates.
+
+### Example
+
+\scriptsize
+```{r}
+cr1 <- coxreg(rr.s ~ edu + coho + lfx + pnoj + pres, data = rrdat1)
+summary(cr1)
+```
+
+## Discrete time 
+
+### Discrete time models
+
+Used when events can only occur at fixed, discrete time points. Sometimes also used when data can only be \emph{measured} at discrete time points, typically whether an event occurred at some point during a year. If $P_i(t)$ is the  probability of individual $i$ experiencing an event at time $t$, we can use logistic regression:
+$$
+\log\left(\frac{P_i(t)}{1-P_i(t)}\right) = b_0(t) + b_1 x_1(t) + b_2
+x_2(t) + \dots.
+$$
+If data are collected annually, then each unit has one observation per year until it experiences an event or is censored. $b_0(t)$ is the baseline hazard.  In the example, I define it to be $\log(t).$
+
+
+### Example
+
+\scriptsize
+```{r}
+cuts <- seq(12, 428, by = 12)
+rrdat2 <- survSplit(data = rrdat1, cut = cuts, end = 'dur', event = 'des', start = 'start', episode = 'epi')
+
+dt1 <- glm(des ~ log(dur) + edu + coho + lfx + pnoj + pres, data = rrdat2, family = binomial)
+summary(dt1)
+```
+
+### Estimated hazard rate
+
+```{r}
+plot(Effect('dur',dt1), rug = FALSE, ci.style = 'none', main = 'Hazard rate',
+     type = 'response')
+
+```
+
+
+### Education effect
+
+```{r}
+plot(Effect(c('edu', 'dur'), dt1), x.var = 'dur', ci.style = 'none', rug = FALSE, 
+     main = 'Hazard rate')
+```

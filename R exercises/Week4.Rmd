@@ -1,0 +1,146 @@
+---
+title: "Week 4 Practical Session"
+author: "David Barron"
+date: "Hilary Term 2017"
+output:
+  pdf_document: default
+---
+
+
+```{r options, echo=FALSE, message=FALSE}
+library(knitr)
+opts_chunk$set(comment=NA, tidy=TRUE)
+library(car)
+library(effects)
+library(arm)
+```
+
+## Poisson regression
+Poisson regression is used with count data. An example is data on interlocking directorates in 248 major Canadian firms in 1976. An "interlock" is created when two firms share one or more directors. Let's look at the data:
+
+
+```{r desc}
+data(Ornstein)
+f <- xtabs(~ interlocks, Ornstein)
+m <- mean(Ornstein$interlocks)
+s <- sd(Ornstein$interlocks)
+x <- as.numeric(names(f))
+plot(dnorm(x, m, s), col ='red', type = 'l', ylim = c(0, 0.12))
+lines(x, f / sum(f), type = 'h')
+points(x, f / sum(f), pch = 16)
+```
+
+A variable like this could be analysed using linear regression, but it's not hard to see that it is a long way from being normally distributed. So, let's try poisson regression.
+
+```{r poisson}
+p1 <- glm(interlocks ~ log(assets) + nation + sector, family = poisson, data = Ornstein)
+summary(p1)
+Anova(p1)
+plot(Effect('assets', p1, xlevels = list(assets = 50)), rescale.axis = FALSE)
+plot(Effect('nation', p1))
+plot(Effect('sector', p1))
+```
+
+Let's compare with negative binomial regression.
+```{r negbin}
+library(MASS)
+p2 <- glm.nb(interlocks ~ log(assets) + nation + sector, data = Ornstein)
+summary(p2)
+Anova(p2)
+plot(Effect('assets', p2, xlevels = list(assets = 50)))
+plot(Effect('nation', p2))
+plot(Effect('sector', p2))
+```
+
+The negative binomial is clearly a better fit.  This is very common in practice.
+The parameter estimates are very similar in the two sets of results, but notice that standard errors in the negative binomial results are larger.  In fact `sector` no longer improves the fit of the model. This is common, and is one of the main reasons for preferring negative binomial regression; estimates of standard errors can be severly biased when there is significant overdispersion.
+
+# Event history analysis
+
+## Descriptive 
+
+We will use a dataset called `Rossi` in the `GlobalDeviance` package.  These data are about recidivism in a group of 432 male prisoners, who were observed for a year after being released from prison.  The variables are:
+
+* `week`: week of first arrest after release, or censoring time;
+* `arrest`: indicator, 1 if person arrested during perion of study, 0 otherwise;
+* `fin`: indicator,  1 if person received financial support after release, 0 otherwise;
+* `age`: at time of release;
+* `race`: indicator, 1 = `black` or 0 = `other`;
+* `wexp`: indicator, 1 if person had full-time work experience prior to prison, 0 otherwise;
+* `mar`: indicator, 1 = `married` at time of release, 0 = `non married` otherwise;
+* `paro`: indicator, 1 if person was released on parole, 0 otherwise;
+* `educ`: level of education, in 6 categories;
+* `emp1`-`emp52`: 1 if person employed in corresponding week, 0 otherwise.
+
+
+```{r rossi}
+library(eha)
+library(GlobalDeviance)
+data(Rossi)
+
+summary(survfit(Surv(Rossi$week, Rossi$arrest) ~ 1, data = Rossi))
+```
+
+
+These data are in wide format.  We need to transform them in to long format. Having done so, you can see that the estimates survival function is the same.
+
+```{r reshape, message=FALSE}
+library(tidyverse)
+library(stringr)
+
+# First, add an ID variable (will be useful later)
+Rossi <- Rossi %>% mutate(id = row_number())
+
+# Convert to long format
+Rossi.long <- Rossi %>% gather(emp, employed, starts_with('emp')) %>% 
+  # remove missing data
+  filter(!is.na(employed)) %>% 
+  # calculate times at start and end of week
+  mutate(end = as.numeric(str_sub(emp, 4, -1)),
+         start = end - 1) %>%
+  # sort so easier to check visually
+  arrange(id, start) %>%  
+  # new censoring indicator
+  mutate(arrest_start = ifelse(arrest == 1 & week == end, 1, 0),  
+         employed = factor(employed, labels = c('no', 'yes'))) %>%  
+  as_data_frame()
+
+summary(survfit(Surv(Rossi.long$start, Rossi.long$end, Rossi.long$arrest_start) ~ 1, 
+                data = Rossi.long))
+```
+
+The reason for doing this is to allow time varying covariates to be included in the analysis.  In this case the explanatory variable is whether the person is in employment, the outcome variable is whether the person is arrested.  Now we can do regressions using these data, but lets start with a KM plot.
+
+```{r km}
+r.surv <- Surv(Rossi.long$start, Rossi.long$end, Rossi.long$arrest_start)
+plot(r.surv, strata=Rossi.long$employed, fn = 'surv', conf = NULL)
+```
+
+This suggests that people in employment are less likely to be arrested.  Let's try a regression.
+
+```{r regressions}
+mod1 <- phreg(r.surv ~ employed, data = Rossi.long, shape = 1)
+summary(mod1)
+mod2  <- phreg(r.surv ~ strata(employed), data = Rossi.long)
+summary(mod2)
+-2 * (mod1$loglik[2] - mod2$loglik[2])
+mod3 <- phreg(r.surv ~ employed, data = Rossi.long, dist = 'pch', cuts = seq(10, 50, by = 10))
+summary(mod3)
+plot(mod3, fn = 'haz')
+```
+
+No real evidence of a non-monotonic hazard function, so Weibull looks best. Plot the two hazard functions to get a visual impression of the size of the difference.
+
+```{r plot}
+plot(mod2, fn = 'haz', main = 'Weibull hazard rate')
+```
+
+## Homework
+Focus on event count analysis; event history analysis is a level up in difficulty!
+
+1. Use the dataset `NMES1988`, which is in the `AER` package (which you will need to install if you haven't already).  Have a look at the help page for details.
+2. The outcome variable of interest is `visits`, the number of visits to a doctor.  Try plotting a histogram of this variable.
+3. Try a poisson regression using one or more of the following variable as explanatory variables: hospital, health, chronic, gender, school, and insurance.
+4. Make sure you can interpret the results. For example, how many more (or less) hospital visits are made by a typical man than a typical woman?
+5. Is there evidence of overdispersion?
+

@@ -1,0 +1,456 @@
+---
+title: "Further topics in linear regression"
+subtitle: "Part 2"
+author: "David Barron"
+date: "Hilary Term 2017"
+fontsize: 10pt
+output: 
+  beamer_presentation:
+    theme: "Madrid"
+    toc: false
+    slide_level: 3
+    keep_tex: true
+    df_print: kable
+    fig_caption: false
+---
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_knit$set(width = 100)
+knitr::opts_chunk$set(comment =  '', echo = FALSE, fig.width=6, fig.asp=0.618, out.width = '90%', fig.align = 'center')
+options('show.signif.stars' = FALSE)
+options('digits' = 3)
+options(scipen = 5)
+library(car)
+library(ggplot2)
+library(foreign)
+library(effects)
+library(lmtest)
+library(sampleSelection)
+library(mvtnorm)
+
+```
+
+# Regression diagnostics
+
+## Outliers
+
+### What to look for
+
+We must identify observations with high **leverage**; that is, with an unusual $x$ value _and_ that is out of line with the other observations.  In the figure, the first graph shows an outlier with low leverage because it is close to the centre of the $x$ values. The second graph shows a high leverage outlier.  The third graph doesn't really have an outlier.  Although there is one unusual observation, it is in line with the other cases.  Only in the second graph does deletion of the outlier have much of an impact on the regression line.
+
+
+
+### High leverage outliers
+
+![leverage](regdiag_fig1.pdf)
+
+
+
+### Example
+
+\large
+Attitudes to inequality
+
+\footnotesize
+Data from World Values Survey 1990.  _secpay_: attitude to two secretaries with the same jobs getting paid different amounts if one is better at the job than the other.  1=Fair, 2=Unfair. Variable is the national average. _gini_: the gini coefficient of income inequality in the country. 0=perfect equality, 1=perfect inequality. _gdp_: GDP per capita in US dollars; _democracy_: 1=experienced democratic rule for at least 10 years. **Here we look only at non-democratic countries**.
+
+\scriptsize
+```{r, echo=FALSE}
+weak <- read.table('Weakliem.txt', header = TRUE)
+weak.nondem <- weak[weak$democrat == 0, ]
+weak1 <- lm(secpay ~ gini + gdp, data = weak.nondem)
+summary(weak1)
+
+```
+
+### Scatterplot
+```{r}
+outlie <- c(7,26)
+weak2 <- update(weak1, data = weak.nondem[-outlie, ])
+weak.outlie <- weak.nondem[outlie, ]
+ggplot(weak.nondem, aes(x = gini, y = secpay)) + geom_point() + theme_bw() +
+  xlab('Gini coefficient') + ylab('Attitudes towards inequality') +
+  geom_abline(intercept = 1.03, slope = 7.42e-4) + 
+  geom_abline(intercept = 0.893, slope = 5.25e-3, colour = 'red') + 
+  ylim(1, 1.65) + 
+  geom_text(data = weak.outlie, aes(label = rownames(weak.outlie), hjust = 'left'), nudge_x = 0.5) + 
+  annotate('text', x = 56, y = 1.15, label = 'Without outliers') +
+  annotate('text', x = 56, y = 1.05, label = 'With outliers')
+```
+
+### Hat values
+
+The hat value is a common way of measuring leverage.  Fitted values can be expressed
+in terms of observed values:
+$$
+\hat{y}_{j} = h_{1j} y_1 + h_{2j} y_2 + \dots + h_{jj} y_j + \dots + h_{nj} y_n = \sum_{i=1}^n h_{ij} y_i.
+$$
+
+So, the weight, $h_{ij},$ captures the extent to which $y_i$ can affect $\hat{y}_j.$  It may be shown that $h_i$ summarizes the potential influence of $y_i$ on all the fitted values. They are bounded by $1/n$ and 1. The average hat-value is $(k+1)/n.$ Values twice this considered noteworthy (some people use three times).
+
+### Hat values plot
+```{r}
+weak.inf <- influence.measures(weak1)
+weak.inf <- data.frame(weak.inf$infmat)
+weak.inf$ID <- 1:dim(weak.inf)[1]
+weak.inf$Country <- rownames(weak.inf)
+hat2 <- 2 * 3/26
+hat3 <- 3 * 3/26
+
+ggplot(weak.inf, aes(x = ID)) + geom_point(aes(y = hat)) + theme_bw() +
+  geom_abline(intercept = hat2, slope = 0, colour = 'blue') + ylab('Hat value') + 
+  annotate('text', x = 3.2, y = 0.26, label = 'Brazil', hjust = 'left') + 
+  annotate('text', x = 8.2, y = 0.24, label = 'Slovenia', hjust = 'left') + 
+  annotate('text', x = 5.2, y = 0.247, label = 'Chile')
+```
+
+\footnotesize
+Note that there are some cases with bigger hat values that the two influential cases. Shows limitation of hat values.
+
+### Studentized residuals
+
+If we refit the model deleting the $i$th observation, we obtain estimate of the standard deviation of residuals, $\sigma_{-i}$ based on $n-1$ cases.
+
+$$
+\epsilon_i^t = \frac{\epsilon_i}{\sigma_{-i} \sqrt{1-h_i}}
+$$
+
+Studentized residuals follow a $t$-distribution with $n-k-2$ degrees of freedom. Observations outside $\pm 2$ range statistically significant.
+
+Significance tests have to be corrected for multiple comparisons.  This is done for you using the `outlierTest` function in the `car` package.
+
+\scriptsize
+```{r}
+outlierTest(weak1, 0.5)
+```
+
+### Studentized residuals plot
+
+```{r}
+rs <- rstudent(weak1)
+rs.dta <- data.frame(ID = weak.inf$ID, Country = rownames(weak.inf), Residuals = rs)
+ggplot(rs.dta, aes(x = ID, y = Residuals)) + geom_point() + theme_bw() + 
+  geom_hline(yintercept = 2, colour = 'blue') + ylab('Studentized residuals') + 
+  geom_text(data = rs.dta[outlie, ], aes(label = Country, vjust = 'top'), nudge_y = -0.1)
+```
+
+### DFBETA
+
+A direct measure of the influence of an observation on regression parameter estimates is:
+$$
+d_{ij} = b_j - b_{j(-i)}
+$$
+
+where $b_{j(-i)}$ is the estimate of $\beta_j$ with the $i$th observation omitted. These
+differences are usually scaled by (omitted) estimates of the standard error of $b_j$:
+$$
+d_{ij}^* = \frac{d_{ij}}{s_{(-i)}(b_j)}.
+$$
+The $d_{ij}$ are often termed DFBETA and the $d_{ij}^*$ are called DFBETAS.
+
+
+### DFBETA plot
+
+```{r}
+ggplot(weak.inf, aes(y = dfb.gdp, x = dfb.gini)) + geom_point() + theme_bw() + 
+  xlab('DFBETAS for gini coefficient') + ylab('DFBETAS for GDP') + 
+  geom_hline(yintercept = c(2/sqrt(26), -2 / sqrt(26)), colour = 'blue') + 
+  geom_vline(xintercept = c(2/sqrt(26), -2 / sqrt(26)), colour = 'blue') +
+  geom_text(data = weak.inf[outlie, ], aes(label = Country, hjust = 'left'), nudge_x = 0.02)
+
+```
+
+### Cook's distance
+
+One way to use DFBETAS is to plot them for each independent variable.  Another is to construct
+an index.  Cook's distance is essentially an $F$ statistic for the ``hypothesis'' that $\beta_j = b_{j(-i)}, j=0,1,\dots,k.$ This is calculated using:
+
+$$
+D_i = \frac{\epsilon^{*2}_i}{k+1} \times \frac{h_i}{1-h_i},
+$$
+
+where $\epsilon^*_i$ is the standardized residual.  No formal hypothesis test, but rule of thumb is
+$$
+D_i > \frac{4}{n-k-1}
+$$
+
+### Cook's distance plot
+
+```{r}
+ggplot(weak.inf, aes(x = ID, y = cook.d)) + geom_point() + theme_bw() +
+  geom_hline(yintercept = 4 / (26 - 3), colour = 'blue') + 
+  ylab("Cook's distance") +
+  geom_text(data = weak.inf[outlie, ], aes(label = Country, hjust = 'right'), nudge_x = -0.3)
+```
+
+### Rules of thumb
+
+- **Hat-values** Values exceeding twice the average $([k+1]/n)$ are noteworthy.
+- **Studentized residuals** About 5\% of these should fall outside the range
+$|t_i| \le 2.$
+- **DFBETAS** $|d_{ij}^*| > 2/\sqrt{n}$
+- **Cook's D** $D_i > 4/(n - k - 1).$
+
+
+## Heteroskedasticity
+
+### Definition
+
+Heteroskedasticity occurs when $\mathrm{var}(\epsilon_i) \ne \sigma^2,$ but varies across observations.  It is
+especially problematic when this is related systematically to an explanatory variable.
+
+\Large Problems 
+
+\normalsize
+
+- Increases standard errors of parameter estimates.
+- Estimated standard errors are **biased**.
+
+
+\Large Solutions
+\normalsize
+
+- Use a different estimator for standard errors.
+- Use a different estimator for regression parameters: weighted least squares.
+
+### What to do?
+
+- Statistical tests
+    - Goldfeld-Quandt test
+    - Breusch-Pagan test
+    
+- Remedial action
+    - Heteroskedasticity-consistent standard errors
+    - Weighted least squares
+    
+### Director interlocks example
+
+\tiny
+Data on the 248 largest Canadian firms in the mid-1970s.  _interlocks_: the number of board members shared with other major firms; _assets_: Assets in millions of dollars; _sector_: a factor with levels BNK=banking, CON=construction, FIN=other financial, HLD=holding company, MAN=manufacturing, MER=merchandising, MIN=mining, TRN=transport, WOD=wood and paper; _nation_: nation of control, a factor with levels CAN=Candian, OTH=Other, UK, US.
+
+```{r}
+data(Ornstein)
+
+inter1 <- lm(interlocks ~ I(assets/1000) + sector + nation, data=Ornstein) 
+summary(inter1)
+```
+
+### Heteroskedastic errors
+
+A common diagnostic is to plot studentised residuals against fitted values.  The cone shape is characteristic of heteroskedastic errors.
+
+```{r}
+int1.res <- residuals(inter1)
+int1.fit <- fitted(inter1)
+int1.tres <- rstudent(inter1)
+het.plot.dta <- data.frame(yhat = int1.fit, rstudent = int1.tres)
+
+ggplot(het.plot.dta, aes(x = yhat, y = rstudent)) + geom_point()  +
+  theme_bw() + xlab('Fitted values') + ylab('Studentised residuals')
+```
+
+### Goldfeld-Quandt test
+
+\footnotesize
+Based on the idea that if the sample observations have been generated under the conditions of
+homoscedasticity, then the variance of the disturbances of one sub-sample is the same as the variances of any
+other sub-sample. Order cases by the variable you think variance is associated with (often fitted values from regression).
+$$
+R = \frac{\text{SSE}_2}{\text{SSE}_1}.
+$$
+\begin{center}
+\begin{tabular}{lr}
+  SSE from the 1st regression:&    4245.1\\
+  SSE from the 2nd regression: &  17187.4\\
+  The $F$-statistic for this test:&    4.04\\
+  The $p$-value for this test:     &    $\ll$ 0.05   \\
+\end{tabular}
+\end{center}
+
+```{r, echo=TRUE}
+gqtest(inter1, order.by = int1.fit)
+```
+
+### Breusch-Pagan test
+Model variances using variables thought to be related to the heteroskedasticity.  First obtain residuals by OLS, then divide these by an estimate of the variance $\hat{s}^2$.  Use as the dependent
+variable, with either the fitted values or some other variable as ``explanatory'' variable;
+the B-P statistic is the explained variance of this regression divided by 2.  This has a $\chi^2$
+distribution with degrees of freedom equal to number of regressors in the second regression.
+
+```{r, echo=TRUE}
+ncvTest(inter1)
+```
+
+### Transform standard errors
+A common way of dealing with heteroskedasticity is to transform standard errors---recall it is standard errors _not_ parameter estimates that are affected by this problem.
+
+$$
+V(b) = (X'X)^{-1} X' \text{diag}(e^2) X (X'X)^{-1}.
+$$
+
+The variance-covariance matrix of the parameter estimates is transformed by the square of the residuals. The square root of the diagonal of this matrix is the standard errors of the parameter estimates.  This is very commonly used in practice now.  They are called the heteroskedasticity-consistent standard errors or robust standard errors.
+
+
+### Example: HCCM results
+
+The idea is that the HC ("heteroskedasticity-consistent") standard errors are used instead of the usual ones to calculate $t$-statistics and hence $p$-values.  You sometimes see these referred to as "robust" standard errors, or "White-corrected" standard error (after their inventor). The
+method of calculating them is sometimes referred to as a "sandwich estimator."
+
+\scriptsize
+```{r}
+inter1.hc <- sqrt(diag(hccm(inter1, type='hc0')))
+b <- coef(inter1)
+t <- b/inter1.hc
+op <- data.frame(b, inter1.hc, t, p = 2 * pnorm(abs(t), lower.tail = FALSE))
+names(op) <- c('Estimate', 'H-C Std. Error', 't-value', 'Pr(>|t|)')
+knitr::kable(op, digits = 2, align = 'c')
+```
+
+## Linearity
+
+The standard model we've been looking at involves linear relationships between explanatory and outcome variables, i.e., the effect of a change in $X$ is the same at all values of $X$.  This may not always be the case.  For example, wages typically increase with age up to a point and then start to decline again. Although it is preferable to make decisions based on theory, it is possible to use graphical methods to check linearity assumptions.
+
+The following exampmle uses data from the Candadian Survey of Labour and Income Dynamics (1994).
+
+```{r}
+data(SLID)
+ix <- complete.cases(SLID)
+SLID <- SLID[ix,]
+SLID$Logwages <- log(SLID$wages)
+slid1 <- lm(Logwages ~ education + age + sex + language, data=SLID)
+summary(slid1)
+```
+
+
+### Residual plots
+
+The most straightforward thing to do is plot residuals against each of the explanatory variables to look for evidence of non-linearity.
+
+```{r, out.width="45%", fig.align='default'}
+qt1 <- residualPlot(slid1, variable = "education", xlab = 'Education', lwd = 4)
+qt2 <- residualPlot(slid1, variable = "age", xlab = 'Age', lwd = 4)
+df <- data.frame(qt1, qt2)
+names(df) <- c('Education', 'Age')
+knitr::kable(df)
+
+```
+
+This function also provides a test of whether adding a quadratic term would be statistically significant. 
+
+### Component plus residual plots
+
+The y axis is:
+$$
+e + \hat{\beta}_i X_i
+$$
+ where $e$ are residuals, $\hat{\beta}_i$ is the estimated regression parameter for the $i$th explanatory variable, $X_i$, which is plotted on the x-axis.  The augmented plots shown also have the linear fit (red dotted line) and a non-parametric 'smoother' (green solid line).  This can also show a departure from linearity.
+ 
+```{r, out.width="45%", fig.align='default'}
+crPlot(slid1, 'education', lwd = 4)
+crPlot(slid1, 'age', lwd = 4)
+```
+
+### Add quadratic terms
+
+\tiny
+```{r}
+slid2 <- lm(Logwages ~ sex + language + poly(education, 2, raw = TRUE) 
+            + poly(age, 2, raw = TRUE), data=SLID)
+summary(slid2, digits = 3)
+anova(slid1, slid2)
+```
+
+### Effect plots
+```{r, out.width="45%", fig.align='default'}
+plot(Effect('education', slid2), ci.style = 'none', rug = FALSE, main = '', xlab = 'Education', ylab = 'Log wages')
+plot(Effect('age', slid2), ci.style = 'none', rug = FALSE, main = '', xlab = 'Age', ylab = 'Log wages')
+
+```
+
+# Selection models
+
+### Sample selection bias
+
+A general issue, not only concerning linear regression.  It is important because it undermines external and internal validity. That is, the problem is not solved by claiming to be interested only in a sub-set of the population.  In effect sample selection excludes a regressor that is correlated with an included regressor.
+
+### Illustration
+
+![Sample selection bias](SampleSelectionBias.pdf)
+
+### Types of selection
+
+![Types of selection](TypesSelection.pdf)
+
+### Intuition
+
+- Non-random selection---inference may not extend to the unobserved group
+- Example: Suppose we observe that college grades are uncorrelated with success in graduate school
+- Can we infer that college grades are irrelevant? 
+- No: applicants admitted with low grades may not be representative of the population with low grades
+-  Unmeasured variables (e.g. motivation) used in the admissions process might explain why those who enter graduate school with low grades do as well as those who enter graduate school with high grades
+
+### Selection equation
+
+- $z^*_i =$latent variable, DV of selection equation; the propensity to be including in the sample;
+- $w'_i =$ vector of covariates for unit $i$ for selection equation;
+- $\alpha =$ vector of coefficients for selection equation;
+- $\epsilon_i =$ random disturbance for unit $i$ for selection equation;
+
+$$
+z^*_i = w'_i \alpha + \epsilon_i.
+$$
+
+\Large Outcome equation
+
+\normalsize
+
+- $y_i =$ DV from outcome equation;
+- $x'_i =$ vector of covariates for unit $i$ for outcome equation;
+- $\beta =$ vector of coefficients for outcome equation;
+- $u_i =$ random disturbance for unit $i$ for outcome equation;
+
+### Heckman model
+
+Assume that $y_i$ is observed if and only if a second, unobserved latent variable, $z^*_i$ exceeds
+a particular threshold:
+
+$$
+z_i = \left\{ \begin{aligned}
+  1 \text{ if } z^*_i > 0; \\
+  0 \text{ otherwise}
+\end{aligned}\right.
+$$
+
+So, we first estimate the probability that $z_i = 1,$ and use a transformation of this
+predicted probability as an independent variable in the outcome equation.
+
+### Sample selection bias: Conclusions
+
+- If potential observations from some population of interest are excluded on a nonrandom basis, one risks
+sample selection bias. 
+- It is difficult to anticipate whether the biased regression estimates overstate or understate the true causal effects. 
+- Problems caused by nonrandom exclusion of observations are manifested in the expected values of the endogenous variable.
+
+### Example
+
+\scriptsize
+A common example of sample selection is when studying wages. In order to earn a wage, you have to have a job. You are more likely to have a job if you are able to earn a good wage. So, there is likely to be sample selection. This is the ordinary regression.
+
+```{r}
+wom <- foreign::read.dta("http://www.stata-press.com/data/r12/womenwk.dta")
+wom$cens <- !is.na(wom$wage)
+wom$Logwage <- log(wom$wage)
+
+stata.lm <- lm(Logwage ~ education + age, data = wom)
+summary(stata.lm)
+```
+
+### Sample selection results
+
+\scriptsize
+```{r}
+stata1 <- selection(cens ~ married + children + education + age, Logwage ~ education + age, 
+                    data = wom)
+summary(stata1)
+```

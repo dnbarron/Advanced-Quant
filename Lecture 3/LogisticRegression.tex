@@ -1,0 +1,605 @@
+\documentclass[10pt,ignorenonframetext,]{beamer}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+
+\usepackage{pgfpages}
+\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+\ifxetex
+\usepackage{mathspec}
+\else
+\usepackage{fontspec}
+\fi
+\defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+\usetheme{Madrid}
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\newif\ifbibliography
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{longtable,booktabs}
+\usepackage{caption}
+% These lines are needed to make table captions work with longtable:
+\makeatletter
+\def\fnum@table{\tablename~\thetable}
+\makeatother
+
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+
+\AtBeginPart{
+\let\insertpartnumber\relax
+\let\partname\relax
+\frame{\partpage}
+}
+\AtBeginSection{
+\ifbibliography
+\else
+\let\insertsectionnumber\relax
+\let\sectionname\relax
+\frame{\sectionpage}
+\fi
+}
+\AtBeginSubsection{
+\let\insertsubsectionnumber\relax
+\let\subsectionname\relax
+\frame{\subsectionpage}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+\title{Logistic regression}
+\subtitle{Binary, ordinal and multinomial}
+\author{David Barron}
+\date{Hilary Term 2017}
+
+\begin{document}
+\frame{\titlepage}
+
+\section{Generalised linear models}\label{generalised-linear-models}
+
+\begin{frame}{Generalised linear models}
+
+GLMs are a generalisation of the linear models we've looked at over the
+past two weeks. They allow us to investigate regression models where the
+outcome variable is one of several important special forms. The simplest
+of these is when the outcome variable has only two possible values, such
+as ``success'' and ``failure''. Some estimation software requires the
+variable to be coded \(0/1\), and we will use that coding in the
+explanation below.
+
+All GLMs have three basic components:
+
+\begin{itemize}
+\tightlist
+\item
+  Probability distribution (sometimes called the ``stochastic
+  component'');
+\item
+  Linear predictor (the ``systemmatic component'');
+\item
+  Link function
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{GLM for binary outcomes: probability distribution}
+
+The GLM for binary outcome variables is often called \emph{logistic
+regression}. The probability distribution associated with it is the
+\emph{binomial} distribution:
+
+\[
+\Pr(Y = k|n, p) = \binom{n}{k} p^k (1-p)^{n - k},
+\] for \(k = 0, 1, 2, \dots, n\) and where
+\(\binom{n}{k} = \frac{n!}{k! (n-k)!}\). In the special case where
+\(n = 1\), this reduces to
+
+\[
+\Pr(Y = k|p) = p^k (1 - p)^{1 - k},
+\]
+
+where \(k = 0,1\). The parameter \(p\) is what we are interested in
+estimating; it is the probability that the outcome variable, \(Y = 1.\)
+
+\end{frame}
+
+\begin{frame}{Linear predictor}
+
+The linear predictor always has the same form in all GLMs. It consists
+of the explanatory variables that we think are associated with the
+probability that \(Y = 1.\) So, this looks very much like the linear
+regression model:
+
+\[
+\eta(x) = \beta_o + \beta_1 x_1 + \dots + \beta_j x_j.
+\] Note, though, there is no ``error term.'' The randomness is provided
+by the probability distribution we've just specified. (If you like, you
+could think of GLMs as having different ``error terms'' to the normal
+distribution we use in linear regression. Of you could think of linear
+regression as being a GLM with the normal distribution as its
+probability distribution. )
+
+\end{frame}
+
+\begin{frame}{Link function}
+
+The general \emph{link function} is defined as: \[
+\eta(x) = f[\mu(x)],
+\] where \(\mu(x)\) is the parameter of the probability distribution we
+are interested in.
+
+You might think that in this case we could just put these two together
+in a straightforward way: \[
+p = \eta(x) = \beta_o + \beta_1 x_1 + \dots + \beta_j + x_j,
+\] but, while this is in fact technically possible, there would be
+significant problems with this model. The two main problems are:
+
+\begin{itemize}
+\tightlist
+\item
+  You could get predicted values of \(p\) that are either smaller than 0
+  or larger than 1, but as \(p\) is a probability, this is logically
+  impossible.
+\item
+  A linear model implies that the impact of a one-unit change in any
+  \(x\) is the same regardless of the value of \(p\), but this can't be
+  true. It must be ``harder'' to increase the probability from, say,
+  0.90 to 0.95 than it would be to increase it from 0.50 to 0.55.
+\end{itemize}
+
+Therefore, a different link function is most commonly used.
+
+\end{frame}
+
+\begin{frame}{Logit link function}
+
+The logit link function is
+
+\[
+\eta(x) = \log \left( \frac{p}{1-p} \right) = \beta_0 + \beta_i x_1 + \dots + \beta_j x_j,
+\] which can be rearranged to give
+
+\[
+ p = \frac{1}{1 + e^{-\eta}}.
+ \]
+
+\(p/(1-p)\) is often called the \emph{odds} (or \emph{odds ratio}), and
+so another name for the logit function is the \emph{log odds}.
+
+An alternative link function that is sometimes used is the normal
+cumulative probability distribution, often called the \emph{probit}
+function. This is virtually identical to the logit function, and as
+interpretation of results using the logit function is generally easier,
+it is much more common.
+
+\end{frame}
+
+\begin{frame}{Plot of the logit and probit functions}
+
+\begin{center}\includegraphics[width=0.9\linewidth]{LogisticRegression_files/figure-beamer/unnamed-chunk-1-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Maximum likelihood estimation}
+
+Estimation of GLMs is straightforward, but it's useful to have some
+intuition about what is going on ``under the hood.'' Iterative (ie,
+trial and error) methods have to be used. The computer tries values of
+the \(\beta\)s in the model, uses them to calculate predicted values of
+\(p\) and then use that to calculate the likelihood of observing the
+actual outcomes given those values of \(p\). The iterations continue
+until the values of \(p\) that result in the maximum likelihood is
+found. The corresponding values of the \(\beta\)s are the maximum
+likelihood estimate of those parameters.
+
+Fortunately, while there are general purpose ML estimation functions in
+R (and if you want to make sure you really understand these principles,
+it is a good idea to see if you can figure out how to use them to
+implement logistic regression), there are special purpose functions that
+make it easy to implement any GLM.
+
+\end{frame}
+
+\section{Logistic regression}\label{logistic-regression}
+
+\begin{frame}[fragile]{Logistic regression example}
+
+\scriptsize
+This example uses data from the Panel Study of Income Dynamics that
+relate to women's labour force participation. The respondents are all
+married women. The outcome is whether the woman is employed or not.
+Explanatory variables: \emph{k5}: number of children 5 or under;
+\emph{k618}: number of children 6--18; \emph{age}; \emph{wc}: attended
+college; \emph{lwg}: log expected wage; \emph{inc}: family income.
+
+\begin{verbatim}
+
+Call:
+glm(formula = lfp ~ k5 + k618 + age + wc + lwg + inc, family = binomial,
+    data = Mroz)
+
+Deviance Residuals:
+   Min      1Q  Median      3Q     Max
+-2.099  -1.094   0.601   0.972   2.177
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)
+(Intercept)  3.21664    0.64090    5.02  5.2e-07
+k5          -1.45610    0.19614   -7.42  1.1e-13
+k618        -0.06427    0.06797   -0.95     0.34
+age         -0.06364    0.01270   -5.01  5.4e-07
+wcyes        0.86225    0.20673    4.17  3.0e-05
+lwg          0.60454    0.15062    4.01  6.0e-05
+inc         -0.03318    0.00783   -4.24  2.3e-05
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 1029.75  on 752  degrees of freedom
+Residual deviance:  905.56  on 746  degrees of freedom
+AIC: 919.6
+
+Number of Fisher Scoring iterations: 4
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile]{Interpretation}
+
+Parameter estimates are interpreted as effect on logit or log odds. For
+example, for each additional \$1000 of family income, the log odds of
+being in the labour force declines by 0.033. This isn't intuitive, but
+it is easy to see the direction of the effect and to assess statistical
+significance. For example, you can see that the probability of a woman
+being in employment goes down as the number of pre-school children goes
+up, while having been to college increases the probability of
+employment. You might prefer to calculate confidence intervals:
+
+\begin{verbatim}
+Waiting for profiling to be done...
+\end{verbatim}
+
+\begin{verbatim}
+              2.5 %  97.5 %
+(Intercept)  1.9787  4.4945
+k5          -1.8522 -1.0821
+k618        -0.1980  0.0689
+age         -0.0889 -0.0391
+wcyes        0.4619  1.2736
+lwg          0.3143  0.9065
+inc         -0.0490 -0.0182
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}{Effect plot}
+
+In this example, we can see that the effect of family income varies
+depending on how many pre-school children are in the family.
+
+\begin{center}\includegraphics[width=0.8\linewidth]{LogisticRegression_files/figure-beamer/unnamed-chunk-4-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Interpretation, continued}
+
+The effect of each explanatory variable on the probability varies both
+across values of that explanatory variable and across values of all the
+other explanatory variables. This is why effect plots are particularly
+useful for logistic regression (and all other GLMs). Even these involve
+some simplification. The example on the previous slide fixed the values
+of the number of school-age children, age, college educated, and log
+expected wage at their sample mean values. This is conventional, but you
+might ask yourself whether it makes sense for dummy variables.
+
+\end{frame}
+
+\begin{frame}[fragile]{Odds ratios}
+
+An alternative is to report parameter estimates as effects on the odds
+ratio, which you can obtain simply by using the anti-log:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{round}\NormalTok{(}\KeywordTok{exp}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(}\DataTypeTok{Estimate =} \KeywordTok{coef}\NormalTok{(l1), }\KeywordTok{confint}\NormalTok{(l1))), }\DecValTok{2}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Waiting for profiling to be done...
+\end{verbatim}
+
+\begin{verbatim}
+            Estimate 2.5 % 97.5 %
+(Intercept)    24.94  7.23  89.52
+k5              0.23  0.16   0.34
+k618            0.94  0.82   1.07
+age             0.94  0.91   0.96
+wcyes           2.37  1.59   3.57
+lwg             1.83  1.37   2.48
+inc             0.97  0.95   0.98
+\end{verbatim}
+
+So, each additional \$1000 of family income reduces the odds of working
+by 3 per cent.
+
+\end{frame}
+
+\begin{frame}[fragile]{Goodness of fit}
+
+We can compare goodness of fit of nested models using the deviance. The
+deviance is defined as twice the difference between the model log
+likelihood and the log likelihood of the saturated model (i.e., the best
+possible fit). The difference between the deviances of nested models has
+a \(\chi^2\) distribution with degrees of freedom equal to the number of
+extra parameters estimated in the more complex model. The \texttt{anova}
+function will calculate this for you:
+
+\begin{longtable}[]{@{}rrrrr@{}}
+\toprule
+Resid. Df & Resid. Dev & Df & Deviance &
+Pr(\textgreater{}Chi)\tabularnewline
+\midrule
+\endhead
+746 & 906 & NA & NA & NA\tabularnewline
+745 & 904 & 1 & 1.06 & 0.302\tabularnewline
+\bottomrule
+\end{longtable}
+
+\end{frame}
+
+\begin{frame}{Other goodness of fit statistics}
+
+A number of other GoF statistics have been suggested as analogues of the
+\(R^2\) statistic often used in linear regression. In these formulae,
+\(L_0\) is the likelihood of a regression with only an intercept,
+\(L_m\) is the likihood of the model actually estimated, and \(n\) is
+the sample size.
+
+\textbf{Cox and Snell Index} \[
+R^2_{CS} = 1 - (L_0 / L_m)^{2/n}.
+\] One drawback of this statistic is that the upper bound is not 1, but
+rather is \(1 - L_0^{2/n}.\)
+
+\textbf{Nagelkerke's Index} \[
+R^2_N = \frac{R^2_{CS}}{1 - L_0^{2/n}}.
+\] As you can see, this is the Cox and Snell index divided by the upper
+bound of this index, which therefore now has an upper bound of 1.
+
+\textbf{McFadden's \(R^2\)} \[
+R^2_{McF} =   1 - \log(L_m) / \log(L_0)
+\]
+
+\end{frame}
+
+\begin{frame}[fragile]{Example}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{descr::}\KeywordTok{LogRegR2}\NormalTok{(l1)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+Chi2                 124
+Df                   6
+Sig.                 0
+Cox and Snell Index  0.152
+Nagelkerke Index     0.204
+McFadden's R2        0.121
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}{Outlier detection}
+
+Similar methods to those used in linear regression can be used to check
+for outliers.
+
+\begin{center}\includegraphics[width=0.9\linewidth]{LogisticRegression_files/figure-beamer/unnamed-chunk-8-1} \end{center}
+
+\end{frame}
+
+\section{Ordinal logistic regression}\label{ordinal-logistic-regression}
+
+\begin{frame}{Ordinal outcomes}
+
+Sometimes we have outcome variables that take a small number of
+discrete, ordered categories. (If there are many categories, you would
+probably be best advised to treat it as a numeric variable.) For
+example, I have been doing research into the quality of adult
+residential care facilities, and this has categories ``Poor'', ``Fair'',
+``Good'', and ``Excellent.'' We want to use a method that uses the
+information about ordering in the data. There are several possible
+alternatives, but I am going to explain only the most straightforward.
+It is often just called \textbf{ordinal logistic regression}, although
+strictly speaking it is just one version of ordinal logit. Sometimes it
+is called the \emph{proportional odds} model, which would be a less
+ambiguous name for it.
+
+\end{frame}
+
+\begin{frame}{Proportional odds logistic regression}
+
+The simplest model for ordinal logistic regression. Our linear predictor
+is: \[
+\eta(x) = \beta_0 + \beta_1 x_1 + \dots + \beta_k x_k.
+\] Then we have \[
+\begin{gathered}
+\text{logit}(p_m) = \eta(x) \\
+\text{logit}(p_m + p_{m-1}) = \eta(x) + \alpha_1 \\
+\text{logit}(p_m + p_{m-1} + p_{m-2}) = \eta(x) + \alpha_1 + \alpha_2 \\
+\dots \\
+\text{logit}(p_1) = 1 - (\eta(x) + \alpha_1 + \alpha_2 + \dots + \alpha_{m-2})
+\end{gathered}
+\] So, if we have an outcome variable with three categories, we first
+consider the log odds of being in the highest category against being in
+either of the other two categories, then the log odds of being in the
+middle category agains being in the lowest category. The linear
+predictor is constrained to be the same in each case, with a threshold
+parameter (the \(\alpha\)s) being estimated for each one.
+
+\end{frame}
+
+\begin{frame}{Example}
+
+Three level variable called \emph{apply}, with levels ``unlikely'',
+``somewhat likely'', and ``very likely'', coded 1, 2, and 3,
+respectively, that we will use as our outcome variable. Three
+explanatory variables: \emph{pared}, dummy variable indicating whether
+at least one parent has a graduate degree; \emph{public}, dummy variable
+indicating whether undergrad college is public or private, and
+\emph{gpa}, student's grade point average.
+
+\begin{center}\includegraphics[width=0.7\linewidth]{LogisticRegression_files/figure-beamer/unnamed-chunk-9-1} \end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]{Regression example}
+
+\footnotesize
+
+\begin{verbatim}
+formula: apply ~ pared + public + gpa
+data:    dat
+
+ link  threshold nobs logLik  AIC    niter max.grad cond.H
+ logit flexible  400  -358.51 727.02 5(0)  1.63e-10 1.3e+03
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)
+paredYes       1.0477     0.2658    3.94  8.1e-05
+publicPublic  -0.0587     0.2979   -0.20    0.844
+gpa            0.6157     0.2606    2.36    0.018
+
+Threshold coefficients:
+                            Estimate Std. Error z value
+unlikely|somewhat likely       2.203      0.780    2.83
+somewhat likely|very likely    4.299      0.804    5.34
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}{Effect plot}
+
+\begin{center}\includegraphics[width=0.9\linewidth]{LogisticRegression_files/figure-beamer/unnamed-chunk-11-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Multinomial logistic regression}
+
+This method is used when an outcome variable consists of discrete but
+unordered categories. Common examples involve individuals making choices
+among a set of alternatives, such as the form of transport to commute to
+work, brand of toothpaste purchased, political party voted for, etc. The
+basic intuition is that we perform logistic regressions on each pair of
+alternatives as follows: \[
+\log\left(\frac{p_a}{p_b}\right) = \beta_{1ab} (x_{1a} - x_{1b}) + \beta_{2ab} (x_{2a} - x_{2b}) + \dots + \beta_{kab} (x_{ka} - x_{kb})
+\] For example, the impact of variable \(x_1\) (say, price) on choice of
+toothpaste brand depends on how different the price of brand \(a\) is
+compared with brand \(b\). We get different parameter estimates for each
+pair of choices. Characteristics of individuals can also be included.
+
+\end{frame}
+
+\begin{frame}[fragile]{Example}
+
+The data are 200 high school students. Outcome variable is programme
+choice (general, academic or vocational). Explanatory variables are
+socio-economic status and writing test score.
+
+\begin{verbatim}
+# weights:  15 (8 variable)
+initial  value 219.722458
+iter  10 value 179.982880
+final  value 179.981726
+converged
+\end{verbatim}
+
+\begin{verbatim}
+Call:
+multinom(formula = prog2 ~ ses + write, data = ml)
+
+Coefficients:
+         (Intercept) sesmiddle seshigh   write
+general         2.85    -0.533  -1.163 -0.0579
+vocation        5.22     0.291  -0.983 -0.1136
+
+Std. Errors:
+         (Intercept) sesmiddle seshigh  write
+general         1.17     0.444   0.514 0.0214
+vocation        1.16     0.476   0.596 0.0222
+
+Residual Deviance: 360
+AIC: 376
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}{Effect plot}
+
+\begin{center}\includegraphics[width=0.9\linewidth]{LogisticRegression_files/figure-beamer/unnamed-chunk-13-1} \end{center}
+
+\end{frame}
+
+\end{document}

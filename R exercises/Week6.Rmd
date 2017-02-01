@@ -1,0 +1,136 @@
+---
+title: "Week 6 Practical Session"
+author: "David Barron"
+date: "24 February 2015"
+output: pdf_document
+---
+
+
+```{r options, echo=FALSE, message=FALSE}
+library(knitr)
+opts_chunk$set(comment=NA, tidy=TRUE, cache=FALSE)
+library(car)
+library(effects)
+library(arm)
+library(reshape2)
+library(plm)
+library(dplyr)
+
+```
+
+## Longitudinal data analysis
+Many countries have a longitudinal household survey.  In the UK, the British Household Panel Survey (now continued by a new survey called Understanding Society) is such a survey.  They make available a teaching version of the data.  It's simplified, but still much more complex than anything we've used before.  There are 9,912 cases (to keep it simpler, this version of the data only includes people included in wave 1) and 760 variables.  The data are in wide format.  BHPS uses a letter prefix to identify the wave the variable was collected, so for example the variable that indicates whether someone works full time or part time is called `ajbft` in wave 1, `bjbft` in wave 2, and so on.
+
+The difficult part is turning this into the long format of data that is needed for analysis.  The only way to do it is to select one set of variables at a time, turn that set of variables into a single long format variable along with an id variable and a wave variable.  When you have done that for all the variables you want to include in the long data set, you then have to merge them together.
+
+First, read the data in and select the variables that don't change over time.
+
+```{r bhps}
+bhps <- foreign::read.dta('C:\\Users\\dbarron\\Dropbox\\Advanced Quant\\BHPS\\stata9\\bhps_sampler3.dta')
+dim(bhps)
+
+bhps1 <- dplyr::select(bhps, pid, sex, aage)
+```
+
+To select variables it makes sense to create a small function to do the work. Then this can be used to select as many variables as we want.
+
+```{r bhps2}
+selvar <- function(vn){
+  require(reshape2) # You must install reshape2 package for this to work
+  vars <- grep(vn, names(bhps), ignore.case=TRUE)
+  if (length(vars) == 0) stop('No variables found')
+  # First variable is pid, always include this
+  op <- bhps[, c(1, vars)]
+  # Turn variable into long format, using pid as id variable. 
+  op.melt <- melt(op, id.vars='pid')
+  # Create a wave variable from the first letter of the variable
+  op.melt$wave <- substr(op.melt$variable, 1, 1)
+  # Rename the value variable 
+  names(op.melt)[3]  <- substr(op.melt$variable[1], 2, 100)
+  # Output pid, selected variable and wave
+  op.melt[, c(1,3,4)]
+}
+
+bhps2 <- selvar('jbstat')
+bhps3 <- selvar('jbsect')
+bhps4 <- selvar('fiyr')
+bhps5 <- selvar('jbft')
+```
+
+Then we can merge these to create a new data set.  I'm using a function called `inner_join` from the `dplyr` package. There is a function called `merge` in base R that you could use instead if you prefer.
+
+```{r merge}
+
+bhps_sub <- inner_join(bhps1, bhps2, by=c('pid'))
+bhps_sub <- inner_join(bhps_sub, bhps3, by=c('pid','wave'))
+bhps_sub <- inner_join(bhps_sub, bhps4, by=c('pid','wave'))
+bhps_sub <- inner_join(bhps_sub, bhps5, by=c('pid','wave'))
+names(bhps_sub)
+dim(bhps_sub)
+xtabs(~wave, bhps_sub)
+```
+
+Now we need to clean up the data.  Again, I've created a short function to create missing data codes.
+
+```{r clean}
+toNA <- function(var, lv){
+  # Turn selected values into NA
+  var[var %in% lv] <- NA
+  # Output transformed variables, dropping an unused factor levels
+  var[ , drop=TRUE]
+}
+
+# Turn character variables into factors
+bhps_sub$jbsect <- factor(bhps_sub$jbsect)
+bhps_sub$jbstat <- factor(bhps_sub$jbstat)
+bhps_sub$wave <- factor(bhps_sub$wave)
+bhps_sub$jbft <- factor(bhps_sub$jbft)
+
+# Missing data
+
+bhps_sub$employed <- toNA(bhps_sub$jbstat, 
+                          levels(bhps_sub$jbstat)[c(1,12,15,19)])
+
+bhps_sub$ft <- toNA(bhps_sub$jbft, levels(bhps_sub$jbft)[c(2,3,5)])
+# Create a numeric wave variable
+bhps_sub$wavenum <- match(bhps_sub$wave, letters)
+# Use this to create age
+bhps_sub$age <- bhps_sub$aage + bhps_sub$wavenum - 1
+# Create log income variable
+bhps_sub$fiyr[bhps_sub$fiyr <= 0] <- NA
+
+bhps_sub$logfiyr <- log(bhps_sub$fiyr)
+
+
+bhps_sub$ft <- factor(bhps_sub$ft)
+```
+
+Now we are ready to do some analysis! First, simple random effects and fixed effects models.
+
+```{r analysis}
+
+p1 <- plm(logfiyr ~ sex + ft + age + I(age^2/1000), data=bhps_sub, index=c('pid','wavenum'))
+
+summary(p1)
+p2 <- plm(logfiyr ~ sex + ft + age + I(age^2/1000), data=bhps_sub, index=c('pid','wavenum'), model='random')
+summary(p2)
+
+```
+
+Next, using lmer a random intercepts model and one that explores whether sex differences in income have changed over time.
+
+```{r lmer1}
+l1 <- lmer(logfiyr ~ sex + ft + age + I(age^2/1000)  + (1|pid), data=bhps_sub )
+display(l1)
+plot(Effect('age', l1))
+
+l2 <- lmer(logfiyr ~ sex*wavenum + ft + age + I(age^2/1000) + (1 + sex|pid), data=bhps_sub)
+
+display(l2)
+plot(Effect(c('wavenum','sex'), l2))
+```
+
+## Homework
+1. Use the dataset `Males` in the `plm` package.  Explore the data.
+2. The outcome variable of interest is `wage`.
+3. Explore factors that influence wage, and in particular if there is evidence that married men earn more than single men.  What problems might there be for drawing conclusions about this question based on these data?

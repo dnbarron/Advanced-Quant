@@ -1,0 +1,186 @@
+---
+title: "Week 8 Practical Session"
+author: "David Barron"
+date: "4 March 2015"
+output: pdf_document
+---
+
+## Structural equation models
+
+### Non-recursive models
+
+Duncan, Haller and Portes' model for peer influence on the aspirations of male high school students in the US.  
+![Model][Duncan]
+
+This is a mixture of a model that includes observed variables and unobserved variables with observed indicators.  There is also a reciprocal effect of the unobserved variables on each other.
+
+```{r Duncan}
+library(lavaan)
+library(semPlot)
+
+R.DHP <- matrix(c(
+    1,       0,     0,       0,      0,     0,       0,     0,     0,      0,
+    .6247,    1,    0,       0,      0,     0,       0,     0,     0,      0,
+    .3269,  .3669,  1,       0,      0,     0,       0,     0,     0,      0,
+    .4216,  .3275,  .6404,   1,      0,     0,       0,     0,     0,      0,
+    .2137,  .2742,  .1124,  .0839,   1,     0,       0,     0,     0,      0,
+    .4105,  .4043,  .2903,  .2598,  .1839,  1,       0,     0,     0,      0,
+    .3240,  .4047,  .3054,  .2786,  .0489,  .2220,   1,     0,     0,      0,
+    .2930,  .2407,  .4105,  .3607,  .0186,  .1861,  .2707,  1,     0,      0,
+    .2995,  .2863,  .5191,  .5007,  .0782,  .3355,  .2302,  .2950, 1,      0,
+    .0760,  .0702,  .2784,  .1988,  .1147,  .1021,  .0931, -.0438,  .2087, 1),
+    ncol = 10, byrow = TRUE)
+
+colnames(R.DHP) <- c("ROccAsp", "REdAsp", "FOccAsp","FEdAsp", "RParAsp", "RIQ", "RSES", "FSES", "FIQ", "FParAsp")
+
+Duncan.mod <- '
+  RGenAsp ~ RParAsp + RIQ + RSES + FSES + FGenAsp
+  FGenAsp ~ RSES + FSES + FIQ + FParAsp + RGenAsp
+
+  RGenAsp =~ ROccAsp + REdAsp
+  FGenAsp =~ FOccAsp + FEdAsp
+
+  RGenAsp ~~ FGenAsp
+'
+
+Duncan.fit0 <- sem(Duncan.mod, sample.cov = R.DHP, sample.nobs = 329)
+summary(Duncan.fit0)
+
+```
+The reciprocal effects of the unobserved variables are marginally statistically significant.  Mostly, it is the person's own (and own family's) characteristics that affect aspiration, rather than those of friends.
+
+Have a look at fit statistics:
+```{r DuncanFit}
+fitMeasures(Duncan.fit0, c('chisq', 'pvalue', 'rmsea', 'gfi', 'nfi', 'cfi'))
+```
+Although the overall model chi square suggests a lack of fit, the other fit statistics imply a valid fit.
+
+### Political Democracy example
+These data were collected for a study on the interconnections between political democracy and industrialization in 75 developing countries.  The variables are defined on the help page for the data set.
+
+
+```{r Bollen}
+data(PoliticalDemocracy)
+
+Bollen1 <- ' # latent variables
+            ind60 =~ x1 + x2 + x3
+            demo60 =~ y1 + y2 + y3 + y4
+            demo65 =~ y5 + y6 + y7 + y8
+            
+            # regressions
+            demo60 ~ ind60
+            demo65 ~ ind60 + demo60
+            '
+
+semPaths(Bollen1)
+
+b1 <- sem(Bollen1, data=PoliticalDemocracy)
+
+summary(b1)
+fitMeasures(b1, c('chisq', 'pvalue', 'rmsea', 'gfi', 'nfi', 'cfi'))
+
+```
+
+The fit statistics aren't acceptable, so let's look at the modification indices.
+
+```{r BollenMI}
+mi1 <- modificationindices(b2)
+mi1[rev(order(mi1[,4])),]
+```
+
+You can see that the highest indices relate to residual covariances, so let's add some of those.
+
+```{r Bollen2}
+Bollen2 <- ' # latent variables
+            ind60 =~ x1 + x2 + x3
+            demo60 =~ y1 + a*y2 + b*y3 + c*y4
+            demo65 =~ y5 + a*y6 + b*y7 + c*y8
+            
+            # regressions
+            demo60 ~ ind60
+            demo65 ~ ind60 + demo60
+
+            # residual covariances
+            y2 ~~ y4
+            '
+b2 <- sem(Bollen2, data = PoliticalDemocracy)
+summary(b2)
+fitMeasures(b2, c('chisq', 'pvalue', 'rmsea', 'gfi', 'nfi', 'cfi'))
+
+```
+
+That's acceptable now.
+
+## Homework
+
+```{r homework}
+ch10.cov <- matrix(c(1.024, 0, 0, 0, 0, 0, 0, 0, 0, 
+                     0.792, 1.077, 0, 0, 0, 0, 0, 0, 0,
+                     1.027, 0.919, 1.844, 0, 0, 0, 0, 0, 0,
+                     0.756, 0.697, 1.244, 1.286, 0, 0, 0, 0, 0, 
+                     0.567, 0.537, 0.876, 0.632, 0.852,  0, 0, 0, 0,
+                     0.445, 0.424, 0.677, 0.526, 0.518, 0.670, 0, 0, 0,
+                     0.434, 0.389, 0.635, 0.498, 0.475, 0.545, 0.716, 0, 0,
+                     0.580, 0.564, 0.893, 0.716, 0.546, 0.422, 0.373, 0.851, 0, 
+                     0.491, 0.499, 0.888, 0.646, 0.508, 0.389, 0.339, 0.629, 0.871),
+                   ncol = 9, byrow = TRUE)
+
+colnames(ch10.cov) <- c('EdAsp', 'OcAsp', 'VerbAch', 'QuantAch', 'FamInc', 'FaEd', 'MoEd', 'VerbAb', 'QuantAb')
+
+print(ch10.cov)
+
+```         
+The model is that a student's achievement (`Achieve`) depends on home and family characteristics (`Home`), the student's ability (`Ability`), and the student's aspiration (`Aspire`).  These four latent variable have the following measures:
+
+_Achieve_: Verbal achievement (VerbAch) and Quantitative achievement (QuantAch).
+_Home_: Family income (FamInc), Father's education (FaEd) and Mother's education (MoEd).
+_Ability_: Verbal ability (VerbAb) and Quantitative ability (QuantAb).
+_Aspire_: Educational aspiration (EdAsp) and Occupational aspiration (OcAsp)
+
+The covariance matrix above is based on data from 200 students.
+
+Aspiration is thought to be influenced by Ability and Home situation.  Achievement is thought to be influenced by all three latent variables.  Specify an appropriate structural equation model, obtain results and determine whether the fit of the model is adequate.  If it is not, modify the model and re-fit.
+
+Since we're not having another class, I've included the answers, but try to do it yourself first!
+
+```{r mod}
+ch10.mod1 <- ' Home =~ FamInc + FaEd + MoEd
+               Ability =~ VerbAb + QuantAb
+               Aspire =~ EdAsp + OcAsp
+               Achieve =~ VerbAch + QuantAch
+               
+               Aspire ~ Home + Ability
+               Achieve ~ Home + Ability + Aspire
+               
+               Home ~~ Ability
+               '
+```
+
+```{r model}
+ch10.op1 <- sem(ch10.mod1, sample.cov = ch10.cov, sample.nobs = 200)
+summary(ch10.op1)
+fitMeasures(ch10.op1, c('chisq', 'pvalue', 'rmsea', 'gfi', 'nfi', 'cfi'))
+ch10.mi <- modificationindices(ch10.op1)
+
+ch10.mi[rev(order(ch10.mi[,4])), ]
+
+ch10.mod2 <- ' Home =~ FamInc + FaEd + MoEd
+               Ability =~ VerbAb + QuantAb
+               Aspire =~ EdAsp + OcAsp
+               Achieve =~ VerbAch + QuantAch
+               
+               Aspire ~ Home + Ability
+               Achieve ~ Home + Ability + Aspire
+               
+               Home ~~ Ability
+
+               FaEd ~~ MoEd
+               '
+
+ch10.op2 <- sem(ch10.mod2, sample.cov = ch10.cov, sample.nobs = 200)
+summary(ch10.op2)
+fitMeasures(ch10.op2, c('chisq', 'pvalue', 'rmsea', 'gfi', 'nfi', 'cfi'))
+
+```
+
+[Duncan]: Duncan.png "Duncan, Haller & Portes (1968)"

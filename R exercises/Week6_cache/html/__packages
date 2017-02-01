@@ -1,0 +1,14 @@
+base
+knitr
+car
+effects
+MASS
+Matrix
+Rcpp
+lme4
+arm
+reshape2
+dplyr
+pbkrtest
+Formula
+plm

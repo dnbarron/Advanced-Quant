@@ -1,0 +1,343 @@
+---
+title: "Logistic regression"
+subtitle: "Binary, ordinal and multinomial"
+author: "David Barron"
+date: "Hilary Term 2017"
+fontsize: 10pt
+output: 
+  beamer_presentation:
+    theme: "Madrid"
+    toc: false
+    slide_level: 3
+    keep_tex: false
+    df_print: kable
+    fig_caption: false
+---
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_knit$set(width = 100)
+knitr::opts_chunk$set(comment =  '', echo=FALSE)
+knitr::opts_chunk$set(fig.width = 6, fig.asp = 0.618, out.width = "90%", fig.align = 'center')
+options('show.signif.stars'=FALSE)
+options('digits' = 3)
+#options(scipen=5)
+library(car)
+library(ggplot2)
+library(foreign)
+library(effects)
+```
+
+# Generalised linear models
+
+### Generalised linear models
+
+GLMs are a generalisation of the linear models we've looked at over the past two weeks.  They allow us to investigate regression models where the outcome variable is one of several important special forms.  The simplest of these is when the outcome variable has only two possible values, such as "success" and "failure".  Some estimation software requires the variable to be coded $0/1$, and we will use that coding in the explanation below.
+
+All GLMs have three basic components:
+
+- Probability distribution (sometimes called the "stochastic component");
+- Linear predictor (the "systemmatic component");
+- Link function
+
+### GLM for binary outcomes: probability distribution
+
+The GLM for binary outcome variables is often called _logistic regression_.  The probability distribution associated with it is the _binomial_ distribution:
+
+$$
+\Pr(Y = k|n, p) = \binom{n}{k} p^k (1-p)^{n - k},
+$$
+for $k = 0, 1, 2, \dots, n$ and where $\binom{n}{k} = \frac{n!}{k! (n-k)!}$. In the special case where $n = 1$, this reduces to 
+
+$$ 
+\Pr(Y = k|p) = p^k (1 - p)^{1 - k},
+$$
+
+where $k = 0,1$.  The parameter $p$ is what we are interested in estimating; it is the probability that the outcome variable, $Y = 1.$ 
+
+### Linear predictor
+
+The linear predictor always has the same form in all GLMs.  It consists of the explanatory variables that we think are associated with the probability that $Y = 1.$  So, this looks very much  like the linear regression model:
+
+$$
+\eta(x) = \beta_o + \beta_1 x_1 + \dots + \beta_j x_j.
+$$
+Note, though, there is no "error term."  The randomness is provided by the probability distribution we've just specified.  (If you like, you could think of GLMs as having different "error terms" to the normal distribution we use in linear regression.  Of you could think of linear regression as being a GLM with the  normal distribution as its probability distribution. )
+
+### Link function
+
+The general _link function_ is defined as:
+$$
+\eta(x) = f[\mu(x)],
+$$
+where $\mu(x)$ is the parameter of the probability distribution we are interested in.
+
+You might think that in this case we could just put these two together in a straightforward way:
+$$
+p = \eta(x) = \beta_o + \beta_1 x_1 + \dots + \beta_j + x_j,
+$$
+but, while this is in fact technically possible, there would be significant problems with this model.  The two main problems are:
+
+- You could get predicted values of $p$ that are either smaller than 0 or larger than 1, but as $p$ is a probability, this is logically impossible.
+- A linear model implies that the impact of a one-unit change in any $x$ is the same regardless of the value of $p$, but this can't be true.  It must be "harder" to increase the probability from, say, 0.90 to 0.95 than it would be to increase it from 0.50 to 0.55.
+
+Therefore, a different link function is most commonly used.  
+
+### Logit link function
+
+The logit link function is 
+
+$$
+\eta(x) = \log \left( \frac{p}{1-p} \right) = \beta_0 + \beta_i x_1 + \dots + \beta_j x_j,
+$$
+ which can be rearranged to give
+ 
+ $$
+ p = \frac{1}{1 + e^{-\eta}}.
+ $$
+ 
+$p/(1-p)$ is often called the _odds_ (or _odds ratio_), and so another name for the logit function is the _log odds_.
+
+An alternative link function that is sometimes used is the normal cumulative probability distribution, often called the _probit_ function.  This is virtually identical to the logit function, and as interpretation of results using the logit function is generally easier, it is much more common.
+ 
+### Plot of the  logit and probit functions
+ 
+```{r, warning=FALSE}
+p <- seq(0, 1, by = 0.01)
+log.dta <- data.frame(p = p, logit = car::logit(p), probit = qnorm(p))
+log.dta <- reshape2::melt(log.dta, id.var = p)
+ggplot(log.dta, aes(x = value, y = p, colour = variable)) + geom_line() + 
+  theme_bw() + xlab(expression(eta(x))) + guides(colour = FALSE) +
+  annotate('text', x = c(1.45, 0.2), y = 0.75, label = c('Logit', 'Probit'))
+```
+
+### Maximum likelihood estimation
+
+Estimation of GLMs is straightforward, but it's useful to have some intuition about what is going on "under the hood."  Iterative (ie, trial and error) methods have to be used. The computer tries values of the $\beta$s in the model, uses them to calculate predicted values of $p$ and then use that to calculate the likelihood of observing the actual outcomes given those values of $p$.  The iterations continue until the values of $p$ that result in the maximum likelihood is found. The corresponding values of the $\beta$s are the maximum likelihood estimate of those parameters.
+
+Fortunately, while there are general purpose ML estimation functions in R (and if you want to make sure you really understand these principles, it is a good idea to see if you can figure out how to use them to implement logistic regression), there are special purpose functions that make it easy to implement any GLM.
+
+# Logistic regression
+
+### Logistic regression example
+
+\scriptsize
+This example uses data from the Panel Study of Income Dynamics that relate to women's labour force participation.  The respondents are all married women.  The outcome is whether the woman is employed or not.  Explanatory variables: _k5_: number of children 5 or under; _k618_: number of children 6--18; _age_; _wc_: attended college; _lwg_: log expected wage; _inc_: family income.
+
+```{r}
+l1 <- glm(lfp ~ k5 + k618 + age + wc + lwg + inc, family = binomial, data = Mroz)
+summary(l1)
+```
+
+### Interpretation
+
+Parameter estimates are interpreted as effect on logit or log odds. For example, for each additional $1000 of family income, the log odds of being in the labour force declines by 0.033.  This isn't intuitive, but it is easy to see the direction of the effect and to assess statistical significance.  For example, you can see that the probability of a woman being in employment goes down as the number of pre-school children goes up, while having been to college increases the probability of employment.  You might prefer to calculate confidence intervals:
+
+```{r}
+confint(l1)
+```
+
+### Effect plot
+
+In this example, we can see that the effect of family income varies depending on how many pre-school children are in the family.
+
+```{r}
+plot(Effect(c('k5', 'inc'), l1, xlevels = list(k5 = c(0, 1, 2, 3))), type = 'response', rug = FALSE,
+     ci.style = 'none', lines = c(1, 2, 6, 5),
+     main = 'Effect plot', xlab = 'Family income ($000s)', ylab = 'Probability of lfp',
+     multiline = TRUE, x.var = 'inc',
+     colors = c('black', 'red', 'green', 'blue'), lwd = 3)
+```
+
+### Interpretation, continued
+
+The effect of each explanatory variable on the probability varies both across values of that explanatory variable and across values of all the other explanatory variables.  This is why effect plots are particularly useful for logistic regression (and all other GLMs).  Even these involve some simplification.  The example on the previous slide fixed the values of the number of school-age children, age, college educated, and log expected wage at their sample mean values.  This is conventional, but you might ask yourself whether it makes sense for dummy variables.
+
+### Odds ratios
+
+An alternative is to report parameter estimates as effects on the odds ratio, which you  can obtain simply by using the anti-log:
+
+```{r, echo = TRUE}
+round(exp(cbind(Estimate = coef(l1), confint(l1))), 2)
+```
+So, each additional $1000 of family income reduces the odds of working by 3 per cent.
+
+### Goodness of fit
+
+We can compare goodness of fit of nested models using the deviance.  The deviance is defined as twice the difference between the model log likelihood and the log likelihood of the saturated model (i.e., the best possible fit).  The difference between the deviances of nested models has a $\chi^2$ distribution with degrees of freedom equal to the number of extra parameters estimated in the more complex model.  The `anova` function will calculate this for you:
+
+```{r}
+l2 <- update(l1, . ~ . + poly(age, 2, raw = TRUE))
+anova(l1, l2, test = 'Chisq')
+```
+
+### Other goodness of fit statistics
+
+A number of other GoF statistics have been suggested as analogues of the $R^2$ statistic often used in linear regression.  In these formulae, $L_0$ is the likelihood of a regression with only an intercept, $L_m$ is the likihood of the model actually estimated, and $n$ is the sample size.
+
+**Cox and Snell Index**
+$$
+R^2_{CS} = 1 - (L_0 / L_m)^{2/n}.
+$$
+One drawback of this statistic is that the upper bound is not 1, but rather is $1 - L_0^{2/n}.$
+
+**Nagelkerke's Index**
+$$
+R^2_N = \frac{R^2_{CS}}{1 - L_0^{2/n}}.
+$$
+As you can see, this is the Cox and Snell index divided by the upper bound of this index, which therefore now has an upper bound of 1.
+
+**McFadden's $R^2$**
+$$
+R^2_{McF} =   1 - \log(L_m) / \log(L_0)
+$$
+
+### Example
+```{r, echo = TRUE}
+descr::LogRegR2(l1)
+```
+
+### Outlier detection
+
+Similar methods to those used in linear regression can be used to check for outliers.
+
+```{r}
+inf1 <- influence.measures(l1)
+inf1 <- data.frame(inf1$infmat)
+inf1$ID <- 1:dim(inf1)[1]
+ix <- inf1$cook.d > 0.02
+ol <- inf1[ix, ]
+ggplot(inf1, aes(x = ID, y = cook.d)) + geom_point() + theme_bw() + ylab("Cook's distance") +
+  ggtitle("Cook's distance plot") + 
+  geom_text(data = ol, aes(label = ID, hjust = 'left'), nudge_x = 10)
+```
+
+# Ordinal logistic regression
+
+### Ordinal outcomes
+
+Sometimes we have outcome variables that take a small number of discrete, ordered categories.  (If there are many categories, you would probably be best advised to treat it as a numeric variable.)  For example, I have been doing research into the quality of adult residential care facilities, and this has categories "Poor", "Fair", "Good", and "Excellent."  We want to use a method that uses the information about ordering in the data.  There are several possible alternatives, but I am going to explain only the most straightforward.  It is often just called **ordinal logistic regression**, although strictly speaking it is just one version of ordinal logit.  Sometimes it is called the _proportional odds_ model, which would be a less ambiguous name for it.
+
+### Proportional odds logistic regression
+
+The simplest model for ordinal logistic regression.  Our linear predictor is:
+$$
+\eta(x) = \beta_0 + \beta_1 x_1 + \dots + \beta_k x_k.
+$$
+Then we have
+$$
+\begin{gathered}
+\text{logit}(p_m) = \eta(x) \\
+\text{logit}(p_m + p_{m-1}) = \eta(x) + \alpha_1 \\
+\text{logit}(p_m + p_{m-1} + p_{m-2}) = \eta(x) + \alpha_1 + \alpha_2 \\
+\dots \\
+\text{logit}(p_1) = 1 - (\eta(x) + \alpha_1 + \alpha_2 + \dots + \alpha_{m-2})
+\end{gathered}
+$$
+So, if we have an outcome variable with three categories, we first consider the log odds of being in the highest category against being in either of the other two categories, then the log odds of being in the middle category agains being in the lowest category.  The linear predictor is constrained to be the same in each case, with a threshold parameter (the $\alpha$s) being estimated for each one.
+
+### Example
+
+Three level variable called _apply_, with levels "unlikely", "somewhat likely", and "very likely", coded 1, 2, and 3, respectively, that we will use as our outcome variable. Three explanatory variables: _pared_, dummy variable indicating whether at least one parent has a graduate degree; _public_, dummy variable indicating whether undergrad college is public or private, and _gpa_, student's grade point average. 
+
+```{r}
+dat <- read.dta("http://www.ats.ucla.edu/stat/data/ologit.dta")
+
+dat$apply <- ordered(dat$apply)
+dat$pared <- factor(dat$pared, labels = c('No', 'Yes'))
+dat$public <- factor(dat$public, labels = c('Private', 'Public'))
+
+ggplot(dat, aes(x = apply, y = gpa)) + theme_bw() +
+  geom_boxplot(size = .75) +
+  geom_jitter(alpha = .5, size = 0.5) +
+  facet_grid(pared ~ public, margins = TRUE) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+```
+
+### Regression example
+
+\footnotesize
+```{r}
+library(ordinal)
+o1 <- clm(apply ~ pared + public + gpa, data = dat, Hess = TRUE)
+summary(o1)
+```
+
+### Effect plot
+
+```{r}
+plot(Effect(c('pared', 'gpa'), o1), rug = FALSE, ci.style = 'none', main = 'Effect plot',
+     lwd = 3, line = c(1, 2, 4))
+```
+
+### Test assumption
+
+The "proportional odds" assumption is quite a strong one, so it's important to test it.  The easiest way to do this is with the `nominal_test` function in the `ordinal` package.
+
+```{r potest}
+nominal_test(o1)
+```
+
+The likelihood ratio test can be thought of as a test of the hypothesis that relaxing the proportional odds assumption does not improve model fit.  In this case, we can see evidence against the PO assumption for the `public` variable, so we can re-estimate the model as follows.
+
+### Partial proportional odds
+
+\scriptsize
+
+```{r , echo = TRUE}
+o2 <- clm(apply ~ pared + gpa, nominal = ~ public, data = dat, Hess = TRUE)
+summary(o2)
+```
+### Effect plot
+
+```{r, out.width="45%"}
+nd <- modelr::data_grid(dat, public, .model = o2)
+pred2 <- predict(o2, newdata = nd)$fit
+pred2 <- data.frame(pred2, public = c('Private', 'Public'))
+fit2 <- tidyr::gather(pred2, 'apply', 'prob', -public)
+fit2$apply <- ordered(fit2$apply, levels = c('unlikely', 'somewhat.likely', 'very.likely'))
+
+pred1 <- predict(o1, newdata = nd)$fit
+pred1 <- data.frame(pred1, public = c('Private', 'Public'))
+fit1 <- tidyr::gather(pred1, 'apply', 'prob', -public)
+fit1$apply <- ordered(fit1$apply, levels = c('unlikely', 'somewhat.likely', 'very.likely'))
+
+ggplot(fit1, aes(x = public, y = prob, colour = apply)) + geom_point(size = 3) +
+  theme_bw() + labs(title = 'Proportional odds', x = NULL, y = 'Probability', colour = 'Apply') +
+  theme(legend.position = 'none')
+ggplot(fit2, aes(x = public, y = prob, colour = apply)) + geom_point(size = 3) +
+  theme_bw() + labs(x = NULL, y = 'Probability', colour = 'Apply', title = 'Partial proportional odds') +
+  theme(legend.position = 'bottom')
+
+```
+
+# Multinomial logistic regression
+
+### Multinomial logistic regression
+
+This method is used when an outcome variable consists of discrete but unordered categories.  Common examples involve individuals making choices among a set of alternatives, such as the form of transport to commute to work, brand of toothpaste purchased, political party voted for, etc. The basic intuition is that we perform logistic regressions on each pair of alternatives as follows:
+$$
+\log\left(\frac{p_a}{p_b}\right) = \beta_{1ab} (x_{1a} - x_{1b}) + \beta_{2ab} (x_{2a} - x_{2b}) + \dots + \beta_{kab} (x_{ka} - x_{kb})
+$$
+For example, the impact of variable $x_1$ (say, price) on choice of toothpaste brand depends on how different the price of brand $a$ is compared with brand $b$.  We get different parameter estimates for each pair of choices.  Characteristics of individuals can also be included.
+
+### Example
+
+\scriptsize
+
+The data are 200 high school students.  Outcome variable is programme choice (general, academic or vocational). Explanatory variables are socio-economic status and writing test score.
+
+```{r, size = 'scriptsize'}
+ml <- read.dta("http://www.ats.ucla.edu/stat/data/hsbdemo.dta")
+library(nnet)
+ml$prog2 <- relevel(ml$prog, ref = 'academic')
+test <- multinom(prog2 ~ ses + write, data = ml)
+summary(test)
+```
+
+### Effect plot
+
+```{r}
+plot(Effect(c('ses', 'write'), test), rug = FALSE, ci.style = 'none', line = c(1, 2, 4),
+     main = 'Effect plot')
+```

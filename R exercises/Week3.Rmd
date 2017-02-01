@@ -1,0 +1,133 @@
+---
+title: "Week 3 Practical Session"
+author: "David Barron"
+date: "Hilary Term 2017"
+output: pdf_document
+---
+
+```{r options, echo=FALSE, message=FALSE}
+library(knitr)
+opts_chunk$set(comment=NA, tidy=TRUE)
+library(car)
+library(effects)
+library(MASS)
+library(arm)
+```
+## Logistic regression
+
+The outcome variable in a logistic regression in R can either be a numeric variable with values 0 and 1 or a factor with two levels.  In that case, the first level (which is usually the one that if first alphabetically) is equivalent to 0 and the other level to 1. This is important, because you have to be able to interpret the direction of regression parameter estimates.
+
+In this example we are wanting to investigate women's labour force participation `lfp`. The data *Mroz* is of married women in the US. The outcome variable is a factor with levels *no* and *yes*. Therefore, *no* is equivalent to 0, and so a positive regression parameter estimate means that an increase in the explanatory variable increases the probability of labour force participation.  The other variables are *k5*: number of children 5 or younger; *k618*: number of children 6--18; *age*: age in years; *wc*: college attendance; *hc*: husband's college attendance; *lwg*: log expected wage rate; *inc*: family income exclusive of wife's income.
+
+```{r eg1}
+data(Mroz)
+head(Mroz)
+b1 <- glm(lfp ~ k5 + k618 + age + wc + hc + lwg + inc, family=binomial(), data=Mroz)
+summary(b1)
+```
+
+If we reverse the coding of the outcome variable, then the signs on the output will change:
+
+```{r relevel}
+lfp.recode <- relevel(Mroz$lfp, 'yes')
+b1a <- glm(lfp.recode ~ k5 + k618 + age + wc + hc + lwg + inc, family=binomial, data=Mroz)
+summary(b1a)
+```
+
+Notice that only the signs have changed. 
+
+## Interpreting parameter estimates
+This can be done using an effect plot. Remember that the impact of any explanatory variable on predicted probabilities depends on the values of the other explanatory variables, so you have to set these too.  The standard choice is the mean, but you might prefer the median. You might also prefer to fix categorical varibles at a particular level, rather than using the mean (which isn't really meaningful for a categorical variable).
+
+The plots show the relatioship between household income and the probability of being in the labour force separately for the four different combinations of the two college education variables.
+```{r effect}
+plot(Effect(c('inc', 'wc','hc'), b1, typical=median))
+```
+
+## Multinomial logit
+Multinomial logistic regression is often used for situations in which people have several choices. In this example, we have women's labour force participation again, but now we have three possible states: not in work, in part time work, and in full time work.
+
+```{r multinom}
+data(Womenlf)
+xtabs(~ partic + region, Womenlf)
+
+Womenlf$partic <- relevel(Womenlf$partic,  'not.work')
+
+library(nnet)
+m1 <- multinom(partic ~ hincome + children + region, data = Womenlf)
+
+summary(m1)
+Anova(m1)
+
+m2 <- multinom(partic ~ hincome + children , data = Womenlf)
+
+m2 <- update(m1, . ~ . - region)
+
+summary(m2, Wald=TRUE)
+anova(m2,m1)
+plot(Effect('hincome', m2, xlevels=list(hincome=50)))
+plot(Effect('children',  m2))
+```
+
+Compare to binary logit for full time, with part time treated as missing.
+```{r binom}
+bin <-  glm(partic ~ hincome + children, data=Womenlf, subset= partic != 'parttime', family=binomial)
+summary(bin)
+```
+You can see that these are reasonably similar.  We could add an interaction.
+
+```{r interact}
+m3 <- update(m2, . ~ . + hincome:children)
+plot(Effect(c('hincome','children'), m3, xlevels=list(hincome=50)))
+Anova(m3)
+```
+
+## Ordinal models
+You have to make sure the levels of the factor you are going to analyse are in the correct order.
+```{r ordinal}
+
+Womenlf$partic <- ordered(Womenlf$partic,levels=c('not.work','parttime','fulltime') )
+
+o1 <- polr(partic ~ hincome + children, data=Womenlf, Hess = TRUE)
+
+summary(o1)
+plot(Effect('hincome', o1, xlevels=list(hincome=50)))
+plot(Effect('children', o1))
+o2 <- update(o1, . ~ . + hincome:children)
+plot(Effect(c('hincome','children'), o2, xlevels=list(hincome=50)))
+
+AIC(o1)
+AIC(m2)
+```
+In this case, the fit of the ordinal model is worse than that of the multinomial we used before, so unlikely that the assumptions of the ordinal model are met.
+
+## Diagnostics
+Going back to the binary logistic regression that we started with, we can look at residuals and Cook's distance.
+```{r diag}
+residualPlots(b1)
+
+influenceIndexPlot(b1, vars=c('Cook', 'hat'), id.n = 3)
+
+compareCoefs(b1, update(b1, subset = -c(119, 220, 416)))
+
+Mroz[c(119,220,416), ]
+```
+The Cook's distance plots and hat value plots identify different cases as the most outlying, but none look particularly problematic.  However, we can compare the coefficients when we remove those three cases.  You can see that the coefficient of `lwg` does change by around 1 standard deviation, so there is some evidence of lack of fit here. This variable is unusual in that how it is defined depends on the outcome variable. For women in the labour force, it is the log of actual  wage, but for those that aren't, it is the log of predicted wage.  Let's have a look at a component plus residual plot.
+
+```{r cpr}
+
+crPlots(b1, 'lwg', pch=as.numeric(Mroz$lfp), id.n=3)
+
+legend('bottomleft', c('Estimated lwg', 'Observed lwg'), pch=1:2, inset=0.01)
+```
+
+We can see the unusual shape that this data has generated. We can see that case 220 is unusual because the person has 3 children, works, has a low income and a low wage.
+
+## Homework
+1. Install the package AER.
+2. In this package there is a data set called `ResumeNames`. Have a look at the help page for this data set.
+3. The outcome variable of interest is *call* (whether or not a resume (that's American English for a CV) sent in response to a job advert generated a telephone call from a potential employer).
+4. The research question is whether the probability of a call is influenced by whether the "candidate" (these were all fictitious) had an African-American or Caucasian-sounding name.
+5. There are a number of other variables in the data that identify characteristics of the "candidate" and characteristics of the job.
+6. Your task is to come up with the best model that tests the hypothesis that ethnicity is associated with employer response while also controlling for other possible confounding variables.
+7. Make sure that you can interpret your results. How would you explain to the reader of a paper in which you presented your results how much difference there was between employer responses to "Caucasion" and "African-American" applicants?  
