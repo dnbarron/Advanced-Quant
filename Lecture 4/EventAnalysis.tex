@@ -7,6 +7,7 @@
 \usepackage{pgfpages}
 \pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
 
+
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
@@ -496,13 +497,60 @@ variable in our regression analyses.
 
 \end{frame}
 
+\begin{frame}[fragile]{Example data: job durations}
+
+\begin{itemize}
+\tightlist
+\item
+  \texttt{id} Identification number of subject
+\item
+  \texttt{noj} Serial number of the job episode
+\item
+  \texttt{ts} Starting time of the job episode
+\item
+  \texttt{tf} Ending time of the job episode
+\item
+  \texttt{sex} Sex
+\item
+  \texttt{ti} Date of interview (CMC: Months since Dec 1899, ie, Jan
+  1900 = 1)
+\item
+  \texttt{tb} Date of birth (CMC)
+\item
+  \texttt{te} Date of entry into the labour market (CMC)
+\item
+  \texttt{tmar} Date of marriage (CMC) {[}0 if not married{]}
+\item
+  \texttt{pres} Prestige score of current job, i.e.~of job episode in
+  current record of data file
+\item
+  \texttt{presn} Prestige score of the next job (if missing: -1)
+\item
+  \texttt{edu} Highest educational attainment before entry into labour
+  market
+\item
+  \texttt{coho} Birth cohort (1: before 1940; 2: 1940--1949; 3: 1950
+  onwards)
+\item
+  \texttt{lfx} \texttt{ts\ -\ te}
+\item
+  \texttt{des} \texttt{tf\ !=\ ti} (if spell ends on date of interview,
+  spell is censored)
+\item
+  \texttt{dur} \texttt{tf\ -\ ts\ +\ 1}
+\end{itemize}
+
+\end{frame}
+
 \begin{frame}{Kaplan-Meier estimator}
 
 There are \(q\) points in time at which at least one event occurs. There
 are \(l\) intervals between these \(q\) points. Then the Kaplan-Meier
 (or product limit) estimate of the survivor function is \[
-\widehat{G}(t) = \prod_{l:\tau_l<t} \left(1 - \frac{E_l}{R_l}\right).
-\] From this we can also calculate the cumulative hazard: \[
+\widehat{G}(t) = \prod_{l:\tau_l<t} \left(1 - \frac{E_l}{R_l}\right),
+\] where \(E_l\) is the number of events in interval \(l\) and \(R_l\)
+is the risk set in the same interval. From this we can also calculate
+the cumulative hazard: \[
 \widehat{H}(t) = -\log\left(\widehat{G}(t)\right).
 \]
 
@@ -549,8 +597,6 @@ Call: survfit(formula = rr.s ~ 1)
 
 \begin{frame}[fragile]{Stratified survivor functions}
 
-\begin{center}\includegraphics[width=0.9\linewidth]{EventAnalysis_files/figure-beamer/unnamed-chunk-15-1} \end{center}
-
 \begin{verbatim}
 Call: survfit(formula = rr.s ~ sex, data = rrdat1)
 
@@ -558,6 +604,8 @@ Call: survfit(formula = rr.s ~ sex, data = rrdat1)
 sex=man   348    245     55      44      68
 sex=woman 252    213     36      32      41
 \end{verbatim}
+
+\begin{center}\includegraphics[width=0.9\linewidth]{EventAnalysis_files/figure-beamer/unnamed-chunk-15-1} \end{center}
 
 \end{frame}
 
@@ -573,7 +621,17 @@ likelihood can then be written: \[
 \mathcal{L} = \prod_{i=1}^n f(t_i)^{1-c_i} G(t_i)^c_i.
 \]
 
-The basic model is \(r_1(t) = r_0(t) \exp(X\beta).\)
+This is how we use the information about censored cases. We know that an
+observation that is censored at time \(t\) survived until at least time
+\(t\). The probability of that is just the survivor function, \(G(t)\).
+For events that occurred at time \(t\), we use the probability density
+function, \(f(t)\).
+
+The basic model is \[
+r(t) = r_0(t) \exp(\beta_1 X_1 + \beta_2 X_2 + \dots + \beta_k X_k).
+\]
+
+\(r_0(t)\) is called the \emph{baseline hazard rate}.
 
 \end{frame}
 
@@ -584,14 +642,15 @@ distribution.
 
 \[
 \begin{aligned}
-r &= \exp(X\beta)\\
+r(t) &= r_0 \exp(\beta_1 X_1 + \beta_2 X_2 + \dots)\\
 G(t) &= \exp(-r t)\\
 f(t) &= r \exp(-r t)
 \end{aligned}
-\] If events occur during some interval with an exponential distribution
-at a rate \(r\), then a count of events during the same interval will
-have a Poisson distribution with mean \(1/r\). Notice that this is the
-only model in which there is no time-dependence in the hazard rate.
+\] In other words, the baseline hazard rate is a constant. If events
+occur during some interval with an exponential distribution at a rate
+\(r\), then a count of events during the same interval will have a
+Poisson distribution with mean \(1/r\). Notice that this is the only
+model in which there is no time-dependence in the hazard rate.
 
 \end{frame}
 
@@ -602,7 +661,7 @@ only model in which there is no time-dependence in the hazard rate.
 \begin{verbatim}
 Call:
 phreg(formula = rr.s ~ edu + coho + lfx + pnoj + pres, data = rrdat1, 
-    shape = 1)
+    shape = 1, center = TRUE)
 
 Covariate          W.mean      Coef Exp(Coef)  se(Coef)    Wald p
 edu                11.097     0.077     1.080     0.025     0.002 
@@ -638,7 +697,7 @@ Overall p-value           0.298852
 \begin{frame}[fragile]{Interpretation}
 
 \small
-The baseline hazard rate (\(h_0(t)\)) is multiplied by the estimated
+The baseline hazard rate (\(r_0(t)\)) is multiplied by the estimated
 effects. For example, the variable \texttt{edu} has a minimum value of 9
 and a maximum of 19. At its minimum, the multiplier of the baseline
 hazard is \(\exp(0.077 \times 9) = 2.00\), while at the maximum the
@@ -714,10 +773,10 @@ exponential model.
 \begin{frame}{Weibull hazard rate}
 
 \[
-r(t) = \frac{p}{\lambda} \left( \frac{t}{\lambda} \right)^{(p-1)} \exp(Xb)
+r(t) = \frac{p}{\lambda} \left( \frac{t}{\lambda} \right)^{(p-1)} \exp(\beta_1 X_1 + \beta_2 X_2 + \dots)
 \] The exponential model is obtained when \(p = 1,\) so it is
 straightforward to do a hypothesis test of Weibull against exponential.
-Therefore \(r = 1/\lambda.\)
+In the exponential model, \(r = 1/\lambda.\)
 
 \end{frame}
 

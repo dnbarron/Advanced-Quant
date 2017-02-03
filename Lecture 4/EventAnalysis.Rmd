@@ -235,12 +235,19 @@ rrdat <- read.dta('C:/Users/dbarron/Dropbox/Teaching/MSc teaching/Advanced Quant
 
 rrdat1 <- mutate(rrdat, des = tfin != ti, 
                  dur = tfin - tstart + 1,
-                 coho = factor(ifelse(tb >= 468 & tb <= 504,'coho2',
-                          ifelse(tb >= 588 & tb <= 624,'coho3','coho1'))),
+                 coho = factor(ifelse(tb >= 468 & tb <= 588,'coho2',
+                          ifelse(tb >= 589 & tb <= 624,'coho3','coho1'))),
                  lfx = tstart - te,
                  pnoj = noj - 1,
                  sex = factor(sex, labels = c('man','woman'))
 )
+
+cmc_to_date <- function(d){
+  year <- d %/% 12
+  month <- d %% 12
+  month <- ifelse(month == 0, 12, month)
+  lubridate::dmy(paste0('01-', month, '- 19', year))
+}
 ```
 
 ```{r, echo=TRUE}
@@ -249,14 +256,33 @@ rr.s <- Surv(rrdat1$dur, rrdat1$des)
 
 The first variable is the duration and the second is the indicator of how the episode ended (0/1 or TRUE/FALSE).  This will be the outcome variable in our regression analyses.
 
+### Example data: job durations
+
+* `id`    Identification number of subject
+* `noj`   Serial number of the job episode
+* `ts`    Starting time of the job episode
+* `tf`    Ending time of the job episode
+* `sex`   Sex 
+* `ti`    Date of interview (CMC: Months since Dec 1899, ie, Jan 1900 = 1)
+* `tb`    Date of birth (CMC)
+* `te`    Date of entry into the labour market (CMC)
+* `tmar`  Date of marriage (CMC) [0 if not married]
+* `pres`  Prestige score of current job, i.e. of job episode in current record of data file
+* `presn` Prestige score of the next job (if missing: -1)
+* `edu`   Highest educational attainment before entry into labour market
+* `coho`  Birth cohort (1: before 1940; 2: 1940--1949; 3: 1950 onwards)
+* `lfx`   `ts - te`
+* `des`   `tf != ti` (if spell ends on date of interview, spell is censored)
+* `dur`   `tf - ts + 1`
+
 
 ### Kaplan-Meier estimator
 
 There are $q$ points in time at which at least one event occurs. There are $l$ intervals between these $q$ points. Then the Kaplan-Meier (or product limit) estimate of the survivor function is
 $$
-\widehat{G}(t) = \prod_{l:\tau_l<t} \left(1 - \frac{E_l}{R_l}\right).
+\widehat{G}(t) = \prod_{l:\tau_l<t} \left(1 - \frac{E_l}{R_l}\right),
 $$
-From this we can also calculate the cumulative hazard:
+where $E_l$ is the number of events in interval $l$ and $R_l$ is the risk set in the same interval.  From this we can also calculate the cumulative hazard:
 $$
 \widehat{H}(t) = -\log\left(\widehat{G}(t)\right).
 $$
@@ -285,7 +311,7 @@ plot.Surv(rr.s, fn='surv')
 ```{r}
 plot(ss2 <- survfit(rr.s ~ sex, data = rrdat1), col = c('blue','red'), mark.time = FALSE)
 ss2
-#legend(300,.9,legend=c('Men','Women'),lty=1,col=c('blue','red'), bty='n')
+legend(300,.9,legend=c('Men','Women'),lty=1,col=c('blue','red'), bty='n')
 
 ```
 
@@ -298,7 +324,14 @@ $$
 \mathcal{L} = \prod_{i=1}^n f(t_i)^{1-c_i} G(t_i)^c_i.
 $$
 
-The basic model is $r_1(t) = r_0(t) \exp(X\beta).$
+This is how we use the information about censored cases.  We know that an observation that is censored at time $t$ survived until at least time $t$.  The probability of that is just the survivor function, $G(t)$. For events that occurred at time $t$, we use the probability density function, $f(t)$.  
+
+The basic model is 
+$$
+r(t) = r_0(t) \exp(\beta_1 X_1 + \beta_2 X_2 + \dots + \beta_k X_k).
+$$  
+
+$r_0(t)$ is called the _baseline hazard rate_.
 
 ### Exponential distribution
 
@@ -306,19 +339,19 @@ The simplest distribution that we can use is the exponential distribution.
 
 $$
 \begin{aligned}
-r &= \exp(X\beta)\\
+r(t) &= r_0 \exp(\beta_1 X_1 + \beta_2 X_2 + \dots)\\
 G(t) &= \exp(-r t)\\
 f(t) &= r \exp(-r t)
 \end{aligned}
 $$
-If events occur during some interval with an exponential distribution at a rate $r$, then a count of events during the same interval will have a Poisson distribution with mean $1/r$.  Notice that this is the only model in which there is no time-dependence in the hazard rate.
+In other words, the baseline hazard rate is a constant.  If events occur during some interval with an exponential distribution at a rate $r$, then a count of events during the same interval will have a Poisson distribution with mean $1/r$.  Notice that this is the only model in which there is no time-dependence in the hazard rate.
 
 
 ### Example
 
 \scriptsize
 ```{r}
-ct1 <- phreg(rr.s ~ edu + coho + lfx + pnoj + pres, data = rrdat1, shape = 1)
+ct1 <- phreg(rr.s ~ edu + coho + lfx + pnoj + pres, data = rrdat1, shape = 1, center = TRUE)
 summary(ct1)
 ```
 
@@ -335,7 +368,7 @@ plot(ct1, 'sur', main = 'Exponential survivor function')
 ### Interpretation
 
 \small
-The baseline hazard rate ($h_0(t)$) is multiplied by the estimated effects.  For example, the variable `edu` has a minimum value of 9 and a maximum of 19. At its minimum, the multiplier of the baseline hazard is $\exp(0.077 \times 9) = 2.00$, while at the maximum the multiplier is $\exp(0.077 \times 19) = 4.32$.  The multiplier can be plotted:
+The baseline hazard rate ($r_0(t)$) is multiplied by the estimated effects.  For example, the variable `edu` has a minimum value of 9 and a maximum of 19. At its minimum, the multiplier of the baseline hazard is $\exp(0.077 \times 9) = 2.00$, while at the maximum the multiplier is $\exp(0.077 \times 19) = 4.32$.  The multiplier can be plotted:
 
 ```{r}
 plot(9:19, exp(.077 * 9:19), type = 'l', xlab = 'Education', ylab = 'Hazard multiplier')
@@ -381,9 +414,9 @@ with 3 degrees of freedom, which is highly significant, so we can conclude that 
 ### Weibull hazard rate
 
 $$
-r(t) = \frac{p}{\lambda} \left( \frac{t}{\lambda} \right)^{(p-1)} \exp(Xb)
+r(t) = \frac{p}{\lambda} \left( \frac{t}{\lambda} \right)^{(p-1)} \exp(\beta_1 X_1 + \beta_2 X_2 + \dots)
 $$
-The exponential model is obtained when $p = 1,$ so it is straightforward to do a hypothesis test of Weibull against exponential.  Therefore $r = 1/\lambda.$
+The exponential model is obtained when $p = 1,$ so it is straightforward to do a hypothesis test of Weibull against exponential.  In the exponential model,  $r = 1/\lambda.$
 
 
 ### Example

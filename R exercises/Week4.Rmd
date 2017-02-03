@@ -36,7 +36,7 @@ A variable like this could be analysed using linear regression, but it's not har
 p1 <- glm(interlocks ~ log(assets) + nation + sector, family = poisson, data = Ornstein)
 summary(p1)
 Anova(p1)
-plot(Effect('assets', p1, xlevels = list(assets = 50)), rescale.axis = FALSE)
+plot(Effect('assets', p1, xlevels = list(assets = 50)))
 plot(Effect('nation', p1))
 plot(Effect('sector', p1))
 ```
