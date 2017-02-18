@@ -1,0 +1,24 @@
+\frametitle{Example}
+
+\begin{verbatim}
+glmer(formula = leave ~ fam + valued + age + sex + INN_OUT +
+    (1 | HOSPITAL), data = nurse, family = binomial, subset = age >=
+    18)
+                    coef.est coef.se
+(Intercept)          3.02     0.27
+famyes              -0.75     0.13
+valuedyes           -0.93     0.13
+age                 -0.05     0.01
+sexmale              0.28     0.21
+INN_OUTOuter London -0.73     0.15
+
+Error terms:
+ Groups   Name        Std.Dev.
+ HOSPITAL (Intercept) 0.18
+ Residual             1.00
+---
+number of obs: 1385, groups: HOSPITAL, 18
+AIC = 1678.9, DIC = 1639
+deviance = 1652.0
+\end{verbatim}
+

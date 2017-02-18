@@ -1,0 +1,129 @@
+---
+title: "Week 5 Practical Session"
+author: "David Barron"
+date: "Hilary Term 2017"
+output: pdf_document
+---
+
+
+```{r options, echo=FALSE, message=FALSE}
+library(knitr)
+opts_chunk$set(comment=NA, tidy=TRUE, cache=TRUE)
+opts_chunk$set(fig.width = 6, fig.asp = 0.618, fig.align = "center", out.width = "80%")
+
+library(car)
+library(effects)
+library(arm)
+library(forcats)
+library(readr)
+library(ggplot2)
+```
+
+```{r data}
+ess <- read_csv('C:\\Users\\dbarron\\Dropbox\\Teaching\\MSc teaching\\Advanced Quant\\data\\ESS/ess.csv')
+
+Happy <- recode(ess$happy,"'Extremely happy' = 10; 'Extremely unhappy' = 0;
+                '.a'=NA; '.b'=NA; '.c'=NA")
+Happy <- as.numeric(as.character(Happy))
+ess$Happy <- Happy
+rm(Happy)
+```
+
+## Multilevel regression
+These data come from the European Social Survey. There are 50,781 respondents in 26 countries.  Data were collected in 2010/11.  The outcome variable of interest consistes of responses to the question ``Taking all things together, how happy would you say you are?''  Possible responses range from 0 (extremely unhappy) to 10 (extremely happy).  Intermediate levels aren't labelled on the questionnaire.  
+
+```{r desc, warning=FALSE}
+library(ggplot2)
+xtabs(~ Happy, ess)
+
+ggplot(ess, aes(x = Happy)) + geom_bar()
+```
+
+We are going to use linear regression. Strictly speaking, this is an ordinal variable, but with that many levels I think most people would opt to use linear regression.  We are going to investigate a range of individual level (age, sex) and country level (inequality, gdp per capita) variables for association with happiness.  The data need a little bit of cleaning first.  This is mainly to remove missing data that use STATA coding. 
+
+```{r clean}
+toNA <- function(var, val = '.a'){
+  var[var %in% val] <- NA
+  var
+}
+
+ess$Age <- as.numeric(toNA(ess$agea, '.a'))
+ess$Sex <- factor(toNA(ess$gndr))
+
+ess$Marital <- recode(ess$marsts, "'.a' = NA; '.b' = NA; '.c' = NA; '.d' = NA;
+                      'In a legally registered civil union' = 'Married'; 
+                      'Legally divorced/civil union dissolved' = 'Divorced'; 
+                      'Legally married' = 'Married'; 'Legally separated' = 'Divorced'; 
+                      'None of these (NEVER married or in legally registered civil' = 'Single';
+                      'Widowed/civil partner died' = 'Widowed'; '' = NA")
+
+ess$Marital <- factor(ess$Marital)
+ess$Marital2 <- recode(ess$Marital, "'Married' = 'Married';
+                       'Divorced' = 'Single'; 'Single' = 'Single'; 'Widowed' = 'Single'")
+names(ess)[14:15] <- c('GDP', 'Gini')
+
+ess$EDUyears <- as.numeric(toNA(ess$eduyrs, c('.a', '.b', '.c')))
+```
+
+You would normally want to do some descriptive statistics on these variables to check that they are OK. For example, there are some people who say they had 40 or more years of education, which seems excessive!
+
+## Simple model, random intercept
+We are treating country as the level 2 variable.  Let's try a model with sex, age, marrital status and gini coefficient.
+
+```{r mod1}
+require(arm)
+m1 <- lmer(Happy ~ Age + I(Age^2) + Marital + Sex + Gini + (1|cntry), data = ess)
+display(m1)
+plot(Effect('Age', m1))
+```
+
+The warning message is because A^2^ is much larger than the other variables.  ML estimators can have a problem with this, so it is a wise precaution to rescale (by dividing the variable by a constant).  We might want to look at how the random intercepts are distributed.
+
+```{r dotplot1}
+lattice::dotplot(ranef(m1, condVar = FALSE))
+```
+
+Now try adding some more variables.
+```{r mod2}
+m2 <- lmer(Happy ~ Age + I(Age^2/1000) + Marital2 + Sex + Gini + I(GDP/1000) + EDUyears + (1|cntry), 
+           data = ess)
+display(m2)
+```
+
+Apart from Gini, these are all statistically significant.  Let's see if the effect of, say, education, varies by country.
+
+```{r mod3}
+ess$GDPk <- ess$GDP/1000
+m3 <- lmer(Happy ~ Age + I(Age^2/1000) + Marital2 + Sex + Gini + GDPk + EDUyears + (1 + EDUyears|cntry), 
+           data = ess)
+display(m3)
+anova(m2, m3)
+lattice::dotplot(ranef(m3, condVar = TRUE))
+```
+
+It doesn't look like very much variation, but it is statistically significant.  Might the variation in EDUyears' effect be associated with levels of GDP?
+
+```{r mod4}
+m4 <- update(m3, . ~ . + EDUyears:GDPk)
+display(m4)
+anova(m3, m4)
+plot(Effect(c('EDUyears','GDPk'), m4), x.var = 'EDUyears')
+```
+
+You can see that the effect of education on happiness does vary pretty substantially with GDP.  However, remember that there aren't very many countries, so this has to be treated with a little bit of caution.  However, it looks as though the effect of education on happiness has a much bigger effect in poorer countries than it does in richer ones.
+
+## Homework
+1. Use the data `5.1.txt`, which is from the Scottish Youth Cohort Trends dataset.  It is a comma-delimited file, so you can read it using `read.csv('5.1.txt')`.  You should get 33,988 rows and 9 variables, as follows.
+
+* caseid: student id
+* schoolid: School id
+* score: Point score calculated from awards in Standard grades taken at age 16. Scores range from 0 to 75, with a higher score indicating a higher attainment
+* cohort90: The sample includes the following cohorts: 1984, 1986, 1988, 1990, 1996 and 1998. The cohort90 variable is calculated by subtracting 1990 from each value. Thus values range from -6 (corresponding to 1984) to 8 (1998), with 1990 coded as zero 
+* female:  Sex of student (1 = female, 0 = male) 
+* sclass: Social class, defined as the higher class of mother or father (1 = managerial and professional, 2 = intermediate, 3 = working, 4 = unclassified) 
+* schtype: School type, distinguishing independent schools from state-funded schools 
+*   (1 = independent, 0 = state-funded) 
+* schurban: Urban-rural classification of school (1 = urban, 0 = town or rural) 
+* schdenom: School denomination (1 = Roman Catholic, 0 = non-denominational)
+
+2. The outcome variable is `score`. Try to develop a suitable multilevel model using these data.

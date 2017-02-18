@@ -1,0 +1,11 @@
+base
+knitr
+car
+effects
+MASS
+Matrix
+lme4
+arm
+forcats
+readr
+ggplot2
