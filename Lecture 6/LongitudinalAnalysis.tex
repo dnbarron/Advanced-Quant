@@ -1,0 +1,704 @@
+\documentclass[10pt,ignorenonframetext,]{beamer}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+
+\usepackage{pgfpages}
+\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+
+
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+\ifxetex
+\usepackage{mathspec}
+\else
+\usepackage{fontspec}
+\fi
+\defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+\usetheme{Madrid}
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\newif\ifbibliography
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{longtable,booktabs}
+\usepackage{caption}
+% These lines are needed to make table captions work with longtable:
+\makeatletter
+\def\fnum@table{\tablename~\thetable}
+\makeatother
+
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+
+\AtBeginPart{
+\let\insertpartnumber\relax
+\let\partname\relax
+\frame{\partpage}
+}
+\AtBeginSection{
+\ifbibliography
+\else
+\let\insertsectionnumber\relax
+\let\sectionname\relax
+\frame{\sectionpage}
+\fi
+}
+\AtBeginSubsection{
+\let\insertsubsectionnumber\relax
+\let\subsectionname\relax
+\frame{\subsectionpage}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+\title{Longitudinal or Panel Analysis}
+\author{David Barron}
+\date{Hilary Term 2017}
+
+\begin{document}
+\frame{\titlepage}
+
+\section{Basic concepts}\label{basic-concepts}
+
+\begin{frame}{Panel Data}
+
+The main characteristic of longitudinal or panel data is that a group of
+individuals (people, firms, etc.) are surveyed at (usually) regular
+intervals. Advantages include:
+
+\begin{itemize}
+\tightlist
+\item
+  Can study dynamics
+\item
+  Sequence of events in time helps show causation. For example, married
+  men generally earn more, but is this a causal effect?
+\item
+  Can control for unobserved heterogeneity
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{What analyses can be done?}
+
+You can do linear regression, logit, poisson, negative binomial
+regressions (and a number of others that we won't be covering) in panel
+or longitudinal format. These versions allow us to deal with some of the
+issues associated with these kinds of data. In particular, we can't
+treat each observation as independent. There will almost certainly be
+more variation from individual to individual than there will be within
+an individual over time.
+
+\end{frame}
+
+\begin{frame}{Wide data}
+
+Using data from chapter 2 of Singer \& Willett. \emph{Wide} data has the
+form:
+
+\small
+
+\begin{longtable}[]{@{}rrrrrrrr@{}}
+\toprule
+id & tol11 & tol12 & tol13 & tol14 & tol15 & male &
+exposure\tabularnewline
+\midrule
+\endhead
+9 & 2.23 & 1.79 & 1.90 & 2.12 & 2.66 & 0 & 1.54\tabularnewline
+45 & 1.12 & 1.45 & 1.45 & 1.45 & 1.99 & 1 & 1.16\tabularnewline
+268 & 1.45 & 1.34 & 1.99 & 1.79 & 1.34 & 1 & 0.90\tabularnewline
+314 & 1.22 & 1.22 & 1.55 & 1.12 & 1.12 & 0 & 0.81\tabularnewline
+442 & 1.45 & 1.99 & 1.45 & 1.67 & 1.90 & 0 & 1.13\tabularnewline
+514 & 1.34 & 1.67 & 2.23 & 2.12 & 2.44 & 1 & 0.90\tabularnewline
+\bottomrule
+\end{longtable}
+
+Data often come in this form, e.g., BHPS, because there are fewer
+observations. However, for analysis the data needs to be in \emph{long}
+format.
+
+\end{frame}
+
+\begin{frame}[fragile]{Long data}
+
+\emph{Long} data is obtained using the \texttt{gather} command.
+\footnotesize
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tol.long <-}\StringTok{ }\NormalTok{tolerance %>%}
+\StringTok{  }\KeywordTok{gather}\NormalTok{(tol, tolerance, }\KeywordTok{starts_with}\NormalTok{(}\StringTok{'tol'}\NormalTok{)) %>%}
+\StringTok{  }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{age =} \KeywordTok{as.numeric}\NormalTok{(}\KeywordTok{str_extract}\NormalTok{(tol, }\StringTok{"[1-9]+"}\NormalTok{)),}
+         \DataTypeTok{time =} \NormalTok{age -}\StringTok{ }\DecValTok{11}\NormalTok{) %>%}
+\StringTok{  }\KeywordTok{arrange}\NormalTok{(id) %>%}\StringTok{ }\KeywordTok{as_data_frame}\NormalTok{()}
+\KeywordTok{head}\NormalTok{(tol.long, }\DataTypeTok{n =} \DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}rrrlrrr@{}}
+\toprule
+id & male & exposure & tol & tolerance & age & time\tabularnewline
+\midrule
+\endhead
+9 & 0 & 1.54 & tol11 & 2.23 & 11 & 0\tabularnewline
+9 & 0 & 1.54 & tol12 & 1.79 & 12 & 1\tabularnewline
+9 & 0 & 1.54 & tol13 & 1.90 & 13 & 2\tabularnewline
+9 & 0 & 1.54 & tol14 & 2.12 & 14 & 3\tabularnewline
+9 & 0 & 1.54 & tol15 & 2.66 & 15 & 4\tabularnewline
+45 & 1 & 1.16 & tol11 & 1.12 & 11 & 0\tabularnewline
+45 & 1 & 1.16 & tol12 & 1.45 & 12 & 1\tabularnewline
+45 & 1 & 1.16 & tol13 & 1.45 & 13 & 2\tabularnewline
+45 & 1 & 1.16 & tol14 & 1.45 & 14 & 3\tabularnewline
+45 & 1 & 1.16 & tol15 & 1.99 & 15 & 4\tabularnewline
+\bottomrule
+\end{longtable}
+
+\end{frame}
+
+\section{Fixed-effects}\label{fixed-effects}
+
+Simple example
+
+\begin{longtable}[]{@{}lrrrl@{}}
+\toprule
+id & year & wage & married & married.f\tabularnewline
+\midrule
+\endhead
+1 & 1 & 1000 & 0 & Single\tabularnewline
+1 & 2 & 1050 & 0 & Single\tabularnewline
+1 & 3 & 950 & 0 & Single\tabularnewline
+1 & 4 & 1000 & 0 & Single\tabularnewline
+1 & 5 & 1100 & 0 & Single\tabularnewline
+1 & 6 & 900 & 0 & Single\tabularnewline
+2 & 1 & 2000 & 0 & Single\tabularnewline
+2 & 2 & 1950 & 0 & Single\tabularnewline
+2 & 3 & 2000 & 0 & Single\tabularnewline
+2 & 4 & 2000 & 0 & Single\tabularnewline
+2 & 5 & 1950 & 0 & Single\tabularnewline
+2 & 6 & 2100 & 0 & Single\tabularnewline
+3 & 1 & 2900 & 0 & Single\tabularnewline
+3 & 2 & 3000 & 0 & Single\tabularnewline
+3 & 3 & 3100 & 0 & Single\tabularnewline
+3 & 4 & 3500 & 1 & Married\tabularnewline
+3 & 5 & 3450 & 1 & Married\tabularnewline
+3 & 6 & 3550 & 1 & Married\tabularnewline
+4 & 1 & 3950 & 0 & Single\tabularnewline
+4 & 2 & 4050 & 0 & Single\tabularnewline
+4 & 3 & 4000 & 0 & Single\tabularnewline
+4 & 4 & 4500 & 1 & Married\tabularnewline
+4 & 5 & 4600 & 1 & Married\tabularnewline
+4 & 6 & 4400 & 1 & Married\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{frame}{Plot}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{LongitudinalAnalysis_files/figure-beamer/unnamed-chunk-4-1} \end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]{The problem}
+
+How do we distinguish the \emph{causal} impact of getting married on
+wages from the possibility that men with higher wages are more likely to
+get married? Suppose we had only cross-sectional data:
+
+\begin{verbatim}
+lm(formula = wage ~ married, data = bru, subset = year == 4)
+            coef.est coef.se t value Pr(>|t|)
+(Intercept) 1500.00   500.00    3.00    0.10 
+married     2500.00   707.11    3.54    0.07 
+---
+n = 4, k = 2
+residual sd = 707.11, R-Squared = 0.86
+\end{verbatim}
+
+Married men earn on average 2500 more than unmarried men. But the mean
+difference between the same pairs of men the year before was 2075.
+
+\end{frame}
+
+\begin{frame}[fragile]{Pooled estimates}
+
+We could pool the data together and do a standard linear regression:
+
+\begin{verbatim}
+lm(formula = wage ~ married, data = bru)
+            coef.est coef.se t value Pr(>|t|)
+(Intercept) 2166.67   236.18    9.17    0.00 
+married     1833.33   472.37    3.88    0.00 
+---
+n = 24, k = 2
+residual sd = 1002.04, R-Squared = 0.41
+\end{verbatim}
+
+This is something of an improvement as we do at least have some highly
+paid, unmarried men in the sample now, so the effect of marriage appears
+smaller. But it is still very biased.
+
+\end{frame}
+
+\begin{frame}{Unobserved heterogeneity/Endogeneity}
+
+In many ways the fundamental problem with regression is presence of
+\emph{unobserved heterogeneity}. In this case we are not taking account
+of factors that explain both why men 3 and 4 are more likely to get
+married and earn higher wages.
+
+Alternatively, we might think that there is a problem of
+\emph{endogeneity}: men 3 and 4 are more likely to get married
+\emph{because} they earn higher wages.
+
+Either way, bias is introduced because there is a correlation between an
+explanatory variable and the error term.
+
+\end{frame}
+
+\begin{frame}{Differences in differences}
+
+Compare mean before and after marriage wages of men 3 and 4 with the
+change in mean wages of men 1 and 2 over the same time.
+
+\begin{tabular}{lccc}
+\hline
+ID & Years 1--3 & Years 4--6& Difference\\
+\hline
+1 & 1000 & 1000 & 0\\
+2 & 2000 & 2000 &  0\\
+3 & 3000 & 3500 & 500\\
+4 & 4000 & 4500 & 500\\
+\hline
+\end{tabular}
+
+So, the mean increase in wages following marriage is 500. \textbf{All
+the rest of the apparent marriage effect is due to other differences
+between the men.} NB, if there had been some time-varying effect
+increasing average wages in the later years, this method would also have
+controlled for that.
+
+\end{frame}
+
+\begin{frame}[fragile]{Least Squares Dummy Variables}
+
+The easiest way to achieve the same result is to put in a dummy variable
+for each individual:
+
+\begin{verbatim}
+lm(formula = wage ~ married + id, data = bru)
+            coef.est coef.se t value Pr(>|t|)
+(Intercept) 1000.00    28.10   35.59    0.00 
+married      500.00    39.74   12.58    0.00 
+id2         1000.00    39.74   25.17    0.00 
+id3         2000.00    44.43   45.02    0.00 
+id4         3000.00    44.43   67.53    0.00 
+---
+n = 24, k = 5
+residual sd = 68.82, R-Squared = 1.00
+\end{verbatim}
+
+This is the LSDV or \textbf{fixed-effects} estimator.
+
+\end{frame}
+
+\begin{frame}[fragile]{Estimation in R}
+
+Using a factor is OK for this toy data, but gets unwieldy quickly. The
+package \texttt{plm} is a good alternative.
+
+\footnotesize
+
+\begin{verbatim}
+Oneway (individual) effect Within Model
+
+Call:
+plm(formula = wage ~ married, data = bru, index = c("id", "year"))
+
+Balanced Panel: n=4, T=6, N=24
+
+Residuals :
+   Min. 1st Qu.  Median 3rd Qu.    Max. 
+   -100     -50       0      50     100 
+
+Coefficients :
+        Estimate Std. Error t-value Pr(>|t|)
+married    500.0       39.7    12.6  1.2e-10
+
+Total Sum of Squares:    840000
+Residual Sum of Squares: 90000
+R-Squared:      0.893
+Adj. R-Squared: 0.87
+F-statistic: 158.333 on 1 and 19 DF, p-value: 1.16e-10
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}{Decomposing errors}
+
+The basic panel regression model is: \[
+y_{it} = \beta_0 + \beta_1 x_{1it} + \beta_2 x_{2it} + \cdots + u_i + \epsilon_{it}, \label{eq:panel}
+\] where the \(u_i\) terms are individual-specific errors and the
+\(\epsilon_{it}\) is equivalent to the standard OLS error term (and
+should fulfill the same assumptions). The mean over time of all
+components in the equation is: \[
+\begin{aligned}
+\bar{y}_i &= \beta_0 + \beta_1 \bar{x}_{1i} + \beta_2 \bar{x}_{2i} + \cdots + u_i + \bar{\epsilon}_{i};\\
+y_{it} - \bar{y}_i &= \beta_1 (x_{1it} - \bar{x}_{1i}) + \beta_2 (x_{2it} - \bar{x}_{2i}) +
+    \epsilon_{it} - \bar{\epsilon}_i.
+\end{aligned}
+\]
+
+\end{frame}
+
+\begin{frame}[fragile]{Removing the means}
+
+\begin{verbatim}
+lm(formula = mwage ~ mmarried + 0, data = bru.2)
+         coef.est coef.se t value Pr(>|t|)
+mmarried 500.00    36.12   13.84    0.00  
+---
+n = 24, k = 1
+residual sd = 62.55, R-Squared = 0.89
+\end{verbatim}
+
+Notice \(R^2\) is same as above.
+
+\end{frame}
+
+\begin{frame}{Plot}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{LongitudinalAnalysis_files/figure-beamer/unnamed-chunk-10-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Restrictions of FE estimator}
+
+\begin{itemize}
+\tightlist
+\item
+  Can't estimate effects of variables that don't vary over time.
+\item
+  Uses lots of degrees of freedom.
+\item
+  Multicollinearity of dummy variables inflates standard errors.
+\end{itemize}
+
+\end{frame}
+
+\section{Random effects}\label{random-effects}
+
+\begin{frame}{Random effects model}
+
+Looking again at the basic equation, we now specify that the \(u_i\) are
+\emph{random variables}, each iid, and all uncorrelated with the
+explanatory variables. This can be obtained: \[
+\begin{gathered}
+\begin{split}
+y_{it} - \theta \bar{y}_i = &\beta_0(1-\theta) + \beta_1 (x_{1it} - \theta \bar{x}_{1i}) \\
+    + &\beta_2 (x_{2it} - \theta \bar{x}_{2i}) + \cdots \\
+    + &\{(1-\theta) u_i + (\epsilon_{it} - \theta \bar{\epsilon}_i)\} ,
+\end{split} \\
+\text{where} \\
+\theta = \sqrt{\frac{\sigma^2_\epsilon}{(T\times \sigma^2_\epsilon) + \sigma^2_u}}
+\end{gathered}
+\]
+
+\end{frame}
+
+\begin{frame}[fragile]{Example}
+
+\tiny
+
+\begin{verbatim}
+Oneway (individual) effect Random Effect Model 
+   (Swamy-Arora's transformation)
+
+Call:
+plm(formula = wage ~ married.f, data = bru, model = "random", 
+    index = c("id", "year"))
+
+Balanced Panel: n=4, T=6, N=24
+
+Effects:
+                   var  std.dev share
+idiosyncratic   4736.8     68.8  0.01
+individual    499210.5    706.5  0.99
+theta:  0.96  
+
+Residuals :
+   Min. 1st Qu.  Median 3rd Qu.    Max. 
+ -160.0   -59.6   -14.7    58.8   158.0 
+
+Coefficients :
+                 Estimate Std. Error t-value Pr(>|t|)
+(Intercept)        2499.2      406.0    6.16  3.4e-06
+married.fMarried    503.2       45.6   11.03  2.0e-10
+
+Total Sum of Squares:    897000
+Residual Sum of Squares: 137000
+R-Squared:      0.847
+Adj. R-Squared: 0.84
+F-statistic: 121.758 on 1 and 22 DF, p-value: 1.96e-10
+\end{verbatim}
+
+Notice that \(\theta\) is close to 1. When it is 1, we have the FE
+estimator again. When it is 0, we have the pooled OLS estimator.
+
+\end{frame}
+
+\begin{frame}{Problems with RE model}
+
+Big problem is the assumption that \(Cov(x_{it},u_i) = 0.\) Mostly we
+would doubt this assumption. If it is false, estimates will be biased.
+FE estimator often thought to be more conservative choice. However, the
+assumption can be relaxed, and people often want to estimate the effect
+of variables that don't change over time (sex, ethnicity, etc.), and so
+use RE.
+
+\end{frame}
+
+\section{Other issues}\label{other-issues}
+
+\begin{frame}{Plot}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{LongitudinalAnalysis_files/figure-beamer/unnamed-chunk-12-1} \end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]{Time trends}
+
+In this modified example, everyone gets an extra 500 added to their
+wages after year 3. However, the FE estimator still shows a marriage
+effect:
+
+\tiny
+
+\begin{verbatim}
+Oneway (individual) effect Within Model
+
+Call:
+plm(formula = extrawage ~ married.f, data = bru, index = c("id", 
+    "year"))
+
+Balanced Panel: n=4, T=6, N=24
+
+Residuals :
+   Min. 1st Qu.  Median 3rd Qu.    Max. 
+   -300    -125       0     113     350 
+
+Coefficients :
+                 Estimate Std. Error t-value Pr(>|t|)
+married.fMarried      500        125       4  0.00076
+
+Total Sum of Squares:    1640000
+Residual Sum of Squares: 890000
+R-Squared:      0.457
+Adj. R-Squared: 0.343
+F-statistic: 16.0112 on 1 and 19 DF, p-value: 0.000764
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile]{Period effects}
+
+The solution is to include wave dummies:
+
+\begin{verbatim}
+lm(formula = extrawage ~ married.f + id + factor(year), data = bru)
+                 coef.est coef.se t value Pr(>|t|)
+(Intercept)       958.33    48.67   19.69    0.00 
+married.fMarried  -16.67    61.56   -0.27    0.79 
+id2              1000.00    43.53   22.97    0.00 
+id3              2008.33    53.31   37.67    0.00 
+id4              3008.33    53.31   56.43    0.00 
+factor(year)2      50.00    53.31    0.94    0.36 
+factor(year)3      50.00    53.31    0.94    0.36 
+factor(year)4     545.83    61.56    8.87    0.00 
+factor(year)5     570.83    61.56    9.27    0.00 
+factor(year)6     533.33    61.56    8.66    0.00 
+---
+n = 24, k = 10
+residual sd = 75.40, R-Squared = 1.00
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile]{Alternative using plm}
+
+\begin{verbatim}
+Twoways effects Within Model
+
+Call:
+plm(formula = extrawage ~ married.f, data = bru, effect = "twoways", 
+    index = c("id", "year"))
+
+Balanced Panel: n=4, T=6, N=24
+
+Residuals :
+   Min. 1st Qu.  Median 3rd Qu.    Max. 
+ -91.70  -58.30   -4.17   41.70  108.00 
+
+Coefficients :
+                 Estimate Std. Error t-value Pr(>|t|)
+married.fMarried    -16.7       61.6   -0.27     0.79
+
+Total Sum of Squares:    80000
+Residual Sum of Squares: 79600
+R-Squared:      0.00521
+Adj. R-Squared: -0.634
+F-statistic: 0.0732984 on 1 and 14 DF, p-value: 0.791
+\end{verbatim}
+
+\end{frame}
+
+\section{Multilevel model of change}\label{multilevel-model-of-change}
+
+\begin{frame}{Mulilevel model of change}
+
+The ability to model change is a key benefit of panel data. This is
+really a type of multilevel data, as we have within-person change and
+between person differences in change. Panel data can distinguish the
+two. Looking at the example from the textbook (chapter 4), we have three
+observations on alcohol use among teenagers, at age 14,15 and 16. Here
+are 9 example cases:
+
+\begin{center}\includegraphics[width=0.6\linewidth]{LongitudinalAnalysis_files/figure-beamer/unnamed-chunk-16-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Differences with COA}
+
+\begin{center}\includegraphics[width=0.45\linewidth]{LongitudinalAnalysis_files/figure-beamer/unnamed-chunk-17-1} \end{center}
+
+\begin{center}\includegraphics[width=0.45\linewidth]{LongitudinalAnalysis_files/figure-beamer/unnamed-chunk-17-2} \end{center}
+
+\end{frame}
+
+\begin{frame}{Multilevel representation}
+
+\[
+Y_{it} = \beta_{0i} + \beta_{1i} T_{it} + \epsilon_{it};
+\]
+
+\[
+\begin{gathered}
+\pi_{0i} = \gamma_{00} + \gamma_{01} COA_i + u_{0i} \\
+\pi_{1i} = \gamma_{10} + \gamma_{11} COA_i + u_{1i}
+\end{gathered}
+\]
+
+\end{frame}
+
+\begin{frame}[fragile]{Results}
+
+\begin{verbatim}
+lmer(formula = alcuse ~ coa * age_14 + (1 + age_14 | id), data = alcohol1, 
+    REML = FALSE)
+            coef.est coef.se t value
+(Intercept)  0.32     0.13    2.42  
+coa1         0.74     0.19    3.82  
+age_14       0.29     0.08    3.48  
+coa1:age_14 -0.05     0.13   -0.39  
+
+Error terms:
+ Groups   Name        Std.Dev. Corr  
+ id       (Intercept) 0.70           
+          age_14      0.39     -0.22 
+ Residual             0.58           
+---
+number of obs: 246, groups: id, 82
+AIC = 637.2, DIC = 621
+deviance = 621.2 
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile]{Full model}
+
+\begin{verbatim}
+lmer(formula = alcuse ~ coa + peer * age_14 + (1 + age_14 | id), 
+    data = alcohol1, REML = FALSE)
+            coef.est coef.se t value
+(Intercept) -0.31     0.15   -2.15  
+coa1         0.57     0.15    3.91  
+peer         0.70     0.11    6.25  
+age_14       0.42     0.11    4.02  
+peer:age_14 -0.15     0.08   -1.79  
+
+Error terms:
+ Groups   Name        Std.Dev. Corr  
+ id       (Intercept) 0.49           
+          age_14      0.37     -0.03 
+ Residual             0.58           
+---
+number of obs: 246, groups: id, 82
+AIC = 606.7, DIC = 589
+deviance = 588.7 
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}{Effects}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{LongitudinalAnalysis_files/figure-beamer/unnamed-chunk-20-1} \end{center}
+
+\end{frame}
+
+\end{document}

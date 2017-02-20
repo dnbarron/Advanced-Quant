@@ -1,0 +1,403 @@
+---
+title: "Longitudinal or Panel Analysis"
+author: "David Barron"
+date: "Hilary Term 2017"
+fontsize: 10pt
+output: 
+  beamer_presentation:
+    theme: "Madrid"
+    toc: false
+    slide_level: 3
+    keep_tex: false
+    df_print: kable
+    fig_caption: false
+---
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_knit$set(width = 100)
+knitr::opts_chunk$set(comment =  '', echo=FALSE)
+knitr::opts_chunk$set(fig.width = 6, fig.asp = 0.618, fig.align = 'center', out.width = "80%")
+options('show.signif.stars'=FALSE)
+options('digits' = 3)
+#options(scipen=5)
+library(ggplot2)
+library(foreign)
+library(effects)
+library(plm)
+library(arm)
+library(tidyverse)
+library(stringr)
+```
+
+# Basic concepts
+
+### Panel Data
+
+The main characteristic of longitudinal or panel data is that a group of individuals (people, firms, etc.) are surveyed at (usually) regular intervals.  Advantages include:
+
+- Can study dynamics
+- Sequence of events in time helps show causation.  For example, married men generally earn more, but is this a causal effect?
+- Can control for unobserved heterogeneity
+
+### What analyses can be done?
+You can do linear regression, logit, poisson, negative binomial regressions (and a number of others that we won't be covering) in panel or longitudinal format.   These versions allow us to deal with some of the issues associated with these kinds of data.  In particular, we can't treat each observation as independent.  There will almost certainly be more variation from individual to individual than there will be within an individual over time.
+
+
+### Wide data
+
+Using data from chapter 2 of Singer \& Willett.  _Wide_ data has the form:
+
+\small
+```{r}
+tolerance <- read.csv('C:/Users/dbarron/Dropbox/Teaching/MSc Teaching/Advanced Quant/data/ALDA/tolerance1.csv')
+head(tolerance)
+```
+
+Data often come in this form, e.g., BHPS, because there are fewer observations.  However, for analysis the data needs to be in _long_ format.
+
+
+### Long data
+
+_Long_ data is obtained using the `gather` command.
+\footnotesize
+```{r, echo = TRUE}
+
+tol.long <- tolerance %>%
+  gather(tol, tolerance, starts_with('tol')) %>%
+  mutate(age = as.numeric(str_extract(tol, "[1-9]+")),
+         time = age - 11) %>%
+  arrange(id) %>% as_data_frame()
+head(tol.long, n = 10)
+```
+
+```{r, include=FALSE}
+tol.pool <- lm(tolerance ~ male + exposure, data = tol.long)
+tol.mod <- lm(tolerance ~ male + exposure + factor(id), data = tol.long)
+display(tol.mod)
+anova(tol.pool, tol.mod)
+```
+
+# Fixed-effects
+
+Simple example
+
+```{r}
+bru <- read.dta('C:/Users/dbarron/Dropbox/Teaching/MSc Teaching/Advanced Quant/data/bruderl marriage.dta')
+bru$married.f <- factor(bru$married, labels = c('Single','Married'))
+bru$id <- factor(bru$id)
+bru
+
+bruplot1 <- ggplot(bru, aes(x = year, y = wage, group = id, colour = married.f)) + 
+  geom_line() + geom_point() + xlab('Year') + ylab('wage') + theme_bw() +
+  theme(legend.title = element_blank())
+```
+
+### Plot
+
+```{r}
+bruplot1 
+```
+
+### The problem
+
+How do we distinguish the _causal_ impact of getting married on wages from the possibility that men with higher wages are more likely to get married?  Suppose we had only cross-sectional data:
+
+```{r}
+b1 <- lm(wage ~ married, data = bru, subset = year == 4)
+display(b1, detail = TRUE)
+```
+
+Married men earn on average 2500 more than unmarried men.  But the mean difference between the same pairs of men the year before was 2075.
+
+
+### Pooled estimates
+
+We could pool the data together and do a standard linear regression:
+
+```{r}
+b2 <- lm(wage ~ married, data = bru)
+display(b2, detail = TRUE)
+```
+
+This is something of an improvement as we do at least have some highly paid, unmarried men in the sample now, so the effect of marriage appears smaller.  But it is still very biased.
+
+
+### Unobserved heterogeneity/Endogeneity
+
+In many ways the fundamental problem with regression is presence of _unobserved heterogeneity_.  In this case we are not taking account of factors that explain both why men 3 and 4 are more likely to get married and earn higher wages.
+
+Alternatively, we might think that there is a problem of _endogeneity_: men 3 and 4 are more likely to get married _because_ they earn higher wages.
+
+Either way, bias is introduced because there is a correlation between an explanatory variable and the error term.
+
+
+### Differences in differences
+
+Compare mean before and after marriage wages of men 3 and 4 with the change in mean wages of men 1 and 2 over the same time.
+
+\begin{tabular}{lccc}
+\hline
+ID & Years 1--3 & Years 4--6& Difference\\
+\hline
+1 & 1000 & 1000 & 0\\
+2 & 2000 & 2000 &  0\\
+3 & 3000 & 3500 & 500\\
+4 & 4000 & 4500 & 500\\
+\hline
+\end{tabular}
+
+So, the mean increase in wages following marriage is 500.  **All the rest of the apparent marriage effect is due to other differences between the men.**  NB, if there had been some time-varying effect increasing average wages in the later years, this method would also have controlled for that.
+
+### Least Squares Dummy Variables
+
+The easiest way to achieve the same result is to put in a dummy variable for each individual:
+
+```{r}
+b3 <- lm(wage ~ married  + id, data = bru)
+display(b3, detail = TRUE)
+```
+
+This is the LSDV or **fixed-effects** estimator.
+
+
+### Estimation in R
+
+Using a factor is OK for this toy data, but gets unwieldy quickly. The package `plm` is a good alternative.
+
+\footnotesize
+```{r}
+b4 <- plm(wage ~ married, data = bru, index = c('id', 'year'))
+summary(b4)
+```
+
+### Decomposing errors
+
+The basic panel regression model is:
+$$
+y_{it} = \beta_0 + \beta_1 x_{1it} + \beta_2 x_{2it} + \cdots + u_i + \epsilon_{it}, \label{eq:panel}
+$$
+where the $u_i$ terms are individual-specific effects and the $\epsilon_{it}$ is equivalent to the standard OLS error term (and should fulfill the same assumptions).  The mean over time of all components in the equation is:
+$$
+\begin{aligned}
+\bar{y}_i &= \beta_0 + \beta_1 \bar{x}_{1i} + \beta_2 \bar{x}_{2i} + \cdots + u_i + \bar{\epsilon}_{i};\\
+y_{it} - \bar{y}_i &= \beta_1 (x_{1it} - \bar{x}_{1i}) + \beta_2 (x_{2it} - \bar{x}_{2i}) +
+    \epsilon_{it} - \bar{\epsilon}_i.
+\end{aligned}
+$$
+
+
+### Removing the means
+
+```{r}
+bru.2 <- bru %>% group_by(id) %>% mutate(mwage = wage - mean(wage),
+                                mmarried = married - mean(married))
+
+b5 <- lm(mwage ~ mmarried + 0, bru.2)
+display(b5, detail = TRUE)
+
+```
+Notice $R^2$ is same as above.
+
+### Plot
+
+```{r}
+bruplot2 <- ggplot(bru.2, aes(x=mmarried,y=mwage)) + geom_point() + theme_bw() +
+  geom_smooth(method='lm') + labs(x = 'Centred marriage', y = 'Centred wage')
+bruplot2
+
+```
+
+### Restrictions of FE estimator
+
+- Can't estimate effects of variables that don't vary over time.
+- Uses lots of degrees of freedom.
+- Multicollinearity of dummy variables inflates standard errors.
+
+# Random effects
+
+### Random effects model
+
+Looking again at the basic equation, we now specify that the $u_i$ are _random variables_, each iid, and all uncorrelated with the explanatory variables. From this we can obtain:
+$$
+\begin{gathered}
+\begin{split}
+y_{it} - \theta \bar{y}_i = &\beta_0(1-\theta) + \beta_1 (x_{1it} - \theta \bar{x}_{1i}) \\
+    + &\beta_2 (x_{2it} - \theta \bar{x}_{2i}) + \cdots \\
+    + &\{(1-\theta) u_i + (\epsilon_{it} - \theta \bar{\epsilon}_i)\} ,
+\end{split} \\
+\text{where} \\
+\theta = \sqrt{\frac{\sigma^2_\epsilon}{(T\times \sigma^2_\epsilon) + \sigma^2_u}}
+\end{gathered}
+$$
+
+### Example
+
+\tiny
+```{r}
+b6 <- plm(wage ~ married.f, data = bru, index = c('id', 'year'), model = 'random')
+
+summary(b6)
+```
+
+Notice that $\theta$ is close to 1.  When it is 1, we have the FE estimator again. When it is 0, we have the pooled OLS estimator.
+
+
+### Problems with RE model
+
+Big problem is the assumption that $Cov(x_{it},u_i) = 0.$  Mostly we would doubt this assumption.  If it is false, estimates will be biased.  FE estimator often thought to be more conservative choice.  However, the assumption can be relaxed, and people often want to estimate the effect of variables that don't change over time (sex, ethnicity, etc.), and so use RE.
+
+
+# Other issues
+
+### Plot
+
+```{r}
+bru$extrawage <- bru$wage
+bru$extrawage[bru$year > 3] <- bru$wage[bru$year > 3] + 500
+bru$extrawage[bru$married == 1] <- bru$extrawage[bru$married == 1] -500
+
+bruplot3 <- ggplot(bru, aes(x = year, y = extrawage, group = id, colour = married.f)) + 
+  geom_line() + geom_point() + theme_bw() + theme(legend.title = element_blank())
+
+bruplot3
+```
+
+### Time trends
+
+In this modified example, everyone gets an extra 500 added to their wages after year 3.  However, the FE estimator still shows a marriage effect:
+
+\tiny
+```{r}
+b7 <- plm(extrawage ~ married.f, data = bru, index = c('id', 'year'))
+summary(b7)
+
+```
+
+### Period effects
+
+The solution is to include wave dummies:
+
+```{r}
+b8 <- lm(extrawage ~ married.f + id + factor(year), data = bru)
+display(b8, detail = TRUE)
+
+```
+
+### Alternative using plm
+
+```{r}
+b8a <- plm(extrawage ~ married.f, data=bru, index=c('id','year'), effect='twoways')
+summary(b8a)
+```
+
+# Multilevel model of change
+
+### Mulilevel model of change
+
+The ability to model change is a key benefit of panel data.  This is really a type of multilevel data, as we have within-person change and between person differences in change. Panel data can distinguish the two. Looking at the example from the textbook (chapter 4), we have three observations on alcohol use among teenagers, at age 14,15 and 16. Here are 9 example cases:
+
+```{r, out.width="60%"}
+alcohol1 <- read.table("http://www.ats.ucla.edu/stat/r/examples/alda/data/alcohol1_pp.txt", 
+                       header = TRUE, sep = ",")
+alcohol1$coa <- factor(alcohol1$coa)
+alcohol1$male <- factor(alcohol1$male)
+alcohol1$age <- ordered(alcohol1$age)
+
+ix <- c(4, 14, 23, 32, 41, 56, 65, 82)
+sel <- alcohol1$id %in% ix
+sub <- alcohol1[sel,]
+
+ggplot(sub, aes(x = age, y = alcuse)) + geom_point() + geom_smooth(method = 'lm', se = FALSE) +
+  facet_wrap(~id) + theme_bw()
+
+alcohol.coa0 <- alcohol1[alcohol1$coa == 0, ]
+
+```
+
+
+### Differences with COA
+
+```{r, out.width="45%"}
+f.coa0 <- by(alcohol.coa0, alcohol.coa0$id, 
+             function(data) fitted(lm(alcuse ~ age, data = data)))
+#transforming f.coa from a list to a vector and 
+#stripping of the names of the elements in the vector
+f.coa0 <- unlist(f.coa0)
+names(f.coa0) <- NULL
+
+#plotting the linear fit by id
+interaction.plot(alcohol.coa0$age, alcohol.coa0$id, f.coa0, legend = FALSE,
+                 xlab = "AGE", ylab = "ALCUSE", ylim = c(-1, 4), lwd = 1, main = 'COA = 0')
+
+alcohol.coa1 <- alcohol1[alcohol1$coa == 1, ]
+
+#fitting the linear model by id
+f.coa1 <- by(alcohol.coa1, alcohol.coa1$id, 
+             function(data) fitted(lm(alcuse ~ age, data = data)))
+#transforming f.coa1 from a list to a vector and 
+#stripping of the names of the elements in the vector
+f.coa1 <- unlist(f.coa1)
+names(f.coa1) <- NULL
+
+#plotting the linear fit by id
+interaction.plot(alcohol.coa1$age, alcohol.coa1$id, f.coa1, legend = FALSE,
+                 xlab = "AGE", ylab = "ALCUSE", ylim = c(-1, 4), lwd = 1, main = 'COA = 1')
+
+
+```
+
+
+### Multilevel representation
+
+$$
+Y_{it} = \beta_{0i} + \beta_{1i} T_{it} + \epsilon_{it};
+$$
+
+$$
+\begin{gathered}
+\beta_{0i} = \gamma_{00} + \gamma_{01} COA_i + u_{0i} \\
+\beta_{1i} = \gamma_{10} + \gamma_{11} COA_i + u_{1i}
+\end{gathered}
+$$
+
+### Results
+
+```{r uncond, include = FALSE}
+model.A <- lmer(alcuse ~ 1 + (1|id), alcohol1, REML = FALSE)
+model.B <- lmer(alcuse ~ age_14 + (1 + age_14|id), alcohol1, REML = FALSE)
+model.D <- lmer(alcuse ~ coa * age_14 + peer * age_14 + (1 + age_14|id), data = alcohol1, REML = FALSE)
+
+```
+
+```{r}
+model.a <- lmer(alcuse ~ coa * age_14 + (1 + age_14 | id), alcohol1, REML = FALSE)
+display(model.a, detail = TRUE)
+
+```
+
+
+### Full model
+
+```{r}
+model.b <- lmer(alcuse ~ coa + peer * age_14 + (1 + age_14 | id), data = alcohol1, REML = FALSE)
+display(model.b, detail = TRUE)
+```
+
+### Effects
+
+
+```{r}
+mod.e.ef <- allEffects(model.b)
+l1 <- .66 + c(0.29150510, 0.4660041, 0.6405032, 0.8150022, 0.9895013)
+l2 <- .66 + c(1.33427910, 1.3952453, 1.4562115, 1.5171777, 1.5781439)
+l3 <- 1.23 + c(0.29150510, 0.4660041, 0.6405032, 0.8150022, 0.9895013)
+l4 <- 1.23 + c(1.33427910, 1.3952453, 1.4562115, 1.5171777, 1.5781439)
+
+plotdta <- data.frame(alcuse = c(l1,l2,l3,l4), COA = c(rep('0', 10), rep('1', 10)), 
+                      Peer = c(rep('Low', 5), rep('High', 5), rep('Low', 5), rep('High', 5)),
+                      Age = rep(c(14, 14.5 ,15, 15.5, 16), 4))
+
+ggplot(plotdta, aes(x = Age, y = alcuse, colour = Peer, shape=COA)) + 
+  geom_line() + geom_point(size = 4) + theme_bw() 
+```
