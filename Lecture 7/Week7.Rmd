@@ -1,0 +1,73 @@
+---
+title: "Week 7 Practical Session"
+author: "David Barron"
+date: "25 February 2015"
+output: pdf_document
+---
+
+## Factor analysis
+You might like to explore the `psych` package, which has some additional features for exploratory factor analysis.  
+Let's have a look at the dataset `bfi`, which are responses to a personality test. There are supposed to be five factors: Agreeableness, Conscientiousness, Extraversion, Neuroticism, and Openness. There are five items that are intended to load on each factor.  More details can be found using `help('bfi')`.
+
+### Number of factors
+There is no universally agreed upon way of deciding on the number of factors. In the `psych` package there is a function `VSS` that provides some tests.
+
+```{r efa}
+library(psych)
+data(bfi)
+summary(bfi)
+bfi.R <- cor(bfi[, 1:25], use = 'complete.obs')
+p1 <- principal(bfi.R, rotate='varimax', n.obs = 2800)
+fa.parallel(bfi.R, n.obs=2800, fm='ml')
+v1 <- VSS(bfi.R, 8, fm='ml', n.obs = 2800)
+v1
+scree(bfi.R)
+```
+
+It's not very clear whether you need four or five factors.  Five is the number there are supposed to be (but there are lots of reasons why this might not work in practice).  Let's compare the five and four factor solutions.
+
+### Five factors
+
+```{r five}
+ml5.out <- fa(bfi.R, nfactors = 5, rotate = "varimax", fm='ml', n.obs = 2800)
+ml5.out$loadings
+plot(ml5.out, cut=0.3, cex = 2)
+```
+
+Looking at the loadings, you can see that the Openness item seems the least clear.
+
+### Four factors
+
+```{r four}
+ml4.out <- fa(bfi.R, nfactors = 4, rotate = "varimax", fm='ml', n.obs = 2800)
+ml4.out$loadings
+plot(ml4.out, cut=0.3, cex = 2)
+```
+
+This solution fails to distinguish between Agreeableness and Extraversion, so the five factor solution is probably to be preferred.
+
+We can look to see if there are differences based on gender, education and age.
+
+```{r scores}
+bfi.scores <- factor.scores(bfi[1:25], ml5.out)
+head(bfi.scores$scores)
+
+for (i in 1:5){
+  print(t.test(bfi.scores$scores[, i], bfi$gender))
+  print(summary(lm(bfi.scores$scores[, i] ~ age + education, data = bfi)))
+}
+
+```
+
+There are significant gender differences in personality on all the dimensions.  Some of them vary with age and education.  It's plausible that education could be associated with personality (though you'd expect the causal direction to be the other way around), but not age!
+
+## Homework
+1. Use the dataset FactorAnalysis.csv (which can be read using `read.csv()` or `read_csv`).
+2. The dataset has 300 rows and 6 variables consisting of university students' ratings of their liking of six subjects on a five point scale from 1 = Strongly Dislike to 5 = Strongly Like. The six subjects are:
+   a. BIO (biology)
+   b. GEO (geology)
+   c. CHEM (chemistry)
+   d. ALG (algebra)
+   e. CALC (calculus)
+   f. STAT (statistics)
+3. Conduct an exploratory factor analysis.  How many factors are appropriate? How would you interpret these factors?
