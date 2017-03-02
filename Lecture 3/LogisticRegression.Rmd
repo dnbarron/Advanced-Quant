@@ -195,6 +195,13 @@ $$
 ### Example
 ```{r, echo = TRUE}
 descr::LogRegR2(l1)
+
+tjur <- function(mod){
+  
+  yhat <- predict(mod, type = 'response')
+  d <- by(yhat, mod$y, mean)
+  unname(abs(d[1] - d[2]))
+}
 ```
 
 ### Outlier detection

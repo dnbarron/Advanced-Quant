@@ -13,6 +13,12 @@ opts_chunk$set(comment=NA, tidy=TRUE)
 library(car)
 library(effects)
 library(arm)
+library(MASS)
+library(eha)
+library(GlobalDeviance)
+library(tidyverse)
+library(stringr)
+
 ```
 
 ## Poisson regression
@@ -36,20 +42,23 @@ A variable like this could be analysed using linear regression, but it's not har
 p1 <- glm(interlocks ~ log(assets) + nation + sector, family = poisson, data = Ornstein)
 summary(p1)
 Anova(p1)
-plot(Effect('assets', p1, xlevels = list(assets = 50)))
-plot(Effect('nation', p1))
-plot(Effect('sector', p1))
+
+plot(Effect('assets', p1, xlevels = list(assets = 50)), type = 'response')
+plot(Effect('nation', p1), type = 'response')
+plot(Effect('sector', p1), type = 'response')
 ```
 
 Let's compare with negative binomial regression.
 ```{r negbin}
-library(MASS)
+
 p2 <- glm.nb(interlocks ~ log(assets) + nation + sector, data = Ornstein)
 summary(p2)
+
 Anova(p2)
-plot(Effect('assets', p2, xlevels = list(assets = 50)))
-plot(Effect('nation', p2))
-plot(Effect('sector', p2))
+
+plot(Effect('assets', p2, xlevels = list(assets = 50)), type = 'response')
+plot(Effect('nation', p2), type = 'response')
+plot(Effect('sector', p2), type = 'response')
 ```
 
 The negative binomial is clearly a better fit.  This is very common in practice.
@@ -74,10 +83,7 @@ We will use a dataset called `Rossi` in the `GlobalDeviance` package.  These dat
 
 
 ```{r rossi}
-library(eha)
-library(GlobalDeviance)
 data(Rossi)
-
 summary(survfit(Surv(Rossi$week, Rossi$arrest) ~ 1, data = Rossi))
 ```
 
@@ -85,8 +91,6 @@ summary(survfit(Surv(Rossi$week, Rossi$arrest) ~ 1, data = Rossi))
 These data are in wide format.  We need to transform them in to long format. Having done so, you can see that the estimates survival function is the same.
 
 ```{r reshape, message=FALSE}
-library(tidyverse)
-library(stringr)
 
 # First, add an ID variable (will be useful later)
 Rossi <- Rossi %>% mutate(id = row_number())
@@ -94,12 +98,11 @@ Rossi <- Rossi %>% mutate(id = row_number())
 # Convert to long format
 Rossi.long <- Rossi %>% gather(emp, employed, starts_with('emp')) %>% 
   # remove missing data
-  filter(!is.na(employed)) %>% 
+  filter(!is.na(employed)) %>%
   # calculate times at start and end of week
   mutate(end = as.numeric(str_sub(emp, 4, -1)),
          start = end - 1) %>%
-  # sort so easier to check visually
-  arrange(id, start) %>%  
+  # sort so easier to check visually  arrange(id, start)
   # new censoring indicator
   mutate(arrest_start = ifelse(arrest == 1 & week == end, 1, 0),  
          employed = factor(employed, labels = c('no', 'yes'))) %>%  

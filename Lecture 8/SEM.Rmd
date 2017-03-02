@@ -1,0 +1,552 @@
+---
+title: "Structural Equation Models"
+author: "David Barron"
+date: "Hilary Term 2017"
+output:
+  beamer_presentation:
+    df_print: kable
+    fig_caption: no
+    keep_tex: no
+    slide_level: 3
+    theme: Madrid
+    toc: no
+fontsize: 10pt
+---
+
+
+```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_knit$set(width = 100)
+knitr::opts_chunk$set(comment =  '', echo=FALSE)
+knitr::opts_chunk$set(fig.align = 'center', fig.width = 6, fig.asp = 0.618, out.width = '80%')
+options('show.signif.stars'=FALSE)
+options('digits' = 3)
+#options(scipen=5)
+library(ggplot2)
+library(foreign)
+library(lavaan)
+library(semPlot)
+library(psych)
+```
+
+```{r funcs}
+my.mi <- function(model){
+  mi <- lavaan::modificationindices(model)
+  ix <- order(-mi[, 4])
+  mi <- mi[ix, ]
+  ix <- mi[, 4] > 1
+  if (sum(ix) <= 10) return(mi[ix, ])
+  else return(mi[1:10, ])
+}
+```
+
+### Introduction
+
+
+- Structural-equation models (SEMs) are multiple-equation regression models in which the response variable in one regression equation can appear as an explanatory variable in another equation. Indeed, two variables in an SEM can even effect one-another reciprocally, either directly, or indirectly through a "feedback" loop.
+- Structural-equation models can include variables that are not measured directly, but rather indirectly through their effects (called indicators).
+- Unmeasured variables are variously termed latent variables, constructs, or factors.
+
+# Confirmatory factor analysis
+
+### Confirmatory factor analysis
+
+- Confirmatory factor analysis, as the name implies, involves specifying a theoretically motivated model of relationships among variables and factors and carrying out statistical tests to confirm that this model provides an adequate fit to the observed data.
+- We can use different assumptions to those standard in exploratory factor analysis.
+- Is a special case of Structural Equation Models.  
+- You can also think of CFA as being "one half" of SEMs, what is often called the _measurement model_.
+
+```{r}
+kabcLower.cor <- '
+1.00
+.39 1.00
+.35  .67 1.00
+.21  .11  .16 1.00
+.32  .27  .29  .38 1.00
+.40  .29  .28  .30  .47 1.00
+.39  .32  .30  .31  .42  .41 1.00
+.39  .29  .37  .42  .58  .51  .42 1.00 '
+# name the variables and convert to full correlation matrix
+kabcFull.cor <- getCov(kabcLower.cor, names = c("hm","nr","wo","gc","tr","sm","ma","ps"))
+# display the correlations
+#kabcFull.cor
+# add the standard deviations and convert to covariances
+kabcFull.cov <- cor2cov(kabcFull.cor, sds = c(3.40, 2.40, 2.90, 2.70, 2.70, 4.20, 2.80, 3.00))
+#kabcFull.cov
+
+kabc.model <- '
+# latent variables
+Sequent =~ hm + nr + wo
+Simultan =~ gc + tr + sm + ma + ps '
+
+model1 <- cfa(kabc.model,
+             sample.cov=kabcFull.cov,
+             sample.nobs=200)
+
+
+kabc.model.alt <- '
+# latent variables
+Sequent =~ NA*hm + nr + wo
+Simultan =~ NA*gc + tr + sm + ma + ps
+
+Sequent ~~ 1 * Sequent
+Simultan ~~ 1 * Simultan '
+
+model1.alt <- sem(kabc.model.alt, sample.cov = kabcFull.cov, sample.nobs = 200)
+
+```
+
+### CFA example
+
+The Kaufman Assessment Battery for Children is an individually administeredd cognitive ability test for children.  The eight items are claimed to be measures of two factors: sequential processing and simultaneous processing.  The former require correct recall of auditory stimuli (nr: Number Recall, wo: Word Order) or visual stimuli (hm: Hand Movements) in a particular order.  The latter are intended to measure more holistic, less order-dependent reasoning (gc: Gestalt Closure, tr: Triangles, sm: Spatial Memory, ma: Matrix Analogies, ps: Photo Series).  We will perform a CFA using these tests on 200 children aged 10.  The covariance matrix is:
+
+```{r}
+kabcFull.cov
+```
+
+### CFA with two factors
+
+```{r}
+semPaths(model1, what = 'path', whatLabels = 'est', edge.label.cex = 1.2)
+```
+
+### Interpretation
+
+- Unlike EFA, it is conventional not to assume variance of unobserved factors = 1, but rather to constrain one regression parameter from each factor to = 1. [Additional homework exercise: try constraining variances of unobserved factors to be 1 and freeing all regression parameters.  Model fit should be the same.]
+- Can do hypothesis tests on regression parameters; all of these are statistically significant.
+- Can obtain standardized results if we prefer; these are a closer equivalent to the EFA loadings.
+- Also no need to assume no correlation between unobserved factors.
+- But it is conventional to assume no correlation between error terms (although this can be relaxed).
+
+### Goodness of fit
+
+\small
+
+- CFA (and more generally SEM) is fit using maximum likelihood estimation, so we obtain the log-likelihood that enable us to compare the relative fit of nested models. Here the log likelihood is `r unclass(logLik(model1))[[1]]`.
+- We can compare that to the log likelihood that would be obtained from a model that reproduces the data perfectly. THis is `r unname(fitmeasures(model1, 'unrestricted.logl'))`.  From these two figures, we can calculate the likelihood ratio $\chi^2$, which in this case is `r unname(fitmeasures(model1, 'chisq'))` with `r unname(fitmeasures(model1, 'df'))` degrees of freedom.
+-  The number of degrees of freedom is the number of estimated parameters fewer in the estimated model than there are observed moments in the data.  There are always $k(k+1)/2$ observed second-order moments (ie, variances and covariances), where $k$ is the number of observed variables, so in this case that is $8 \times 9 \div 2 = 36.$  There are 17 estimated parameters: 6 regression parameters, 8 variances of measured variables, 2 variances and 1 covariance of unobserved factors.  That gives $36 - 17 = 19$ degrees of freedom.
+- Gives p-value of `r unname(fitmeasures(model1, 'pvalue'))`.  That means we would have to conclude this model does not fit the data.
+
+### Other GoF statistics
+
+\small
+
+- __RMSEA__ This is actually a "badness of fit" statistic, so we want values close to 0.  Measures size of discrepency from *close fit*, defined as $\hat{\Delta}_{model} = \max(0, \chi^2_{model} - df_{model})$.  This is then standardized, to give the RMSEA statistic:
+
+$$
+\hat{\epsilon} = \sqrt{\frac{\hat{\Delta}_{model}} {df_{model}(N - 1)}}.
+$$
+
+- __CFI__ Ranges from 0 to 1.  Compares estimated model to null model, using the same $\hat{\Delta}$ as before:
+$$
+\mathrm{CFI} = 1 - \frac{\hat{\Delta}_{model}}{\hat{\Delta}_{null}}.
+$$
+Commonly cited rule is that CFI $> 0.95$, implying a fit that is 95\% better than the null model. The TLI and NNFI are variants on this index.
+
+- __SRMR__ Standardised root mean square residual, where the residual is the difference between observed and fitted correlation matrices.  Rule of thumb is that SRMR $> 0.10$ may indicate a poor fit, but it is a good idea to look at the residual matrix itself.
+
+### GoF statistics
+
+\tiny
+```{r}
+fitMeasures(model1)
+```
+
+### GoF rules of thumb
+
+\tiny
+\begin{tabular}{llp{5.5cm}}
+\hline
+Statistic & Rule of thumb & Comments \\
+\hline
+$\chi^2$ & Not significant (ie, p-value $> .05$) & Influenced by sample size.\\ \addlinespace
+CFI & More than 0.93 & Compares model to the independence model. Relatively insensitive to sample size, but biased. Must lie between 0 and 1\\ \addlinespace
+RMSEA & Less than .08, ideally less than .05 & Has no upper bound, so hard to interpret.\\ \addlinespace
+TLI & Greater than .9 or .95 & Compares to null model, but controls for complexity. Relatively insensitive to sample size.\\ \addlinespace
+AIC & & Only useful for comparing models. Controls for model complexity.\\ \addlinespace
+BIC & & Similar to AIC, with greater penalty for complexity \\
+\hline
+\end{tabular}
+
+\normalsize
+Not clear which measure is "best", so good idea to look at more than one. There are many others that you might see used in articles, but these are the most common.  In the example, most show inadequate fit.
+
+### Modification indices
+
+\footnotesize
+```{r}
+my.mi(model1)
+
+```
+
+These show the effect of freeing a constrained parameter.  We may then choose to modify our model accordingly.
+
+### Modified model
+
+```{r}
+kabc.model.2 <- '
+# latent variables
+Sequent =~ hm + nr + wo
+Simultan =~ gc + tr + sm + ma + ps + hm'
+
+model2 <- cfa(kabc.model.2, sample.cov = kabcFull.cov, sample.nobs = 200)
+
+semPaths(model2, what = 'path', whatLabels = 'est', edge.label.cex = 1.2)
+fitMeasures(model2, c('chisq', 'df', 'pvalue', 'cfi', 'rmsea', 'gfi', 'tli'))
+
+```
+
+
+### Standardized results
+
+```{r}
+semPaths(model2, what = 'path', whatLabels = 'std', edge.label.cex = 1.2)
+```
+
+# Path models
+
+### Path models
+
+Path models have only observed variables, but they differ from the regression models we've seen so far in that they allow us to model indirect and reciprocal effects as well as direct effects.  Models with reciprocal effects are known as *nonrecursive* models.  The following example is Duncan, Haller, and Portes's (nonrecursive) peer-influences model. It is based on a sample of Michigan high school students. It is an example of a general class of peer influence models that acknowledge that if I am influencing my peers (e.g., my best friend), then he or she could be influencing me.
+
+```{r}
+lower <- '
+1
+.6247 1
+.3269  .3669 1
+.4216  .3275  .6404 1
+.2137  .2742  .1124  .0839 1
+.4105  .4043  .2903  .2598  .1839 1
+.3240  .4047  .3054  .2786  .0489  .2220 1
+.2930  .2407  .4105  .3607  .0186  .1861  .2707 1
+.2995  .2863  .5191  .5007  .0782  .3355  .2302  .2950 1
+.0760  .0702  .2784  .1988  .1147  .1021  .0931 -.0438  .2087 1'
+
+R.DHP <- getCov(lower, names=c("ROccAsp", "REdAsp", "FOccAsp", "FEdAsp", "RParAsp", "RIQ", "RSES", "FSES", "FIQ", "FParAsp"))
+
+dhp.mod <- 'ROccAsp ~ RIQ + RSES + FOccAsp
+            FOccAsp ~ FIQ + FSES + ROccAsp
+           # ROccAsp ~~ FOccAsp
+'
+dhp_op <- sem(model = dhp.mod, sample.cov = R.DHP, sample.nobs = 329)
+
+#semPaths(dhp_op, residual=FALSE)
+```
+
+### Path diagram
+
+```{r}
+semPaths(dhp_op)
+```
+
+\scriptsize
+Duncan, Haller, and Portes's (nonrecursive) peer-influences model: RIQ: respondent's IQ; RSE: respondent's family SES; FSE: best friend's family SES; FIQ: best friend's IQ; ROA: respondent's occupational aspiration; FOA: best friend's occupational aspiration.
+
+### Results
+
+\tiny
+
+```{r} 
+summary(dhp_op)
+fitmeasures(dhp_op, c('cfi', 'rmsea', 'srmr'))
+```
+### Add covariance between the two error terms
+
+\tiny
+```{r}
+dhp.mod.alt <- 'ROccAsp ~ RIQ + RSES + FOccAsp
+            FOccAsp ~ FIQ + FSES + ROccAsp
+            ROccAsp ~~ FOccAsp'
+
+dhp_alt.op <- sem(model = dhp.mod.alt, sample.cov = R.DHP, sample.nobs = 329)
+
+summary(dhp_alt.op)
+fitmeasures(dhp_alt.op, c('cfi', 'rmsea', 'srmr'))
+```
+
+# Structural equation models
+
+### Types of variables
+
+Several classes of variables appear in SEMs:
+
+- Endogenous variables are the response variables of the model.
+      - There is one structural equation (regression equation) for each endogenous variable.
+      - An endogenous variable may, however, also appear as an explanatory variable in other structural equations.
+      - For the kinds of models that we will consider, the endogenous variables are (as in the single-equation linear model) quantitative continuous variables.
+- Exogenous variables appear only as explanatory variables in the structural equations.
+      - The values of exogenous variable are therefore determined outside of the model (hence the term).
+
+### Types of variables 2
+
+- Structural errors (or disturbances) represent the aggregated omitted causes of the endogenous variables, along with measurement error (and possibly intrinsic randomness) in the endogenous variables.
+    - There is one error variable for each endogenous variable (and hence for each structural equation).
+    - The errors are assumed to have zero expectations and to be independent of (or at least uncorrelated with) the exogenous variables.
+    - The errors for different observations are assumed to be independent of one another, but (depending upon the form of the model) different errors for the same observation may be related.
+
+
+### General structural equation model
+
+That is, a structural equation model can contain some or all of the following:
+
+- Exogenous concepts (unobserved);
+- Endogenous concepts (unobserved);
+- Indicators of exogenous concepts;
+- Indicators of endogenous concepts;
+- Structural errors;
+- Measurement errors;
+- Structural parameters
+- Covariances
+
+### LISREL
+
+There are three basic equations in a SEM. These are shown using the notation that is standard in LISREL, the first and most well-known computer software for analysing these models:
+
+$$
+\begin{aligned}
+\eta &= \beta \eta + \Gamma \xi + \zeta\\
+y &= \Lambda_y \eta  + \epsilon \\
+x &= \Lambda_x \xi + \delta
+\end{aligned}
+$$
+
+### Meanings
+
+\small
+These terms have the following meaning:
+
+- $\eta$: Endogenous concepts.
+- $\beta$: Structural coefficients for the relationships among endogenous concepts.
+- $\xi$: Exogenous concepts.
+- $\Gamma$: Structural coefficients for the relationships between exogenous and endogenous concepts.
+- $\zeta$: Structural errors.
+- $x$ and $y$: Observed exogeneous and endogenous indicators, respectively.
+- $\Lambda_y$: Structural coefficients relating indicators to endogenous concepts.
+- $\epsilon$ and $\delta$: Measurement errors.
+- $\Lambda_x$: Structural coefficients relating indicators to exogenous concepts.
+
+### Covariance matrices
+
+In addition, the following covariance matrices are defined:
+
+- $\Phi$: Covariances among the concepts.
+- $\Psi$: Covariances among the structural errors.
+- $\Theta_\epsilon$: Covariances among the $\epsilon$ measurement errors.
+- $\Theta_\delta$: Covariances among the $\delta$ measurement errors.
+
+### Assumptions of general SEM
+
+- The measurement errors, $\delta$ and $\epsilon$,
+    - have expectations of 0;
+    - are each multivariately-normally distributed;
+    - are independent of each other;
+    - are independent of the latent exogenous variables ($\xi$), latent endogenous variables ($\eta$), and structural disturbances ($\zeta$).
+- The N observations are independently sampled.
+- The latent exogenous variables, $\xi$, are multivariate normal.
+- This assumption is unnecessary for exogenous variables that are measured without error.
+
+### Assumptions 2
+
+- The structural disturbances, $\zeta$
+    - have expectation 0;
+    - are multivariately-normally distributed;
+    - are independent of the latent exogenous variables ($\xi$’s).
+- Under these assumptions, the observable indicators, $x$ and $y$, have a multivariate-normal distribution.
+
+$$
+\genfrac{[}{]}{0pt}{0}{X_{i}}{Y_{i}} \sim N_{q+p} ({\mathbf 0,\Sigma})
+$$
+where $\Sigma$ represents the population covariance matrix of the indicators.
+
+### Identification of SEMs
+
+Identification of models with latent variables is a complex problem without a simple general solution.
+
+- A global necessary condition for identification is that the number of free parameters in the model can be no larger than the number of variances and covariances among observed variables,
+$$
+\frac{(k)(k + 1)}{2}
+$$
+- This condition is insufficiently restrictive to give us any confidence that a model that meets the condition is identified.
+- That is, it is easy to meet this condition and still have an underidentified model.
+
+### Useful rule
+
+A useful rule that sometimes helps is that a model is identified if: 
+
+1. all of the measurement errors in the model are uncorrelated with one another;
+2. there are at least two unique indicators for each latent variable, or if there is only one indicator for a latent variable, it is measured without error;
+3. the structural sub model would be identified were it an observed variable model
+
+### Estimation
+
+The variances and covariances of the observed variables ($\Sigma$) are functions
+of the parameters of the SEM ($\beta$, $\Gamma$, $\Lambda_x$, $\Lambda_y$, $\Phi$, $\Theta_\delta$ , $\Theta_\epsilon$, and $\Psi$).
+
+- In any particular model, there will be restrictions on many of the elements of the parameter matrices.
+- Most commonly, these restrictions are exclusions: certain parameters are prespecified to be 0.
+- The $\Lambda$ matrices (or the $\Psi$ matrix) must contain normalizing restrictions to set the metrics of the latent variables.
+- If the restrictions on the model are sufficient to identify it, then MLEs of the parameters can be found.
+
+### SEM example
+
+```{r}
+mas_mod <- ' Exhaust =~ L1 + L2 + L3 + L8 + L13 + L14 + L20
+             Depers =~ L5 + L6 + L10 + L11 + L15 + L16 + L22
+             Accomp =~ L4R + L7R + L9R + L12R + L17R + L18R + L19R + L21R
+             Plans =~ P5 + P6
+             Plans ~ Exhaust + Depers + Accomp '
+
+mas <- read.dta('C:\\Users\\dbarron\\Dropbox\\Nurses survey\\allnursedata.dta', convert.factors=FALSE)
+mas$P5[mas$P5 == 5] <- NA
+mas$P6[mas$P6 == 5] <- NA
+
+mas_op <- sem(mas_mod, mas)
+
+semPaths(mas_op, what = 'mod')
+```
+
+
+### Model explained
+
+- There are three exogenous latent variables ($\xi$); these are the three components of burnout as measured by the Maslach Burnout Inventory.
+- Each exogenous latent variable has a number of exogenous indicators ($x$), 22 in all.
+- Each indicator  has a path with a coefficient ($\Lambda_x$). One per latent variable is fixed to 1, so there are $22 - 3 = 19$ free parameters.
+- Each of the exogenous indicators has an error ($\delta$).
+- There is one endogenous latent variable ($\eta$), the career plans of a nurse.
+- There is a path between each exogenous latent variable and the endogenous latent variable ($\Gamma$)
+
+### Continued
+
+- The endogenous latent variable has a structural error ($\zeta$).
+- The endogenous latent variable has two indicators ($y$).
+- The endogenous indicators have error terms ($\epsilon$).
+- Each indicator has a path with a coefficient ($\Lambda_y$), one of which will be set to one, so there is 1 free parameter.
+- There are 3 covariances between the exogenous concepts and 3 variances ($\Phi$), so 6 free parameters.
+- Covariances among the $\delta$ measurement errors are zero (that it, $\Theta_\delta$ is a diagonal matrix with 22 free parameters).
+- Covariances among the $\epsilon$ measurement errors are zero (that it, $\Theta_\epsilon$ is a diagonal matrix with 2 free parameters).
+- There is only one structural error, so $\Psi$ is just a single free parameter.
+
+### Specification
+
+There are 24 observed variables, and hence there are $24 \times 25 \div 2 = 300$ observed variances and covariances. There are 54 free parameters to be estimated.  Therefore there are $300-54=246$ degrees of freedom.
+\tiny
+
+```{r, echo=TRUE}
+mas_mod <- ' Exhaust =~ L1 + L2 + L3 + L8 + L13 + L14 + L20
+             Depers =~ L5 + L6 + L10 + L11 + L15 + L16 + L22
+             Accomp =~ L4R + L7R + L9R + L12R + L17R + L18R + L19R + L21R
+             Plans =~ P5 + P6
+             Plans ~ Exhaust + Depers + Accomp '
+```
+
+### Results
+
+\tiny
+```{r}
+#summary(mas_op, header = FALSE)
+lavInspect(mas_op, 'list')[1:27, c(2:4, 14, 15)]
+```
+
+### Results, continued
+
+\tiny
+
+```{r}
+lavInspect(mas_op, 'list')[28:58, c(2:4, 14, 15)]
+```
+
+### Interpretation
+
+High numbers of the `Plans' variable mean more likely to stay in nursing, so the interpretation of these results is that each component of burnout reduces the chances that a nurse will remain in nursing.   All those parameter estimates are statistically significant.
+
+```{r}
+fitMeasures(mas_op, c('chisq', 'df', 'pvalue', 'cfi', 'rmsea', 'srmr'))
+```
+
+\tiny
+```{r}
+my.mi(mas_op)
+
+mas_mod_alt <- ' Exhaust =~ L1 + L2 + L3 + L8 + L13 + L14 + L20
+             Depers =~ L5 + L6 + L10 + L11 + L15 + L16 + L22
+             Accomp =~ L4R + L7R + L9R + L12R + L17R + L18R + L19R + L21R
+             Plans =~ P5 + P6
+             Plans ~ Exhaust + Depers + Accomp 
+              L10 ~~ L11'
+
+mas_alt_op <- sem(mas_mod_alt, data = mas)
+```
+
+### Political Democracy example
+
+```{r}
+
+model <- ' 
+# latent variable definitions
+ind60 =~ x1 + x2 + x3
+dem60 =~ y1 + a*y2 + b*y3 + c*y4
+dem65 =~ y5 + a*y6 + b*y7 + c*y8
+
+# regressions
+dem60 ~ ind60
+dem65 ~ ind60 + dem60
+
+# residual correlations
+y1 ~~ y5
+y2 ~~ y4 + y6
+y3 ~~ y7
+y4 ~~ y8
+y6 ~~ y8
+'
+
+fit2 <- lavaan::sem(model, data = PoliticalDemocracy)
+
+semPaths(fit2, edge.label.cex = 1.2)
+```
+
+
+### Note
+
+- Data from 75 countries
+- Two endogenous concepts ($\eta$), Democracy in 1960 and in 1965.
+- Each $\eta$ has four indicators ($y$); press freedom, freedom of political opposition, fairness of elections, effectiveness of elected legislature
+- One exogenous concept ($\xi$), Industrialisation in 1960.
+- This has three indicators ($x$): GNP per capita, energy consumption per capita, percentage of labour force in industry.
+- One $\beta$ parameter and two $\Gamma$ parameters.
+- This model specifies some correlations between error terms (ie, $\Lambda_\epsilon$ is *not* a diagonal matrix).
+- This model constrains some parameters in the measurement model to be equal.
+- There are 66 observed moments and 28 parameters to be estimated, so 38 degrees of freedom.
+
+### Results
+
+\tiny
+```{r}
+#summary(fit2, fit.measures=FALSE, header = FALSE)
+lavInspect(fit2, 'list')[1:34, c(2:4, 11, 14, 15)]
+```
+
+
+### Goodness of fit
+
+\tiny
+```{r}
+fitMeasures(fit2)
+```
+
+# Extras
+
+### Definitions of GoF statistics
+
+\scriptsize
+\begin{tabular}{ccc}
+Statistic & Definition & Criterion \\
+\hline \addlinespace
+GFI & $1 - [\chi^2_{model}/\chi^2_{null}] $  & $> 0.9$ \\ \addlinespace
+NFI & $[ \chi^2_{null} - \chi^2_{model}]/\chi^2_{null} $ & $> 0.95$ \\ \addlinespace
+RFI & $ 1 - [(\chi^2_{model}/df_{model}) / (\chi^2_{null}/df_{null})]$ \\ \addlinespace
+IFI & $ (\chi^2_{null} - \chi^2_{model}) / (\chi^2_{null} - df_{model})$ \\ \addlinespace
+TLI & $ [(\chi^2_{null}/df_{null}) - (\chi^2_{model}/df_{model})]/[(\chi^2_{null}/df_{null}) - 1]$ \\ \addlinespace
+CFI & $ 1 - [(\chi^2_{model} - df_{model}) / (\chi^2_{null} - df_{null})]$ & $> 0.95$ \\ \addlinespace
+Model AIC & $\chi^2_{model} + 2q \text{(number of free parameters)} $ \\ \addlinespace
+Null AIC & $ \chi^2_{null} + 2q \text{(number of free parameters)} $ \\ \addlinespace
+RMSEA & $\sqrt{[\chi^2_{model} - df_{model}]/[(N - 1) df_{model}]}$ & $< 0.07$
+\end{tabular}

@@ -3,6 +3,7 @@ library(arm)
 library(plm)
 library(effects)
 library(ggplot2)
+library(dplyr)
 
 data(Males)
 str(Males)
@@ -11,6 +12,14 @@ View(Males)
 
 ggplot(Males, aes(y = exp(wage))) + geom_boxplot(aes(x=occupation)) + coord_flip()
 
+Males2 <- Males %>% group_by(nr) %>%
+  mutate(ch_married = married != lag(married))
+
+Males2 %>% group_by(nr) %>%
+  filter(any(ch_married == 1)) %>%
+  ggplot(aes(x = year, y = wage, colour = married)) + geom_line(aes(group = nr), alpha = 0.3)
+
+xtabs(~ch_married, Males2)
 
 p1 <- plm(wage ~  exper + married, data = Males, index = c('nr', 'year'))
 summary(p1)

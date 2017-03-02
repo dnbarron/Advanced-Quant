@@ -25,7 +25,7 @@ The difficult part is turning this into the long format of data that is needed f
 
 First, read the data in and select the variables that don't change over time.
 
-```{r bhps}
+```{r bhps, warning=FALSE, message=FALSE}
 bhps <- foreign::read.dta('C:\\Users\\dbarron\\Dropbox\\Advanced Quant\\BHPS\\stata9\\bhps_sampler3.dta')
 dim(bhps)
 
@@ -36,19 +36,16 @@ To select variables it makes sense to create a small function to do the work. Th
 
 ```{r bhps2}
 selvar <- function(vn){
-  require(reshape2) # You must install reshape2 package for this to work
-  vars <- grep(vn, names(bhps), ignore.case=TRUE)
-  if (length(vars) == 0) stop('No variables found')
-  # First variable is pid, always include this
-  op <- bhps[, c(1, vars)]
-  # Turn variable into long format, using pid as id variable. 
-  op.melt <- melt(op, id.vars='pid')
-  # Create a wave variable from the first letter of the variable
-  op.melt$wave <- substr(op.melt$variable, 1, 1)
-  # Rename the value variable 
-  names(op.melt)[3]  <- substr(op.melt$variable[1], 2, 100)
-  # Output pid, selected variable and wave
-  op.melt[, c(1,3,4)]
+  require(dplyr)
+  require(tidyr)
+  require(stringr)
+  op <- bhps %>% select(pid, ends_with(vn)) %>%
+    gather(variable, var, ends_with(vn)) %>%
+    mutate(wave = str_sub(variable, 1, 1)) %>%
+    select(-variable) %>%
+    arrange(pid, wave)
+  names(op)[2] <- vn
+  op
 }
 
 bhps2 <- selvar('jbstat')

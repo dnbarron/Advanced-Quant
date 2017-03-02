@@ -1,0 +1,352 @@
+---
+title: "Week 8 Practical Session"
+author: "David Barron"
+date: "Hilary Term 2017"
+output: pdf_document
+---
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_knit$set(width = 100)
+knitr::opts_chunk$set(comment =  '', echo=FALSE)
+knitr::opts_chunk$set(fig.align = 'center', fig.width = 6, fig.asp = 0.618, out.width = '80%')
+options('show.signif.stars'=FALSE)
+options('digits' = 3)
+#options(scipen=5)
+library(ggplot2)
+library(foreign)
+library(lavaan)
+library(semPlot)
+library(psych)
+```
+
+```{r funcs}
+my.mi <- function(model){
+  mi <- lavaan::modificationindices(model)
+  ix <- order(-mi[, 4])
+  mi <- mi[ix, ]
+  ix <- mi[, 4] > 1
+  if (sum(ix) <= 10) return(mi[ix, ])
+  else return(mi[1:10, ])
+}
+```
+
+# Structural equation models
+
+There are two commonly used packages for doing structural equation modelling in R: `sem` and `lavaan`.  I use the latter because I find the models easier to specify.  It also includes some utilities to make creating covariance matrices a bit easier.  First, enter it as a single string.
+
+```{r, echo=TRUE}
+# input the correlations in lower diagnonal form
+houghtonLower.cor <- '
+1.000
+.668 1.000
+.635  .599 1.000
+.263  .261   .164 1.000
+.290  .315   .247  .486 1.000
+.207  .245   .231  .251  .449 1.000
+-.206 -.182  -.195 -.309 -.266 -.142 1.000 
+-.280 -.241  -.238 -.344 -.305 -.230  .753 1.000
+-.258 -.244 -.185  -.255 -.255 -.215  .554  .587 1.000 
+.080  .096  .094  -.017  .151  .141 -.074 -.111  .016 1.000
+.061  .028 -.035  -.058 -.051 -.003 -.040 -.040 -.018 .284 1.000
+.113  .174  .059   .063  .138  .044 -.119 -.073 -.084 .563  .379 1.000 '
+```
+Then use the function `getCov` to create a correlation matrix, and the function `cor2cov` to convert to a covariance matrix:
+
+```{r, echo=TRUE}
+houghtonFull.cor <- 
+ getCov(houghtonLower.cor, names = c("wk1","wk2","wk3","hap","md1","md2","pr1","pr2",
+                                     "app","bel","st","ima"))
+
+houghtonFull.cov <- 
+ cor2cov(houghtonFull.cor, sds = c(0.939, 1.017, 0.937, 0.562, 0.760, 0.524, 0.585, 0.609, 
+                                   0.731, 0.711, 1.124, 1.001))
+print(houghtonFull.cov, digits = 1)
+```
+
+This example comes from a study of job satisfaction among 263 university employees.  The hypothesis is that constructive thinking reduces dysfunctional thinking, which leads to an enhanced sense of well-being, which in turn results in greater job satisfaction.  The four theoretical constructs are:
+
+1. Constructive (opportunity oriented) thinking
+2. Dysfunctional (obstacle oriented) thinking
+3. Subjective well-being
+4. Job satisfaction
+
+The structural part of the model reprsents the hypotheses that:
+
+1. Both dysfunctional thinking and subjective well-being have direct effects on job satisfaction
+2. Dysfunctional thinking has a direct effect on subjective well-being
+3. Constructive thinking has a direct effect on dysfunctional thinking
+
+In the measurement part of the model, each construct has three indicators (see p. 221 of Kline).
+
+```{r, echo=TRUE}
+
+# specify sr model
+houghtonSR.model0 <- '
+# measurement part
+
+Construc =~ bel + st + ima
+Dysfunc =~ pr1 + pr2 + app
+WellBe =~ hap + md1 + md2
+JobSat =~ wk1 + wk2 + wk3
+
+# structural part
+
+Dysfunc ~ Construc
+WellBe ~  Dysfunc
+JobSat ~ Dysfunc + WellBe '
+
+# fit sr model to data
+srmodel0 <- sem(houghtonSR.model0,
+         sample.cov = houghtonFull.cov,
+         sample.nobs = 263)
+```
+
+This is what the model looks like as a diagramme, followed by the results.
+
+```{r, echo=TRUE}
+semPaths(srmodel0, layout = 'spring')
+
+summary(srmodel0, fit.measures = TRUE)
+
+```
+The implication is that constructive thinking reduces dysfunctional thinking, dysfunctional teaching reduces subjective well-being and job satisfaction, and subjective well-being increases job satisfaction.  
+
+## Single indicator, non-recursive model
+
+This example involves a study of 177 nurses intended to investigate occupational commitment (ie, to the nursing profession), organizational commitment (ie, to the hospital that currently employs them) and turnover intention.  There are three types of organizational and occupational commitment: affective (emotional attachment), continuance (perceived cost of leaving) and normative (feeling of obligation to stay), and two types of turnover intention (occupational and organizational).  The hypothesis is that the three types of occupational commitment influence occupational turnover intention, the three types of organizational commitment influence organizational turnover intention, and organizational and occupational turnover intention mutually influence each other.
+
+Normally, with only one indicator per factor, we would not be able to estimate error variances, but the original authors also published score reliability coefficients, which we can use to calculate measurement error variance (see p. 222 of Kline).
+
+A diagramme of the model is shown below:
+
+```{r}
+# input the correlations in lower diagnonal form
+changLower.cor <- '
+ 1.0
+-.10  1.0
+ .66  .10  1.0
+ .48  .06  .42  1.0
+ .08  .58  .15  .22  1.0
+ .48  .12  .44  .69  .34  1.0
+-.53 -.04 -.58 -.34 -.13 -.34 1.0
+-.50 -.02 -.40 -.63 -.28 -.58 .56 1.0 '
+# name the variables and convert to full correlation matrix
+changFull.cor <-
+ getCov(changLower.cor, names = c("aoc","coc","noc","apc","cpc","npc","orgti","occti"))
+
+changFull.cov <-
+ cor2cov(changFull.cor, sds = c(1.04, 0.98, 0.97, 1.07, 0.78, 1.09, 1.40, 1.50))
+changFull.cov
+
+# specify initial model with single indicators
+
+chang.model1 <- '
+#latent variables
+ AOC =~ aoc
+ COC =~ coc
+ NOC =~ noc
+ APC =~ apc
+ CPC =~ cpc
+ NPC =~ npc
+ OrgTI =~ orgti
+ OccTI =~ occti
+
+#regressions
+ OrgTI ~ AOC + COC + NOC
+ OccTI ~ APC + CPC + NPC
+ OrgTI ~ OccTI
+ OccTI ~ OrgTI
+
+#fix error variances
+ aoc ~~ .1947*aoc
+ coc ~~ .2881*coc
+ noc ~~ .2446*noc
+ apc ~~ .1603*apc
+ cpc ~~ .1764*cpc
+ npc ~~ .1901*npc
+ orgti ~~ .2744*orgti
+ occti ~~ .2700*occti
+
+#correlated disturbances
+ OrgTI ~~ OccTI '
+
+
+
+# fit initial model to data
+model1 <- sem(chang.model1,
+       sample.cov = changFull.cov,
+       sample.nobs = 177)
+
+
+
+# equality-constrained reciprocal effect
+chang.model3 <- '
+
+# latent variables
+AOC =~ aoc
+COC =~ coc
+NOC =~ noc
+APC =~ apc
+CPC =~ cpc
+NPC =~ npc
+OrgTI =~ orgti
+OccTI =~ occti
+
+# regressions
+OrgTI ~ AOC + COC + NOC
+OccTI ~ APC + CPC + NPC + COC
+
+# constrained imposed through label ("a")
+OrgTI ~ a * OccTI
+OccTI ~ a * OrgTI
+
+# fix error variances
+aoc ~~ .1947*aoc
+coc ~~ .2881*coc
+noc ~~ .2446*noc
+apc ~~ .1603*apc
+cpc ~~ .1764*cpc
+npc ~~ .1901*npc
+orgti ~~ .2744*orgti
+occti ~~ .2700*occti
+
+# correlated disturbances
+OrgTI ~~ OccTI '
+
+model3 <- sem(chang.model3,
+       sample.cov = changFull.cov,
+       sample.nobs = 177)
+
+semPaths(model1, layout = 'tree2')
+```
+
+
+### Results
+```{r}
+summary(model1, fit.measures = TRUE)
+residuals(model1, type = 'standardized')$cov
+my.mi(model1)
+```
+
+The largest standadized residual concerns the relationship between occupational turnover intention and continuance organizational commitment.  This also has one of the largest modification indices, so try adding that to the model.
+
+```{r, echo = TRUE}
+# respecified model with single indicators
+chang.model2 <- '
+
+#latent variables
+ AOC =~ aoc
+ COC =~ coc
+ NOC =~ noc
+ APC =~ apc
+ CPC =~ cpc
+ NPC =~ npc
+ OrgTI =~ orgti
+ OccTI =~ occti
+
+#regressions
+ OrgTI ~ AOC + COC + NOC
+ OccTI ~ APC + CPC + NPC + COC
+ OrgTI ~ OccTI
+ OccTI ~ OrgTI
+
+#fix error variances
+ aoc ~~ .1947*aoc
+ coc ~~ .2881*coc
+ noc ~~ .2446*noc
+ apc ~~ .1603*apc
+ cpc ~~ .1764*cpc
+ npc ~~ .1901*npc
+ orgti ~~ .2744*orgti
+ occti ~~ .2700*occti
+
+#correlated disturbances
+ OrgTI ~~ OccTI '
+
+# fit respecified model to data
+model2 <- sem(chang.model2,
+       sample.cov = changFull.cov,
+       sample.nobs = 177)
+
+```
+
+Compare model fits:
+```{r, echo = TRUE}
+anova(model1, model2)
+
+summary(model2, fit.measure = TRUE)
+```
+## Homework
+
+```{r homework}
+ch10.cov <- matrix(c(1.024, 0, 0, 0, 0, 0, 0, 0, 0, 
+                     0.792, 1.077, 0, 0, 0, 0, 0, 0, 0,
+                     1.027, 0.919, 1.844, 0, 0, 0, 0, 0, 0,
+                     0.756, 0.697, 1.244, 1.286, 0, 0, 0, 0, 0, 
+                     0.567, 0.537, 0.876, 0.632, 0.852,  0, 0, 0, 0,
+                     0.445, 0.424, 0.677, 0.526, 0.518, 0.670, 0, 0, 0,
+                     0.434, 0.389, 0.635, 0.498, 0.475, 0.545, 0.716, 0, 0,
+                     0.580, 0.564, 0.893, 0.716, 0.546, 0.422, 0.373, 0.851, 0, 
+                     0.491, 0.499, 0.888, 0.646, 0.508, 0.389, 0.339, 0.629, 0.871),
+                   ncol = 9, byrow = TRUE)
+
+colnames(ch10.cov) <- c('EdAsp', 'OcAsp', 'VerbAch', 'QuantAch', 'FamInc', 'FaEd', 'MoEd', 'VerbAb', 'QuantAb')
+
+print(ch10.cov)
+
+```         
+The model is that a student's achievement (`Achieve`) depends on home and family characteristics (`Home`), the student's ability (`Ability`), and the student's aspiration (`Aspire`).  These four latent variable have the following measures:
+
+_Achieve_: Verbal achievement (VerbAch) and Quantitative achievement (QuantAch).
+_Home_: Family income (FamInc), Father's education (FaEd) and Mother's education (MoEd).
+_Ability_: Verbal ability (VerbAb) and Quantitative ability (QuantAb).
+_Aspire_: Educational aspiration (EdAsp) and Occupational aspiration (OcAsp)
+
+The covariance matrix above is based on data from 200 students.
+
+Aspiration is thought to be influenced by Ability and Home situation.  Achievement is thought to be influenced by all three latent variables.  Specify an appropriate structural equation model, obtain results and determine whether the fit of the model is adequate.  If it is not, modify the model and re-fit.
+
+Since we're not having another class, I've included the answers, but try to do it yourself first!
+
+### First SEM
+
+```{r mod}
+ch10.mod1 <- ' Home =~ FamInc + FaEd + MoEd
+               Ability =~ VerbAb + QuantAb
+               Aspire =~ EdAsp + OcAsp
+               Achieve =~ VerbAch + QuantAch
+               
+               Aspire ~ Home + Ability
+               Achieve ~ Home + Ability + Aspire
+               
+               Home ~~ Ability
+               '
+ch10.op1 <- sem(ch10.mod1, sample.cov = ch10.cov, sample.nobs = 200)
+summary(ch10.op1)
+fitMeasures(ch10.op1, c('chisq', 'df', 'pvalue', 'rmsea', 'cfi', 'srmr'))
+my.mi(ch10.op1)
+residuals(ch10.op1, type = 'standardized')$cov
+```
+There are a number of possible modifications that these results suggest.  Examples include covariance between father's and mother's education (which seems very plausible).  Let's try this out.
+
+```{r model}
+
+ch10.mod2 <- ' Home =~ FamInc + FaEd + MoEd
+               Ability =~ VerbAb + QuantAb
+               Aspire =~ EdAsp + OcAsp
+               Achieve =~ VerbAch + QuantAch
+               
+               Aspire ~ Home + Ability
+               Achieve ~ Home + Ability + Aspire
+               
+               Home ~~ Ability
+
+               FaEd ~~ MoEd
+               '
+
+ch10.op2 <- sem(ch10.mod2, sample.cov = ch10.cov, sample.nobs = 200)
+summary(ch10.op2)
+fitMeasures(ch10.op2, c('chisq', 'pvalue', 'rmsea', 'cfi', 'srmr'))
+
+```
+That seems to do the trick.  You can see that all the hypothesised structural relationships are statistically significant.

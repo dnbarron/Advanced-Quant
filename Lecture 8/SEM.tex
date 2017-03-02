@@ -1,0 +1,1221 @@
+\documentclass[10pt,ignorenonframetext,]{beamer}
+\setbeamertemplate{caption}[numbered]
+\setbeamertemplate{caption label separator}{: }
+\setbeamercolor{caption name}{fg=normal text.fg}
+\beamertemplatenavigationsymbolsempty
+
+\usepackage{pgfpages}
+\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+\ifxetex
+\usepackage{mathspec}
+\else
+\usepackage{fontspec}
+\fi
+\defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+\usetheme{Madrid}
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\newif\ifbibliography
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
+\newcommand{\ImportTok}[1]{{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
+\newcommand{\BuiltInTok}[1]{{#1}}
+\newcommand{\ExtensionTok}[1]{{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
+\newcommand{\RegionMarkerTok}[1]{{#1}}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
+\newcommand{\NormalTok}[1]{{#1}}
+\usepackage{longtable,booktabs}
+\usepackage{caption}
+% These lines are needed to make table captions work with longtable:
+\makeatletter
+\def\fnum@table{\tablename~\thetable}
+\makeatother
+
+% Prevent slide breaks in the middle of a paragraph:
+\widowpenalties 1 10000
+\raggedbottom
+
+\AtBeginPart{
+\let\insertpartnumber\relax
+\let\partname\relax
+\frame{\partpage}
+}
+\AtBeginSection{
+\ifbibliography
+\else
+\let\insertsectionnumber\relax
+\let\sectionname\relax
+\frame{\sectionpage}
+\fi
+}
+\AtBeginSubsection{
+\let\insertsubsectionnumber\relax
+\let\subsectionname\relax
+\frame{\subsectionpage}
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+
+\title{Structural Equation Models}
+\author{David Barron}
+\date{Hilary Term 2017}
+
+\begin{document}
+\frame{\titlepage}
+
+\begin{frame}{Introduction}
+
+\begin{itemize}
+\tightlist
+\item
+  Structural-equation models (SEMs) are multiple-equation regression
+  models in which the response variable in one regression equation can
+  appear as an explanatory variable in another equation. Indeed, two
+  variables in an SEM can even effect one-another reciprocally, either
+  directly, or indirectly through a ``feedback'' loop.
+\item
+  Structural-equation models can include variables that are not measured
+  directly, but rather indirectly through their effects (called
+  indicators).
+\item
+  Unmeasured variables are variously termed latent variables,
+  constructs, or factors.
+\end{itemize}
+
+\end{frame}
+
+\section{Confirmatory factor
+analysis}\label{confirmatory-factor-analysis}
+
+\begin{frame}{Confirmatory factor analysis}
+
+\begin{itemize}
+\tightlist
+\item
+  Confirmatory factor analysis, as the name implies, involves specifying
+  a theoretically motivated model of relationships among variables and
+  factors and carrying out statistical tests to confirm that this model
+  provides an adequate fit to the observed data.
+\item
+  We can use different assumptions to those standard in exploratory
+  factor analysis.
+\item
+  Is a special case of Structural Equation Models.\\
+\item
+  You can also think of CFA as being ``one half'' of SEMs, what is often
+  called the \emph{measurement model}.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{CFA example}
+
+The Kaufman Assessment Battery for Children is an individually
+administeredd cognitive ability test for children. The eight items are
+claimed to be measures of two factors: sequential processing and
+simultaneous processing. The former require correct recall of auditory
+stimuli (nr: Number Recall, wo: Word Order) or visual stimuli (hm: Hand
+Movements) in a particular order. The latter are intended to measure
+more holistic, less order-dependent reasoning (gc: Gestalt Closure, tr:
+Triangles, sm: Spatial Memory, ma: Matrix Analogies, ps: Photo Series).
+We will perform a CFA using these tests on 200 children aged 10. The
+covariance matrix is:
+
+\begin{verbatim}
+      hm    nr   wo    gc   tr    sm   ma   ps
+hm 11.56 3.182 3.45 1.928 2.94  5.71 3.71 3.98
+nr  3.18 5.760 4.66 0.713 1.75  2.92 2.15 2.09
+wo  3.45 4.663 8.41 1.253 2.27  3.41 2.44 3.22
+gc  1.93 0.713 1.25 7.290 2.77  3.40 2.34 3.40
+tr  2.94 1.750 2.27 2.770 7.29  5.33 3.18 4.70
+sm  5.71 2.923 3.41 3.402 5.33 17.64 4.82 6.43
+ma  3.71 2.150 2.44 2.344 3.18  4.82 7.84 3.53
+ps  3.98 2.088 3.22 3.402 4.70  6.43 3.53 9.00
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}{CFA with two factors}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{SEM_files/figure-beamer/unnamed-chunk-3-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Interpretation}
+
+\begin{itemize}
+\tightlist
+\item
+  Unlike EFA, it is conventional not to assume variance of unobserved
+  factors = 1, but rather to constrain one regression parameter from
+  each factor to = 1. {[}Additional homework exercise: try constraining
+  variances of unobserved factors to be 1 and freeing all regression
+  parameters. Model fit should be the same.{]}
+\item
+  Can do hypothesis tests on regression parameters; all of these are
+  statistically significant.
+\item
+  Can obtain standardized results if we prefer; these are a closer
+  equivalent to the EFA loadings.
+\item
+  Also no need to assume no correlation between unobserved factors.
+\item
+  But it is conventional to assume no correlation between error terms
+  (although this can be relaxed).
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Goodness of fit}
+
+\small
+
+\begin{itemize}
+\tightlist
+\item
+  CFA (and more generally SEM) is fit using maximum likelihood
+  estimation, so we obtain the log-likelihood that enable us to compare
+  the relative fit of nested models. Here the log likelihood is
+  -3779.041.
+\item
+  We can compare that to the log likelihood that would be obtained from
+  a model that reproduces the data perfectly. THis is -3759.878. From
+  these two figures, we can calculate the likelihood ratio \(\chi^2\),
+  which in this case is 38.325 with 19 degrees of freedom.
+\item
+  The number of degrees of freedom is the number of estimated parameters
+  fewer in the estimated model than there are observed moments in the
+  data. There are always \(k(k+1)/2\) observed second-order moments (ie,
+  variances and covariances), where \(k\) is the number of observed
+  variables, so in this case that is \(8 \times 9 \div 2 = 36.\) There
+  are 17 estimated parameters: 6 regression parameters, 8 variances of
+  measured variables, 2 variances and 1 covariance of unobserved
+  factors. That gives \(36 - 17 = 19\) degrees of freedom.
+\item
+  Gives p-value of 0.005. That means we would have to conclude this
+  model does not fit the data.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Other GoF statistics}
+
+\small
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{RMSEA} This is actually a ``badness of fit'' statistic, so we
+  want values close to 0. Measures size of discrepency from \emph{close
+  fit}, defined as
+  \(\hat{\Delta}_{model} = \max(0, \chi^2_{model} - df_{model})\). This
+  is then standardized, to give the RMSEA statistic:
+\end{itemize}
+
+\[
+\hat{\epsilon} = \sqrt{\frac{\hat{\Delta}_{model}} {df_{model}(N - 1)}}.
+\]
+
+\begin{itemize}
+\item
+  \textbf{CFI} Ranges from 0 to 1. Compares estimated model to null
+  model, using the same \(\hat{\Delta}\) as before: \[
+  \mathrm{CFI} = 1 - \frac{\hat{\Delta}_{model}}{\hat{\Delta}_{null}}.
+  \] Commonly cited rule is that CFI \(> 0.95\), implying a fit that is
+  95\% better than the null model. The TLI and NNFI are variants on this
+  index.
+\item
+  \textbf{SRMR} Standardised root mean square residual, where the
+  residual is the difference between observed and fitted correlation
+  matrices. Rule of thumb is that SRMR \(> 0.10\) may indicate a poor
+  fit, but it is a good idea to look at the residual matrix itself.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{GoF statistics}
+
+\tiny
+
+\begin{verbatim}
+               npar                fmin               chisq 
+             17.000               0.096              38.325 
+                 df              pvalue      baseline.chisq 
+             19.000               0.005             498.336 
+        baseline.df     baseline.pvalue                 cfi 
+             28.000               0.000               0.959 
+                tli                nnfi                 rfi 
+              0.939               0.939               0.887 
+                nfi                pnfi                 ifi 
+              0.923               0.626               0.960 
+                rni                logl   unrestricted.logl 
+              0.959           -3779.041           -3759.878 
+                aic                 bic              ntotal 
+           7592.082            7648.153             200.000 
+               bic2               rmsea      rmsea.ci.lower 
+           7594.295               0.071               0.038 
+     rmsea.ci.upper        rmsea.pvalue                 rmr 
+              0.104               0.132               0.767 
+         rmr_nomean                srmr        srmr_bentler 
+              0.767               0.072               0.072 
+srmr_bentler_nomean         srmr_bollen  srmr_bollen_nomean 
+              0.072               0.072               0.072 
+         srmr_mplus   srmr_mplus_nomean               cn_05 
+              0.072               0.072             158.306 
+              cn_01                 gfi                agfi 
+            189.864               0.956               0.917 
+               pgfi                 mfi                ecvi 
+              0.505               0.953               0.362 
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}{GoF rules of thumb}
+
+\tiny
+
+\begin{tabular}{llp{5.5cm}}
+\hline
+Statistic & Rule of thumb & Comments \\
+\hline
+$\chi^2$ & Not significant (ie, p-value $> .05$) & Influenced by sample size.\\ \addlinespace
+CFI & More than 0.93 & Compares model to the independence model. Relatively insensitive to sample size, but biased. Must lie between 0 and 1\\ \addlinespace
+RMSEA & Less than .08, ideally less than .05 & Has no upper bound, so hard to interpret.\\ \addlinespace
+TLI & Greater than .9 or .95 & Compares to null model, but controls for complexity. Relatively insensitive to sample size.\\ \addlinespace
+AIC & & Only useful for comparing models. Controls for model complexity.\\ \addlinespace
+BIC & & Similar to AIC, with greater penalty for complexity \\
+\hline
+\end{tabular}
+
+\normalsize
+Not clear which measure is ``best'', so good idea to look at more than
+one. There are many others that you might see used in articles, but
+these are the most common. In the example, most show inadequate fit.
+
+\end{frame}
+
+\begin{frame}{Modification indices}
+
+\footnotesize
+
+\begin{longtable}[]{@{}llllrrrrr@{}}
+\toprule
+& lhs & op & rhs & mi & epc & sepc.lv & sepc.all &
+sepc.nox\tabularnewline
+\midrule
+\endhead
+25 & Simultan & =\textasciitilde{} & hm & 20.10 & 1.054 & 1.428 & 0.421
+& 0.421\tabularnewline
+35 & nr & \textasciitilde{}\textasciitilde{} & wo & 20.10 & 4.741 &
+4.741 & 0.685 & 0.685\tabularnewline
+26 & Simultan & =\textasciitilde{} & nr & 7.01 & -0.510 & -0.691 &
+-0.289 & -0.289\tabularnewline
+29 & hm & \textasciitilde{}\textasciitilde{} & wo & 7.01 & -1.746 &
+-1.746 & -0.178 & -0.178\tabularnewline
+32 & hm & \textasciitilde{}\textasciitilde{} & sm & 4.85 & 1.609 & 1.609
+& 0.113 & 0.113\tabularnewline
+33 & hm & \textasciitilde{}\textasciitilde{} & ma & 3.80 & 0.995 & 0.995
+& 0.105 & 0.105\tabularnewline
+23 & Sequent & =\textasciitilde{} & ma & 3.25 & 0.269 & 0.454 & 0.162 &
+0.162\tabularnewline
+40 & nr & \textasciitilde{}\textasciitilde{} & ps & 3.15 & -0.502 &
+-0.502 & -0.070 & -0.070\tabularnewline
+20 & Sequent & =\textasciitilde{} & gc & 2.90 & -0.254 & -0.429 & -0.159
+& -0.159\tabularnewline
+55 & ma & \textasciitilde{}\textasciitilde{} & ps & 2.73 & -0.733 &
+-0.733 & -0.088 & -0.088\tabularnewline
+\bottomrule
+\end{longtable}
+
+These show the effect of freeing a constrained parameter. We may then
+choose to modify our model accordingly.
+
+\end{frame}
+
+\begin{frame}[fragile]{Modified model}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{SEM_files/figure-beamer/unnamed-chunk-6-1} \end{center}
+
+\begin{verbatim}
+ chisq     df pvalue    cfi  rmsea    gfi    tli 
+18.108 18.000  0.449  1.000  0.005  0.977  1.000 
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}{Standardized results}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{SEM_files/figure-beamer/unnamed-chunk-7-1} \end{center}
+
+\end{frame}
+
+\section{Path models}\label{path-models}
+
+\begin{frame}{Path models}
+
+Path models have only observed variables, but they differ from the
+regression models we've seen so far in that they allow us to model
+indirect and reciprocal effects as well as direct effects. Models with
+reciprocal effects are known as \emph{nonrecursive} models. The
+following example is Duncan, Haller, and Portes's (nonrecursive)
+peer-influences model. It is based on a sample of Michigan high school
+students. It is an example of a general class of peer influence models
+that acknowledge that if I am influencing my peers (e.g., my best
+friend), then he or she could be influencing me.
+
+\end{frame}
+
+\begin{frame}{Path diagram}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{SEM_files/figure-beamer/unnamed-chunk-9-1} \end{center}
+
+\scriptsize
+Duncan, Haller, and Portes's (nonrecursive) peer-influences model: RIQ:
+respondent's IQ; RSE: respondent's family SES; FSE: best friend's family
+SES; FIQ: best friend's IQ; ROA: respondent's occupational aspiration;
+FOA: best friend's occupational aspiration.
+
+\end{frame}
+
+\begin{frame}[fragile]{Results}
+
+\tiny
+
+\begin{verbatim}
+lavaan (0.5-23.1097) converged normally after  14 iterations
+
+  Number of observations                           329
+
+  Estimator                                         ML
+  Minimum Function Test Statistic               20.620
+  Degrees of freedom                                 3
+  P-value (Chi-square)                           0.000
+
+Parameter Estimates:
+
+  Information                                 Expected
+  Standard Errors                             Standard
+
+Regressions:
+                   Estimate  Std.Err  z-value  P(>|z|)
+  ROccAsp ~                                           
+    RIQ               0.315    0.051    6.226    0.000
+    RSES              0.200    0.050    3.999    0.000
+    FOccAsp           0.176    0.077    2.304    0.021
+  FOccAsp ~                                           
+    FIQ               0.437    0.049    8.862    0.000
+    FSES              0.283    0.048    5.920    0.000
+    ROccAsp          -0.003    0.074   -0.038    0.970
+
+Variances:
+                   Estimate  Std.Err  z-value  P(>|z|)
+   .ROccAsp           0.746    0.058   12.826    0.000
+   .FOccAsp           0.657    0.054   12.161    0.000
+\end{verbatim}
+
+\begin{verbatim}
+  cfi rmsea  srmr 
+0.928 0.134 0.046 
+\end{verbatim}
+
+\end{frame}
+
+\begin{frame}[fragile]{Add covariance between the two error terms}
+
+\tiny
+
+\begin{verbatim}
+lavaan (0.5-23.1097) converged normally after  24 iterations
+
+  Number of observations                           329
+
+  Estimator                                         ML
+  Minimum Function Test Statistic                2.820
+  Degrees of freedom                                 2
+  P-value (Chi-square)                           0.244
+
+Parameter Estimates:
+
+  Information                                 Expected
+  Standard Errors                             Standard
+
+Regressions:
+                   Estimate  Std.Err  z-value  P(>|z|)
+  ROccAsp ~                                           
+    RIQ               0.237    0.053    4.480    0.000
+    RSES              0.176    0.047    3.728    0.000
+    FOccAsp           0.398    0.104    3.816    0.000
+  FOccAsp ~                                           
+    FIQ               0.311    0.056    5.598    0.000
+    FSES              0.219    0.047    4.689    0.000
+    ROccAsp           0.422    0.131    3.215    0.001
+
+Covariances:
+                   Estimate  Std.Err  z-value  P(>|z|)
+ .ROccAsp ~~                                          
+   .FOccAsp          -0.494    0.136   -3.634    0.000
+
+Variances:
+                   Estimate  Std.Err  z-value  P(>|z|)
+   .ROccAsp           0.790    0.074   10.749    0.000
+   .FOccAsp           0.715    0.086    8.272    0.000
+\end{verbatim}
+
+\begin{verbatim}
+  cfi rmsea  srmr 
+0.997 0.035 0.013 
+\end{verbatim}
+
+\end{frame}
+
+\section{Structural equation models}\label{structural-equation-models}
+
+\begin{frame}{Types of variables}
+
+Several classes of variables appear in SEMs:
+
+\begin{itemize}
+\tightlist
+\item
+  Endogenous variables are the response variables of the model.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    There is one structural equation (regression equation) for each
+    endogenous variable.
+  \item
+    An endogenous variable may, however, also appear as an explanatory
+    variable in other structural equations.
+  \item
+    For the kinds of models that we will consider, the endogenous
+    variables are (as in the single-equation linear model) quantitative
+    continuous variables.
+  \end{itemize}
+\item
+  Exogenous variables appear only as explanatory variables in the
+  structural equations.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    The values of exogenous variable are therefore determined outside of
+    the model (hence the term).
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Types of variables 2}
+
+\begin{itemize}
+\tightlist
+\item
+  Structural errors (or disturbances) represent the aggregated omitted
+  causes of the endogenous variables, along with measurement error (and
+  possibly intrinsic randomness) in the endogenous variables.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    There is one error variable for each endogenous variable (and hence
+    for each structural equation).
+  \item
+    The errors are assumed to have zero expectations and to be
+    independent of (or at least uncorrelated with) the exogenous
+    variables.
+  \item
+    The errors for different observations are assumed to be independent
+    of one another, but (depending upon the form of the model) different
+    errors for the same observation may be related.
+  \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{General structural equation model}
+
+That is, a structural equation model can contain some or all of the
+following:
+
+\begin{itemize}
+\tightlist
+\item
+  Exogenous concepts (unobserved);
+\item
+  Endogenous concepts (unobserved);
+\item
+  Indicators of exogenous concepts;
+\item
+  Indicators of endogenous concepts;
+\item
+  Structural errors;
+\item
+  Measurement errors;
+\item
+  Structural parameters
+\item
+  Covariances
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{LISREL}
+
+There are three basic equations in a SEM. These are shown using the
+notation that is standard in LISREL, the first and most well-known
+computer software for analysing these models:
+
+\[
+\begin{aligned}
+\eta &= \beta \eta + \Gamma \xi + \zeta\\
+y &= \Lambda_y \eta  + \epsilon \\
+x &= \Lambda_x \xi + \delta
+\end{aligned}
+\]
+
+\end{frame}
+
+\begin{frame}{Meanings}
+
+\small
+These terms have the following meaning:
+
+\begin{itemize}
+\tightlist
+\item
+  \(\eta\): Endogenous concepts.
+\item
+  \(\beta\): Structural coefficients for the relationships among
+  endogenous concepts.
+\item
+  \(\xi\): Exogenous concepts.
+\item
+  \(\Gamma\): Structural coefficients for the relationships between
+  exogenous and endogenous concepts.
+\item
+  \(\zeta\): Structural errors.
+\item
+  \(x\) and \(y\): Observed exogeneous and endogenous indicators,
+  respectively.
+\item
+  \(\Lambda_y\): Structural coefficients relating indicators to
+  endogenous concepts.
+\item
+  \(\epsilon\) and \(\delta\): Measurement errors.
+\item
+  \(\Lambda_x\): Structural coefficients relating indicators to
+  exogenous concepts.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Covariance matrices}
+
+In addition, the following covariance matrices are defined:
+
+\begin{itemize}
+\tightlist
+\item
+  \(\Phi\): Covariances among the concepts.
+\item
+  \(\Psi\): Covariances among the structural errors.
+\item
+  \(\Theta_\epsilon\): Covariances among the \(\epsilon\) measurement
+  errors.
+\item
+  \(\Theta_\delta\): Covariances among the \(\delta\) measurement
+  errors.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Assumptions of general SEM}
+
+\begin{itemize}
+\tightlist
+\item
+  The measurement errors, \(\delta\) and \(\epsilon\),
+
+  \begin{itemize}
+  \tightlist
+  \item
+    have expectations of 0;
+  \item
+    are each multivariately-normally distributed;
+  \item
+    are independent of each other;
+  \item
+    are independent of the latent exogenous variables (\(\xi\)), latent
+    endogenous variables (\(\eta\)), and structural disturbances
+    (\(\zeta\)).
+  \end{itemize}
+\item
+  The N observations are independently sampled.
+\item
+  The latent exogenous variables, \(\xi\), are multivariate normal.
+\item
+  This assumption is unnecessary for exogenous variables that are
+  measured without error.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Assumptions 2}
+
+\begin{itemize}
+\tightlist
+\item
+  The structural disturbances, \(\zeta\)
+
+  \begin{itemize}
+  \tightlist
+  \item
+    have expectation 0;
+  \item
+    are multivariately-normally distributed;
+  \item
+    are independent of the latent exogenous variables (\(\xi\)'s).
+  \end{itemize}
+\item
+  Under these assumptions, the observable indicators, \(x\) and \(y\),
+  have a multivariate-normal distribution.
+\end{itemize}
+
+\[
+\genfrac{[}{]}{0pt}{0}{X_{i}}{Y_{i}} \sim N_{q+p} ({\mathbf 0,\Sigma})
+\] where \(\Sigma\) represents the population covariance matrix of the
+indicators.
+
+\end{frame}
+
+\begin{frame}{Identification of SEMs}
+
+Identification of models with latent variables is a complex problem
+without a simple general solution.
+
+\begin{itemize}
+\tightlist
+\item
+  A global necessary condition for identification is that the number of
+  free parameters in the model can be no larger than the number of
+  variances and covariances among observed variables, \[
+  \frac{(k)(k + 1)}{2}
+  \]
+\item
+  This condition is insufficiently restrictive to give us any confidence
+  that a model that meets the condition is identified.
+\item
+  That is, it is easy to meet this condition and still have an
+  underidentified model.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Useful rule}
+
+A useful rule that sometimes helps is that a model is identified if:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  all of the measurement errors in the model are uncorrelated with one
+  another;
+\item
+  there are at least two unique indicators for each latent variable, or
+  if there is only one indicator for a latent variable, it is measured
+  without error;
+\item
+  the structural sub model would be identified were it an observed
+  variable model
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}{Estimation}
+
+The variances and covariances of the observed variables (\(\Sigma\)) are
+functions of the parameters of the SEM (\(\beta\), \(\Gamma\),
+\(\Lambda_x\), \(\Lambda_y\), \(\Phi\), \(\Theta_\delta\) ,
+\(\Theta_\epsilon\), and \(\Psi\)).
+
+\begin{itemize}
+\tightlist
+\item
+  In any particular model, there will be restrictions on many of the
+  elements of the parameter matrices.
+\item
+  Most commonly, these restrictions are exclusions: certain parameters
+  are prespecified to be 0.
+\item
+  The \(\Lambda\) matrices (or the \(\Psi\) matrix) must contain
+  normalizing restrictions to set the metrics of the latent variables.
+\item
+  If the restrictions on the model are sufficient to identify it, then
+  MLEs of the parameters can be found.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{SEM example}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{SEM_files/figure-beamer/unnamed-chunk-12-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Model explained}
+
+\begin{itemize}
+\tightlist
+\item
+  There are three exogenous latent variables (\(\xi\)); these are the
+  three components of burnout as measured by the Maslach Burnout
+  Inventory.
+\item
+  Each exogenous latent variable has a number of exogenous indicators
+  (\(x\)), 22 in all.
+\item
+  Each indicator has a path with a coefficient (\(\Lambda_x\)). One per
+  latent variable is fixed to 1, so there are \(22 - 3 = 19\) free
+  parameters.
+\item
+  Each of the exogenous indicators has an error (\(\delta\)).
+\item
+  There is one endogenous latent variable (\(\eta\)), the career plans
+  of a nurse.
+\item
+  There is a path between each exogenous latent variable and the
+  endogenous latent variable (\(\Gamma\))
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Continued}
+
+\begin{itemize}
+\tightlist
+\item
+  The endogenous latent variable has a structural error (\(\zeta\)).
+\item
+  The endogenous latent variable has two indicators (\(y\)).
+\item
+  The endogenous indicators have error terms (\(\epsilon\)).
+\item
+  Each indicator has a path with a coefficient (\(\Lambda_y\)), one of
+  which will be set to one, so there is 1 free parameter.
+\item
+  There are 3 covariances between the exogenous concepts and 3 variances
+  (\(\Phi\)), so 6 free parameters.
+\item
+  Covariances among the \(\delta\) measurement errors are zero (that it,
+  \(\Theta_\delta\) is a diagonal matrix with 22 free parameters).
+\item
+  Covariances among the \(\epsilon\) measurement errors are zero (that
+  it, \(\Theta_\epsilon\) is a diagonal matrix with 2 free parameters).
+\item
+  There is only one structural error, so \(\Psi\) is just a single free
+  parameter.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Specification}
+
+There are 24 observed variables, and hence there are
+\(24 \times 25 \div 2 = 300\) observed variances and covariances. There
+are 54 free parameters to be estimated. Therefore there are
+\(300-54=246\) degrees of freedom. \tiny
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mas_mod <-}\StringTok{ ' Exhaust =~ L1 + L2 + L3 + L8 + L13 + L14 + L20}
+\StringTok{             Depers =~ L5 + L6 + L10 + L11 + L15 + L16 + L22}
+\StringTok{             Accomp =~ L4R + L7R + L9R + L12R + L17R + L18R + L19R + L21R}
+\StringTok{             Plans =~ P5 + P6}
+\StringTok{             Plans ~ Exhaust + Depers + Accomp '}
+\end{Highlighting}
+\end{Shaded}
+
+\end{frame}
+
+\begin{frame}{Results}
+
+\tiny
+
+\begin{longtable}[]{@{}lllrr@{}}
+\toprule
+lhs & op & rhs & est & se\tabularnewline
+\midrule
+\endhead
+Exhaust & =\textasciitilde{} & L1 & 1.000 & 0.000\tabularnewline
+Exhaust & =\textasciitilde{} & L2 & 0.938 & 0.044\tabularnewline
+Exhaust & =\textasciitilde{} & L3 & 1.214 & 0.056\tabularnewline
+Exhaust & =\textasciitilde{} & L8 & 1.322 & 0.055\tabularnewline
+Exhaust & =\textasciitilde{} & L13 & 0.997 & 0.055\tabularnewline
+Exhaust & =\textasciitilde{} & L14 & 1.011 & 0.058\tabularnewline
+Exhaust & =\textasciitilde{} & L20 & 0.799 & 0.053\tabularnewline
+Depers & =\textasciitilde{} & L5 & 1.000 & 0.000\tabularnewline
+Depers & =\textasciitilde{} & L6 & 0.855 & 0.070\tabularnewline
+Depers & =\textasciitilde{} & L10 & 1.565 & 0.091\tabularnewline
+Depers & =\textasciitilde{} & L11 & 1.531 & 0.089\tabularnewline
+Depers & =\textasciitilde{} & L15 & 0.544 & 0.045\tabularnewline
+Depers & =\textasciitilde{} & L16 & 0.456 & 0.043\tabularnewline
+Depers & =\textasciitilde{} & L22 & 0.910 & 0.082\tabularnewline
+Accomp & =\textasciitilde{} & L4R & 1.000 & 0.000\tabularnewline
+Accomp & =\textasciitilde{} & L7R & 1.435 & 0.128\tabularnewline
+Accomp & =\textasciitilde{} & L9R & 1.740 & 0.150\tabularnewline
+Accomp & =\textasciitilde{} & L12R & 1.404 & 0.148\tabularnewline
+Accomp & =\textasciitilde{} & L17R & 1.561 & 0.142\tabularnewline
+Accomp & =\textasciitilde{} & L18R & 1.828 & 0.167\tabularnewline
+Accomp & =\textasciitilde{} & L19R & 1.869 & 0.157\tabularnewline
+Accomp & =\textasciitilde{} & L21R & 1.585 & 0.146\tabularnewline
+Plans & =\textasciitilde{} & P5 & 1.000 & 0.000\tabularnewline
+Plans & =\textasciitilde{} & P6 & 1.571 & 0.125\tabularnewline
+Plans & \textasciitilde{} & Exhaust & -0.151 & 0.022\tabularnewline
+Plans & \textasciitilde{} & Depers & -0.131 & 0.033\tabularnewline
+Plans & \textasciitilde{} & Accomp & -0.138 & 0.043\tabularnewline
+\bottomrule
+\end{longtable}
+
+\end{frame}
+
+\begin{frame}{Results, continued}
+
+\tiny
+
+\begin{longtable}[]{@{}llllrr@{}}
+\toprule
+& lhs & op & rhs & est & se\tabularnewline
+\midrule
+\endhead
+28 & L1 & \textasciitilde{}\textasciitilde{} & L1 & 1.674 &
+0.086\tabularnewline
+29 & L2 & \textasciitilde{}\textasciitilde{} & L2 & 1.005 &
+0.055\tabularnewline
+30 & L3 & \textasciitilde{}\textasciitilde{} & L3 & 1.495 &
+0.083\tabularnewline
+31 & L8 & \textasciitilde{}\textasciitilde{} & L8 & 0.853 &
+0.061\tabularnewline
+32 & L13 & \textasciitilde{}\textasciitilde{} & L13 & 2.231 &
+0.111\tabularnewline
+33 & L14 & \textasciitilde{}\textasciitilde{} & L14 & 2.600 &
+0.129\tabularnewline
+34 & L20 & \textasciitilde{}\textasciitilde{} & L20 & 2.585 &
+0.124\tabularnewline
+35 & L5 & \textasciitilde{}\textasciitilde{} & L5 & 1.475 &
+0.075\tabularnewline
+36 & L6 & \textasciitilde{}\textasciitilde{} & L6 & 1.763 &
+0.086\tabularnewline
+37 & L10 & \textasciitilde{}\textasciitilde{} & L10 & 0.956 &
+0.068\tabularnewline
+38 & L11 & \textasciitilde{}\textasciitilde{} & L11 & 0.963 &
+0.067\tabularnewline
+39 & L15 & \textasciitilde{}\textasciitilde{} & L15 & 0.751 &
+0.036\tabularnewline
+40 & L16 & \textasciitilde{}\textasciitilde{} & L16 & 0.791 &
+0.038\tabularnewline
+41 & L22 & \textasciitilde{}\textasciitilde{} & L22 & 2.738 &
+0.131\tabularnewline
+42 & L4R & \textasciitilde{}\textasciitilde{} & L4R & 1.165 &
+0.058\tabularnewline
+43 & L7R & \textasciitilde{}\textasciitilde{} & L7R & 1.291 &
+0.069\tabularnewline
+44 & L9R & \textasciitilde{}\textasciitilde{} & L9R & 1.519 &
+0.084\tabularnewline
+45 & L12R & \textasciitilde{}\textasciitilde{} & L12R & 2.725 &
+0.134\tabularnewline
+46 & L17R & \textasciitilde{}\textasciitilde{} & L17R & 1.690 &
+0.088\tabularnewline
+47 & L18R & \textasciitilde{}\textasciitilde{} & L18R & 2.434 &
+0.127\tabularnewline
+48 & L19R & \textasciitilde{}\textasciitilde{} & L19R & 1.387 &
+0.081\tabularnewline
+49 & L21R & \textasciitilde{}\textasciitilde{} & L21R & 1.880 &
+0.097\tabularnewline
+50 & P5 & \textasciitilde{}\textasciitilde{} & P5 & 0.355 &
+0.029\tabularnewline
+51 & P6 & \textasciitilde{}\textasciitilde{} & P6 & 0.255 &
+0.062\tabularnewline
+52 & Exhaust & \textasciitilde{}\textasciitilde{} & Exhaust & 1.562 &
+0.133\tabularnewline
+53 & Depers & \textasciitilde{}\textasciitilde{} & Depers & 0.747 &
+0.083\tabularnewline
+54 & Accomp & \textasciitilde{}\textasciitilde{} & Accomp & 0.316 &
+0.047\tabularnewline
+55 & Plans & \textasciitilde{}\textasciitilde{} & Plans & 0.254 &
+0.027\tabularnewline
+56 & Exhaust & \textasciitilde{}\textasciitilde{} & Depers & 0.548 &
+0.055\tabularnewline
+57 & Exhaust & \textasciitilde{}\textasciitilde{} & Accomp & 0.069 &
+0.028\tabularnewline
+58 & Depers & \textasciitilde{}\textasciitilde{} & Accomp & 0.143 &
+0.023\tabularnewline
+\bottomrule
+\end{longtable}
+
+\end{frame}
+
+\begin{frame}[fragile]{Interpretation}
+
+High numbers of the `Plans' variable mean more likely to stay in
+nursing, so the interpretation of these results is that each component
+of burnout reduces the chances that a nurse will remain in nursing. All
+those parameter estimates are statistically significant.
+
+\begin{verbatim}
+   chisq       df   pvalue      cfi    rmsea     srmr 
+1301.136  246.000    0.000    0.860    0.067    0.074 
+\end{verbatim}
+
+\tiny
+
+\begin{longtable}[]{@{}llllrrrrr@{}}
+\toprule
+& lhs & op & rhs & mi & epc & sepc.lv & sepc.all &
+sepc.nox\tabularnewline
+\midrule
+\endhead
+302 & L10 & \textasciitilde{}\textasciitilde{} & L11 & 124.0 & 0.786 &
+0.786 & 0.286 & 0.286\tabularnewline
+69 & Exhaust & =\textasciitilde{} & L12R & 116.8 & 0.509 & 0.636 & 0.348
+& 0.348\tabularnewline
+362 & L4R & \textasciitilde{}\textasciitilde{} & L7R & 116.0 & 0.489 &
+0.489 & 0.288 & 0.288\tabularnewline
+290 & L6 & \textasciitilde{}\textasciitilde{} & L16 & 104.1 & 0.413 &
+0.413 & 0.279 & 0.279\tabularnewline
+131 & L1 & \textasciitilde{}\textasciitilde{} & L2 & 57.2 & 0.381 &
+0.381 & 0.137 & 0.137\tabularnewline
+86 & Depers & =\textasciitilde{} & L12R & 47.0 & 0.509 & 0.440 & 0.241 &
+0.241\tabularnewline
+95 & Accomp & =\textasciitilde{} & L3 & 43.1 & 0.580 & 0.326 & 0.167 &
+0.167\tabularnewline
+158 & L2 & \textasciitilde{}\textasciitilde{} & L20 & 38.8 & -0.368 &
+-0.368 & -0.126 & -0.126\tabularnewline
+80 & Depers & =\textasciitilde{} & L13 & 38.4 & 0.481 & 0.416 & 0.214 &
+0.214\tabularnewline
+225 & L13 & \textasciitilde{}\textasciitilde{} & L22 & 34.7 & 0.500 &
+0.500 & 0.140 & 0.140\tabularnewline
+\bottomrule
+\end{longtable}
+
+\end{frame}
+
+\begin{frame}{Political Democracy example}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{SEM_files/figure-beamer/unnamed-chunk-18-1} \end{center}
+
+\end{frame}
+
+\begin{frame}{Note}
+
+\begin{itemize}
+\tightlist
+\item
+  Data from 75 countries
+\item
+  Two endogenous concepts (\(\eta\)), Democracy in 1960 and in 1965.
+\item
+  Each \(\eta\) has four indicators (\(y\)); press freedom, freedom of
+  political opposition, fairness of elections, effectiveness of elected
+  legislature
+\item
+  One exogenous concept (\(\xi\)), Industrialisation in 1960.
+\item
+  This has three indicators (\(x\)): GNP per capita, energy consumption
+  per capita, percentage of labour force in industry.
+\item
+  One \(\beta\) parameter and two \(\Gamma\) parameters.
+\item
+  This model specifies some correlations between error terms (ie,
+  \(\Lambda_\epsilon\) is \emph{not} a diagonal matrix).
+\item
+  This model constrains some parameters in the measurement model to be
+  equal.
+\item
+  There are 66 observed moments and 28 parameters to be estimated, so 38
+  degrees of freedom.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Results}
+
+\tiny
+
+\begin{longtable}[]{@{}llllrr@{}}
+\toprule
+lhs & op & rhs & label & est & se\tabularnewline
+\midrule
+\endhead
+ind60 & =\textasciitilde{} & x1 & & 1.000 & 0.000\tabularnewline
+ind60 & =\textasciitilde{} & x2 & & 2.180 & 0.138\tabularnewline
+ind60 & =\textasciitilde{} & x3 & & 1.818 & 0.152\tabularnewline
+dem60 & =\textasciitilde{} & y1 & & 1.000 & 0.000\tabularnewline
+dem60 & =\textasciitilde{} & y2 & a & 1.191 & 0.139\tabularnewline
+dem60 & =\textasciitilde{} & y3 & b & 1.175 & 0.120\tabularnewline
+dem60 & =\textasciitilde{} & y4 & c & 1.251 & 0.117\tabularnewline
+dem65 & =\textasciitilde{} & y5 & & 1.000 & 0.000\tabularnewline
+dem65 & =\textasciitilde{} & y6 & a & 1.191 & 0.139\tabularnewline
+dem65 & =\textasciitilde{} & y7 & b & 1.175 & 0.120\tabularnewline
+dem65 & =\textasciitilde{} & y8 & c & 1.251 & 0.117\tabularnewline
+dem60 & \textasciitilde{} & ind60 & & 1.471 & 0.392\tabularnewline
+dem65 & \textasciitilde{} & ind60 & & 0.600 & 0.226\tabularnewline
+dem65 & \textasciitilde{} & dem60 & & 0.865 & 0.075\tabularnewline
+y1 & \textasciitilde{}\textasciitilde{} & y5 & & 0.583 &
+0.356\tabularnewline
+y2 & \textasciitilde{}\textasciitilde{} & y4 & & 1.440 &
+0.689\tabularnewline
+y2 & \textasciitilde{}\textasciitilde{} & y6 & & 2.183 &
+0.737\tabularnewline
+y3 & \textasciitilde{}\textasciitilde{} & y7 & & 0.712 &
+0.611\tabularnewline
+y4 & \textasciitilde{}\textasciitilde{} & y8 & & 0.363 &
+0.444\tabularnewline
+y6 & \textasciitilde{}\textasciitilde{} & y8 & & 1.372 &
+0.577\tabularnewline
+x1 & \textasciitilde{}\textasciitilde{} & x1 & & 0.081 &
+0.019\tabularnewline
+x2 & \textasciitilde{}\textasciitilde{} & x2 & & 0.120 &
+0.070\tabularnewline
+x3 & \textasciitilde{}\textasciitilde{} & x3 & & 0.467 &
+0.090\tabularnewline
+y1 & \textasciitilde{}\textasciitilde{} & y1 & & 1.855 &
+0.433\tabularnewline
+y2 & \textasciitilde{}\textasciitilde{} & y2 & & 7.581 &
+1.366\tabularnewline
+y3 & \textasciitilde{}\textasciitilde{} & y3 & & 4.956 &
+0.956\tabularnewline
+y4 & \textasciitilde{}\textasciitilde{} & y4 & & 3.225 &
+0.723\tabularnewline
+y5 & \textasciitilde{}\textasciitilde{} & y5 & & 2.313 &
+0.479\tabularnewline
+y6 & \textasciitilde{}\textasciitilde{} & y6 & & 4.968 &
+0.921\tabularnewline
+y7 & \textasciitilde{}\textasciitilde{} & y7 & & 3.560 &
+0.710\tabularnewline
+y8 & \textasciitilde{}\textasciitilde{} & y8 & & 3.308 &
+0.704\tabularnewline
+ind60 & \textasciitilde{}\textasciitilde{} & ind60 & & 0.449 &
+0.087\tabularnewline
+dem60 & \textasciitilde{}\textasciitilde{} & dem60 & & 3.875 &
+0.866\tabularnewline
+dem65 & \textasciitilde{}\textasciitilde{} & dem65 & & 0.164 &
+0.227\tabularnewline
+\bottomrule
+\end{longtable}
+
+\end{frame}
+
+\begin{frame}[fragile]{Goodness of fit}
+
+\tiny
+
+\begin{verbatim}
+               npar                fmin               chisq 
+             28.000               0.268              40.179 
+                 df              pvalue      baseline.chisq 
+             38.000               0.374             730.654 
+        baseline.df     baseline.pvalue                 cfi 
+             55.000               0.000               0.997 
+                tli                nnfi                 rfi 
+              0.995               0.995               0.920 
+                nfi                pnfi                 ifi 
+              0.945               0.653               0.997 
+                rni                logl   unrestricted.logl 
+              0.997           -1548.818           -1528.728 
+                aic                 bic              ntotal 
+           3153.636            3218.526              75.000 
+               bic2               rmsea      rmsea.ci.lower 
+           3130.277               0.028               0.000 
+     rmsea.ci.upper        rmsea.pvalue                 rmr 
+              0.087               0.665               0.477 
+         rmr_nomean                srmr        srmr_bentler 
+              0.477               0.056               0.056 
+srmr_bentler_nomean         srmr_bollen  srmr_bollen_nomean 
+              0.056               0.047               0.047 
+         srmr_mplus   srmr_mplus_nomean               cn_05 
+              0.050               0.050             100.647 
+              cn_01                 gfi                agfi 
+            115.167               0.920               0.861 
+               pgfi                 mfi                ecvi 
+              0.530               0.986               1.282 
+\end{verbatim}
+
+\end{frame}
+
+\section{Extras}\label{extras}
+
+\begin{frame}{Definitions of GoF statistics}
+
+\scriptsize
+
+\begin{tabular}{ccc}
+Statistic & Definition & Criterion \\
+\hline \addlinespace
+GFI & $1 - [\chi^2_{model}/\chi^2_{null}] $  & $> 0.9$ \\ \addlinespace
+NFI & $[ \chi^2_{null} - \chi^2_{model}]/\chi^2_{null} $ & $> 0.95$ \\ \addlinespace
+RFI & $ 1 - [(\chi^2_{model}/df_{model}) / (\chi^2_{null}/df_{null})]$ \\ \addlinespace
+IFI & $ (\chi^2_{null} - \chi^2_{model}) / (\chi^2_{null} - df_{model})$ \\ \addlinespace
+TLI & $ [(\chi^2_{null}/df_{null}) - (\chi^2_{model}/df_{model})]/[(\chi^2_{null}/df_{null}) - 1]$ \\ \addlinespace
+CFI & $ 1 - [(\chi^2_{model} - df_{model}) / (\chi^2_{null} - df_{null})]$ & $> 0.95$ \\ \addlinespace
+Model AIC & $\chi^2_{model} + 2q \text{(number of free parameters)} $ \\ \addlinespace
+Null AIC & $ \chi^2_{null} + 2q \text{(number of free parameters)} $ \\ \addlinespace
+RMSEA & $\sqrt{[\chi^2_{model} - df_{model}]/[(N - 1) df_{model}]}$ & $< 0.07$
+\end{tabular}
+
+\end{frame}
+
+\end{document}

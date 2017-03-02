@@ -29,7 +29,7 @@ summary(base)
 m1 <- lmer(score ~ 1|schoolid, data = scot)
 summary(m1)
 
-m2 <- lmer(score ~ cohort90 + female + sclass + (1|schoolid), data = scot)
+m2 <- lmer(score ~ female + sclass + (1|schoolid), data = scot)
 summary(m2)
 
 m3 <- lmer(score ~ cohort90 + female + sclass*schtype + (1 + sclass|schoolid), data = scot)
@@ -43,6 +43,9 @@ display(m4)
 
 m5 <- lmer(score ~ cohort90 + female + schdenom + sclass + schtype + (1|schoolid) , data = scot)
 display(m5)
+
 plot(Effect(c('female','schdenom'), m5))
 
-lattice::dotplot(coef(m4))
+lattice::dotplot(coef(m3))
+
+anova(m3, m5)

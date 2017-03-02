@@ -19,8 +19,8 @@ summary(bfi)
 bfi.R <- cor(bfi[, 1:25], use = 'complete.obs')
 p1 <- principal(bfi.R, rotate='varimax', n.obs = 2800)
 fa.parallel(bfi.R, n.obs=2800, fm='ml')
-v1 <- VSS(bfi.R, 8, fm='ml', n.obs = 2800)
-v1
+#v1 <- VSS(bfi.R, 8, fm='ml', n.obs = 2800)
+#v1
 scree(bfi.R)
 ```
 
