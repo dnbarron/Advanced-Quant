@@ -8,7 +8,7 @@ output:
     theme: "Madrid"
     toc: false
     slide_level: 3
-    keep_tex: false
+    keep_tex: true
     df_print: kable
     fig_caption: false
 ---
@@ -71,12 +71,12 @@ $$
 $P$ is the observed correlation matrix (a $6 \times 6$ matrix in our example):
 $$
 P = \begin{pmatrix}
-1.00 \\
-\rho_{21} & 1.00 \\
-\rho_{31} & \rho_{32} & 1.00 \\
-\rho_{41} & \rho_{42} & \rho_{43} & 1.00 \\
-\rho_{51} & \rho_{52} & \rho_{53} & \rho_{54} & 1.00 \\
-\rho_{61} & \rho_{62} & \rho_{63} & \rho_{64} & \rho_{65} & 1.00 \\
+\rho_{11} \\
+\rho_{21} & \rho_{22} \\
+\rho_{31} & \rho_{32} & \rho_{33} \\
+\rho_{41} & \rho_{42} & \rho_{43} & \rho_{44} \\
+\rho_{51} & \rho_{52} & \rho_{53} & \rho_{54} & \rho_{55} \\
+\rho_{61} & \rho_{62} & \rho_{63} & \rho_{64} & \rho_{65} & \rho_{66} \\
 \end{pmatrix}
 $$
 $\Lambda$ is the matrix of _factor loadings_, the strength and direction of the linear relationships between common factors and measured variables:
@@ -149,7 +149,7 @@ P = \Lambda\Lambda^T,
 $$
 that is, assuming that there is no variance due to unique factors.
 
-The attraction of PCA has been ease of computation, but this is no longer a serious concern.  I generally prefer CFA primarily because it maps on to the idea that MVs are associated with theoretical, unobserved constructs.  We will look at both methods.
+The attraction of PCA has been ease of computation, but this is no longer a serious concern.  I generally prefer CFA primarily because it maps on to the idea that MVs are associated with theoretical, unobserved constructs.  
 
 ### Example data
 
@@ -185,6 +185,12 @@ Although there are likely to be theoretical expectations about the number of com
 ### Eigenvalues greater than one
 
 A very common method is based on the eigenvalues of the sample correlation matrix.  The rule (sometimes called the _Kaiser criterion_) is that the number of common factors required is equal to the number of eigenvalues greater than 1.  This rule has some logic when it comes to PCA, but less so to CFA.  It also performs poorly in simulation studies.
+
+The eigenvalues of the sample correlation matrix, $\theta$, are given by:
+
+$$
+P = V \theta V^{-1}
+$$
 
 ### Scree test
 
@@ -241,6 +247,12 @@ Number of factors  |  RMSEA
 
 A general rule of thumb is that RMSEA lower than 0.08 are acceptable, and ideally it should be below 0.05.
 
+#### RMSEA definition
+
+$\sqrt{[\chi^2_{model} - df_{model}]/[(N - 1) df_{model}]}$
+
+
+
 # Rotation
 
 ### Rotation
@@ -269,7 +281,7 @@ names(fa.dta) <- c('MV', 'Rotation', 'CF1', 'CF2')
 
 ggplot(fa.dta, aes(x = CF1, y = CF2, colour = Rotation, shape = Rotation)) + #geom_point() + 
   theme_bw() + geom_hline(yintercept = 0) + geom_vline(xintercept = 0) + 
-  geom_text(aes(label = MV))
+  geom_text(aes(label = MV)) + coord_equal()
 
 ```
 

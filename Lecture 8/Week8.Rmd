@@ -63,6 +63,39 @@ houghtonFull.cov <-
 print(houghtonFull.cov, digits = 1)
 ```
 
+## Specifying models in `lavaan`
+
+Models are specified in a single string, with each equation being specified on a new line within the string.  Generally, we use the usual R formula syntax, but there are three common types of equation:
+
+- **Measurement model** Equations specified using `=~` to separate lhs and rhs of equation. Lhs is the unobserved construct, rhs are the measured variables that act as its indicators.
+- **Structural model** Equations specified using `~`.  Variables on both sides can be measured (as in the path analysis example) or unobserved.
+- **Variances and covariances** Equations specified using `~~`.  This is usually used as a way of telling `lavaan` which of these are to be considered free parameters to be estimated.
+
+You can constrain a parameter that would be free by default or free a parameter that would be constrained by default using *premultiplication*.  To free a normally constrained parameter, premultiply by `NA`, eg,
+
+```
+Y =~ NA * X1 + X2
+```
+
+To constrain a parameter that would otherwise be free, premultiply by the value to which it is to be constrained, eg,
+
+```
+Y ~~ 1 * Y
+```
+
+To constrain two or more parameters to be equal, premultiply by the same label:
+
+```
+Y1 =~ a * X1 + X2
+Y2 =~ a * X1 + X3
+```
+
+You can see the defaults in the help pages for the functions `cfa` and `sem`.  For example, 
+
+"The `sem` function is a wrapper for the more general `lavaan function`, but setting the following default options: `int.ov.free = TRUE`, `int.lv.free = FALSE`, `auto.fix.first = TRUE` (unless `std.lv = TRUE`), `auto.fix.single = TRUE`, `auto.var = TRUE`, `auto.cov.lv.x = TRUE`, `auto.th = TRUE`, `auto.delta = TRUE`, and `auto.cov.y` = TRUE."
+
+## Example
+
 This example comes from a study of job satisfaction among 263 university employees.  The hypothesis is that constructive thinking reduces dysfunctional thinking, which leads to an enhanced sense of well-being, which in turn results in greater job satisfaction.  The four theoretical constructs are:
 
 1. Constructive (opportunity oriented) thinking
@@ -101,7 +134,7 @@ srmodel0 <- sem(houghtonSR.model0,
          sample.nobs = 263)
 ```
 
-This is what the model looks like as a diagramme, followed by the results.
+This is what the model looks like as a diagramme, followed by the results.  The function for producing these diagrams is `semPaths`, which is in the `semPlots` package.
 
 ```{r, echo=TRUE}
 semPaths(srmodel0, layout = 'spring')
@@ -109,7 +142,7 @@ semPaths(srmodel0, layout = 'spring')
 summary(srmodel0, fit.measures = TRUE)
 
 ```
-The implication is that constructive thinking reduces dysfunctional thinking, dysfunctional teaching reduces subjective well-being and job satisfaction, and subjective well-being increases job satisfaction.  
+The implication is that constructive thinking reduces dysfunctional thinking, dysfunctional thinking reduces subjective well-being and job satisfaction, and subjective well-being increases job satisfaction.  
 
 ## Single indicator, non-recursive model
 

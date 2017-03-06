@@ -225,7 +225,7 @@ R.DHP <- getCov(lower, names=c("ROccAsp", "REdAsp", "FOccAsp", "FEdAsp", "RParAs
 
 dhp.mod <- 'ROccAsp ~ RIQ + RSES + FOccAsp
             FOccAsp ~ FIQ + FSES + ROccAsp
-           # ROccAsp ~~ FOccAsp
+            ROccAsp ~~ FOccAsp
 '
 dhp_op <- sem(model = dhp.mod, sample.cov = R.DHP, sample.nobs = 329)
 
@@ -466,12 +466,15 @@ fitMeasures(mas_op, c('chisq', 'df', 'pvalue', 'cfi', 'rmsea', 'srmr'))
 ```{r}
 my.mi(mas_op)
 
-mas_mod_alt <- ' Exhaust =~ L1 + L2 + L3 + L8 + L13 + L14 + L20
+mas_mod_alt <- ' Exhaust =~ L1 + L2 + L3 + L8 + L13 + L14 + L20 + L12R
              Depers =~ L5 + L6 + L10 + L11 + L15 + L16 + L22
              Accomp =~ L4R + L7R + L9R + L12R + L17R + L18R + L19R + L21R
              Plans =~ P5 + P6
              Plans ~ Exhaust + Depers + Accomp 
-              L10 ~~ L11'
+              L10 ~~ L11
+             L4R ~~ L19R + L7R
+             L6 ~~ L16
+             L1 ~~ L2'
 
 mas_alt_op <- sem(mas_mod_alt, data = mas)
 ```
@@ -484,11 +487,13 @@ model <- '
 # latent variable definitions
 ind60 =~ x1 + x2 + x3
 dem60 =~ y1 + a*y2 + b*y3 + c*y4
-dem65 =~ y5 + a*y6 + b*y7 + c*y8
+dem65 =~ NA* y5 + a*y6 + b*y7 + c*y8
 
 # regressions
 dem60 ~ ind60
 dem65 ~ ind60 + dem60
+
+ind60 ~~ 1 * ind60
 
 # residual correlations
 y1 ~~ y5

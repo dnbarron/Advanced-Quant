@@ -9,6 +9,8 @@ output: pdf_document
 ```{r options, echo=FALSE, message=FALSE}
 library(knitr)
 opts_chunk$set(comment=NA, tidy=TRUE, cache=TRUE)
+opts_chunk$set(fig.width = 6, fig.asp = 0.618, fig.align = "center", out.width = "80%")
+
 library(car)
 library(effects)
 library(arm)
