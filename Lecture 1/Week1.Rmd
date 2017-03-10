@@ -1,0 +1,202 @@
+---
+title: "Week 1 Practical Session"
+author: "David Barron"
+date: "Hilary Term 2016"
+output: pdf_document
+---
+
+```{r options, echo=FALSE}
+library(knitr)
+opts_chunk$set(comment=NA, tidy=TRUE)
+```
+
+## Introduction to R
+
+This is a brief introduction to basic R use. The document is also available at http://rpubs.com/DavidBarron/53541.
+
+### Arithmetic operators
+All the basic arithmetic operators work as you would expect:
+
+```{r arithmetic}
+2 + 3
+5 - 3
+4 * 9
+8 / 2
+2^3
+7 %% 3
+7 %/% 3
+```
+
+The last two may be a little less familiar: they are called the *modulus* and *integer division*, respectively.
+
+### Assignment to variables
+
+There are two assignment operators, `<-` and `=`.  The advantage of the latter is that it only takes one key stroke (and it may be natural to you if you use other programming languages). The advantage of the former is that it makes your code easier to read, as `=` is used for other purposes as well.  Most R coders recommend the use of `<-`.
+
+```{r assignment}
+x <- 4
+x
+y <- 4 * 5
+y
+x +  y
+```
+
+### Data types
+The basic data type is the *vector*. A single number is just a vector of length 1.  Vectors can store numbers (either integers or decimals), character strings, or `TRUE`/`FALSE` values. The simplest way to create a vector is using the concatenation operator, `c`:
+
+```{r concat}
+a <- c(2, 4, 6)
+mode(a)
+b <- c('two', 'four', 'six')
+mode(b)
+c <- c(TRUE, FALSE, TRUE)
+mode(c)
+c(a, b)
+c(a, c)
+```
+
+You will notice that the last two cases involve *coercion*.  In a vector, all the values have to be of the same mode, so if you attempt to join to vectors with different modes, one is coerced to the type of the other. The rule is that the most "general" mode wins.  For example, you can represent numbers as characters, and logical values as 0 or 1.
+
+### Matrices, lists and data frames
+There are four other classes of data type that you are likely to come across.  This is a summary:
+
+Class | Characteristics| Dimensions
+------|----------------|---------------
+Vector | All components have the same mode | 1
+Matrix | A set of vectors of the same mode and length | 2
+Data frame | A set of vectors of the same length | 2
+List | A set of objects of any mode or length | 
+
+Examples:
+```{r classes}
+print(m <- cbind(a, b, c))  # Matrix
+print(d <- data.frame(a, b, c))  # Data frame
+print(l <- list(a, b, c))  # List
+```
+
+To begin with you are most likely to use data frames (as these are passed to the functions used to actually do statistics!). Lists are often used by these functions to store output if you need to do more than just look at the printed output. (A data frame might look like a sort of matrix, but actually it is a sort of list.)
+
+Notice that the data frame has added names at the top of the column (by default the names of the vectors, but this can be over-ridden as we'll see in a minute).  It is natural to think of the columns as variables (and hence these are *variable names*) and the rows as observations.
+
+### Selecting components of data 
+Unlike some other statistical analysis systems, you work with multiple data sets at once.  That saves a lot of opening and closing of files, but it does make accessing components of data more difficult as you have to tell R not just the same of a variable, but also the data frame in which that variable is located.  There are a number of ways of doing this:
+
+1. Indexing
+You can specify the content of any component of a data frame (or matrix or vector) by using the row and/or column index in square brackets:
+```{r index}
+d[1,1]
+d[, 1]
+d[3, ]
+d[1:2, ]
+d[, c(1, 3)]
+a[3]
+```
+Notice that you can specify all the cases in one dimension simply by leaving it blank. So the second example above shows all the rows for one variable while the second shows all the columns (variables) for one observation. You can select multiple rows and/or columns by using the `:` operator, which is a short cut to specify a sequence of integers (e.g., `r 1:3`) or a vector, as in the fifth example above.  Indexing a vector is done in the same way, but there is no comma as there is only one dimension.
+
+2. Naming
+You can select columns (variables) by name in two ways:
+```{r naming}
+d[, 'a']
+d$a
+d[, c('b', 'c')]
+```
+
+Using the `$` operator is more convenient for selecting a single variable; the other method is more flexible as you can select more than one variable at a time.
+
+3. Using the `with` or `transform` functions
+```{r with}
+a.sq <- with(d, a^2)
+d  # Doesn't change d, can add it explicitly
+d$as.sq <- a.sq
+
+d <- transform(d, a.squared=a^2)
+d
+```
+Notice that, although `tranform` does add a new variable, you have to explicitly assign this to a name to store it permanently. You can either overwrite the existing data frame or create a new one.
+
+4. Use the `attach` function
+This makes the variable names temporarily available as if they were separate vectors.
+```{r attach}
+attach(d)
+log(a)
+detach(d)
+```
+
+The advantage of the `attach` function is you can then work with variable names in a way that might seem natural to you, but it can be risky if there is more than one object with the same names. It is also easy to forget to detach it.  I generally avoid this method in favour of either 2 or 3.
+
+### Functions
+We've already seen some functions (e.g., `log`, `transform`).  Functions are what do the hard work in R, particularly the ones that have been written to do statistical analyses like regression.  The function is always followed by ( ), inside which are given the *arguments*: the pieces of data or information R needs for the function to work.  Here are some useful functions for taking an initial look at some data.
+
+```{r summary}
+head(mtcars) # The first 6 rows of data
+tail(mtcars, 10) # The last 10 rows of data
+summary(mtcars)
+```
+
+And here are some useful functions for getting descriptive statistics:
+```{r desc}
+mean(mtcars$mpg)
+sd(mtcars$mpg)
+table(mtcars$cyl)
+```
+
+R has very powerful graphical capabilities. Here are some simple examples:
+```{r plots}
+plot(mtcars$disp, mtcars$mpg) # scatter plot
+hist(mtcars$wt) # histogram
+```
+
+### Missing values
+It is very common for data to have some observations that are missing for some reason. In surveys, some people might refuse to answer certain questions or just not know the answers, for example.  Most statistical packages have a special code for such cases, and in R that code is `NA` (which I guess stands for "not available"). Be careful, though. Often when you obtain data from archives it uses special numbers to indicate missing because it doesn't want to rely on something specific to one package. 
+
+When data contains missing values, the default behaviour is for R to fail when you try to do a statistical analysis. This is a good thing as you want to be warned that there are missing cases. However, usually you will want to override this default, and you can do this by adding another argument to the function call:
+
+To illustrate this, I'll turn the first value in the `mtcars` data frame into `NA`:
+```{r missing}
+mtcars.tmp <- mtcars
+mtcars.tmp[1,1] <- NA
+mtcars.tmp[, 1]
+mean(mtcars.tmp$mpg)  # Fails
+mean(mtcars.tmp$mpg, na.rm=TRUE) # Works!
+rm(mtcars.tmp)
+```
+
+The option here is `na.rm` ("NA remove"), which I set to `TRUE`. This then removes cases that are `NA` before calculating the mean.  To know what options are available for a function, you can look at its help page by using the command `?mean` or `help('mean')`.  Accessing the built-in help is essential; there's far too much to remember!
+
+### Packages
+Much of the power of R comes from packages written to perform numerous tasks.  R ships with a number of built in packages, others can be installed from within R.  Once installed, they can easily be accessed.  Below I give an example of a package that enables files in various data formats to be uploaded into R.
+
+### Data import/export
+We need to be able to read data stored on a computer into R, and also to save our work to disk.  It is straightforward to read data in a plain text format, including the very common .csv format. We can also use the `foreign` package to read in data stored in a variety of data formats, such as STATA.
+
+```{r data}
+## Load a .csv file
+peru <- read.csv('C:\\Users\\dbarron\\Dropbox\\Advanced Quant\\PeruMicroWeek1.csv')
+
+# This installs the package from a website. If you haven't specified one, you will be prompted to choose a repository. Any one will do.
+install.packages('haven', repos="http://cran.rstudio.com")  
+# Then make the package available 
+library(haven)
+
+lfs <- read_dta('C:\\Users\\dbarron\\Dropbox\\Teaching\\MSc teaching\\Advanced Quant\\data\\lfs2002.dta')
+
+write.csv(lfs, 'C:\\Users\\dbarron\\Dropbox\\Teaching\\MSc teaching\\Advanced Quant\\data\\lfs2002.csv')
+```
+In these examples, notice the use of `\\` in the strings that specify the location of the files to read. They are required (or alternatively you can use `/`) because `\` has a special meaning inside a string.
+
+### Linear regression
+The function for carrying out linear regression is `lm` (for "linear model").  Have a look at the help first: `?lm`. You will see that the first argument that is required is a `formula`. This is the standard way of passing information about a regression model to R functions.  Most often you specify it as `outcome variable ~ explanatory variable 1 +  explanatory variable 2 + ...`.  You can refer to the variable names in the data frame because, as you can see, the next argument you have to pass is the name of the data frame.  Here is an example:
+
+```{r regress}
+lm1 <- lm(mpg ~ cyl + wt, data = mtcars)
+summary(lm1)
+```
+
+# Homework
+Data are in the Class Material section on Ublend.
+
+1. Import the dataset PeruMicroWeek1.csv. Review the dataset by looking at its structure, header, and summary.
+2. Calculate the means and standard deviations of Average Loan Balance (avgloanbal) and Percentage of Female Borrowers (femaleperc) in the dataset. 
+3. Plot a histogram of Average Loan Balance.
+4. Plot Average Loan Balance vs Self Sufficiency Ratio (selfsuff). Note: The Self Sufficiency Ratio measures how able a microfinance organization is to financially sustain its operations.
+5. Run an OLS regression. Dependent variable: Self Sufficiency Ratio. Explanatory variables: Average Loan Balance and Percentage of Female Borrowers. View a summary of the regression results. What is the effect of the explanatory variables on an organization's Self Sufficiency Ratio? 
