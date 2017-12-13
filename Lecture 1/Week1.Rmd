@@ -1,13 +1,14 @@
 ---
-title: "Week 1 Practical Session"
+title: "Practical Session 1"
 author: "David Barron"
-date: "Hilary Term 2016"
+date: "Hilary Term 2018"
 output: pdf_document
 ---
 
-```{r options, echo=FALSE}
+```{r setup, echo=FALSE}
 library(knitr)
 opts_chunk$set(comment=NA, tidy=TRUE)
+
 ```
 
 ## Introduction to R
@@ -174,7 +175,7 @@ We need to be able to read data stored on a computer into R, and also to save ou
 peru <- read.csv('C:\\Users\\dbarron\\Dropbox\\Advanced Quant\\PeruMicroWeek1.csv')
 
 # This installs the package from a website. If you haven't specified one, you will be prompted to choose a repository. Any one will do.
-install.packages('haven', repos="http://cran.rstudio.com")  
+# install.packages('haven', repos="http://cran.rstudio.com")  
 # Then make the package available 
 library(haven)
 
@@ -193,7 +194,7 @@ summary(lm1)
 ```
 
 # Homework
-Data are in the Class Material section on Ublend.
+Data are in the `data` directory on Weblearn: https://weblearn.ox.ac.uk/x/MbYn1T.
 
 1. Import the dataset PeruMicroWeek1.csv. Review the dataset by looking at its structure, header, and summary.
 2. Calculate the means and standard deviations of Average Loan Balance (avgloanbal) and Percentage of Female Borrowers (femaleperc) in the dataset. 

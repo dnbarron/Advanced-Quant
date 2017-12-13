@@ -2,7 +2,7 @@
 title: "Further topics in linear regression"
 subtitle: "Part 2"
 author: "David Barron"
-date: "Hilary Term 2017"
+date: "Hilary Term 2018"
 fontsize: 10pt
 output: 
   beamer_presentation:

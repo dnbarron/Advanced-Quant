@@ -2,7 +2,7 @@
 title: "Event Analysis"
 subtitle: "Event Counts and Event History Analysis"
 author: "David Barron"
-date: "Hilary Term 2017"
+date: "Hilary Term 2018"
 fontsize: 10pt
 output: 
   beamer_presentation:
@@ -162,7 +162,7 @@ plot(Effect('N', p1), rug = FALSE, ci.style = 'none', ylab = 'Multiplier of the 
 
 As with linear and logistic regressions, it is possible to plot residuals and do various outlier tests.
 
-```{r, out.width=".5\\linewidth", fig.align='default', fig.asp = 0.8}
+```{r, out.width="45%", fig.align='default', fig.asp = 0.8}
 residualPlot(p1)
 influencePlot(p1)
 ```
@@ -190,7 +190,7 @@ plot(Effect('N', n1), ci.style = 'none', type = 'response', main = 'Effect plot'
 
 ### Residuals, outliers, etc.
 
-```{r, out.width=".5\\linewidth", fig.align='default', fig.asp=0.8}
+```{r, out.width="45%", fig.align='default', fig.asp=0.8}
 residualPlot(n1)
 influencePlot(n1)
 
@@ -301,8 +301,8 @@ summary(s1, times = 1:20)
 ### Estimates of G and H
 
 ```{r, out.width="45%", fig.align='default', fig.asp = .8}
-plot.Surv(rr.s)
-plot.Surv(rr.s, fn='surv')
+plot(rr.s)
+plot(rr.s, fn='surv')
 ```
 
 

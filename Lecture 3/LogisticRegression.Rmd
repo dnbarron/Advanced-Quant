@@ -2,7 +2,7 @@
 title: "Logistic regression"
 subtitle: "Binary, ordinal and multinomial"
 author: "David Barron"
-date: "Hilary Term 2017"
+date: "Hilary Term 2018"
 fontsize: 10pt
 output: 
   beamer_presentation:
@@ -24,7 +24,7 @@ options('digits' = 3)
 #options(scipen=5)
 library(car)
 library(ggplot2)
-library(foreign)
+library(haven)
 library(effects)
 ```
 
@@ -248,7 +248,7 @@ So, if we have an outcome variable with three categories, we first consider the 
 Three level variable called _apply_, with levels "unlikely", "somewhat likely", and "very likely", coded 1, 2, and 3, respectively, that we will use as our outcome variable. Three explanatory variables: _pared_, dummy variable indicating whether at least one parent has a graduate degree; _public_, dummy variable indicating whether undergrad college is public or private, and _gpa_, student's grade point average. 
 
 ```{r}
-dat <- read.dta("http://www.ats.ucla.edu/stat/data/ologit.dta")
+dat <- read_dta("https://stats.idre.ucla.edu/stat/data/ologit.dta")
 
 dat$apply <- ordered(dat$apply)
 dat$pared <- factor(dat$pared, labels = c('No', 'Yes'))
@@ -298,16 +298,17 @@ summary(o2)
 ### Effect plot
 
 ```{r, out.width="45%"}
-nd <- modelr::data_grid(dat, public, .model = o2)
+nd <- modelr::data_grid(dat, public, pared = 'No', gpa = 3)
 pred2 <- predict(o2, newdata = nd)$fit
 pred2 <- data.frame(pred2, public = c('Private', 'Public'))
 fit2 <- tidyr::gather(pred2, 'apply', 'prob', -public)
-fit2$apply <- ordered(fit2$apply, levels = c('unlikely', 'somewhat.likely', 'very.likely'))
+#fit2$apply <- ordered(fit2$apply, levels = c('unlikely', 'somewhat.likely', 'very.likely'))
+fit2$apply <- ordered(fit2$apply)
 
 pred1 <- predict(o1, newdata = nd)$fit
 pred1 <- data.frame(pred1, public = c('Private', 'Public'))
 fit1 <- tidyr::gather(pred1, 'apply', 'prob', -public)
-fit1$apply <- ordered(fit1$apply, levels = c('unlikely', 'somewhat.likely', 'very.likely'))
+fit1$apply <- ordered(fit1$apply)#, levels = c('unlikely', 'somewhat.likely', 'very.likely'))
 
 ggplot(fit1, aes(x = public, y = prob, colour = apply)) + geom_point(size = 3) +
   theme_bw() + labs(title = 'Proportional odds', x = NULL, y = 'Probability', colour = 'Apply') +
@@ -335,7 +336,7 @@ For example, the impact of variable $x_1$ (say, price) on choice of toothpaste b
 The data are 200 high school students.  Outcome variable is programme choice (general, academic or vocational). Explanatory variables are socio-economic status and writing test score.
 
 ```{r, size = 'scriptsize'}
-ml <- read.dta("http://www.ats.ucla.edu/stat/data/hsbdemo.dta")
+ml <- foreign::read.dta("https://stats.idre.ucla.edu/stat/data/hsbdemo.dta")
 library(nnet)
 ml$prog2 <- relevel(ml$prog, ref = 'academic')
 test <- multinom(prog2 ~ ses + write, data = ml)

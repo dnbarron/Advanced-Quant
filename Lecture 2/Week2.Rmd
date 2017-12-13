@@ -1,0 +1,120 @@
+---
+title: "Week 2 Practical Session"
+author: "David Barron"
+date: "Hilary Term 2018"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r options, echo=FALSE}
+library(knitr)
+opts_chunk$set(comment=NA, tidy=TRUE)
+```
+
+## Data analysis
+Let's have a look at the Canadian occupational prestige data.  This is a dataset that comes with the `car` package, so we can get access to it by using the `data(Prestige)` function.
+
+```{r data}
+library(car)
+library(effects)
+
+data(Prestige)
+head(Prestige)
+str(Prestige)
+
+hist(Prestige$income)
+```
+
+Let's look at some data analysis.  I will use the `update` function, which takes as its first argument an existing regression output and as its second, a modified formula.  The `.` means all the variables in the original formula.  It just saves a bit of typing; you can achieve the same result by using `lm` again if you prefer.
+
+```{r reg1, error=TRUE}
+l1<- lm(prestige ~ income + education, data=Prestige)
+summary(l1)
+
+
+l2 <- update(l1, . ~ . + type)
+summary(l2)
+
+anova(l1, l2)
+any(is.na(Prestige$type))
+```
+
+This is a common problem; there are some missing data in the `type` variable, so we can't compare the fit of these two regressions.  The solution is to re-fit the first regression with the same data as was used for the second.
+
+```{r miss}
+l1a <- update(l1, subset = !is.na(type))
+summary(l1a)
+
+anova(l1a, l2)
+```
+This uses update again, but this time I've used the `subset` option to restrict the data to those rows that don't have an NA in the `type` variable.  `!` is the *not* operator in R, while `is.na` is a function that returns `TRUE` for any row that is `NA`.  Now we can see that the `type` variabe improves fit.
+
+## Stepwise regression
+Does stepwise regression give us the same result? Yes!
+```{r step}
+l.step <- step(lm(prestige~1, data=Prestige, subset=!is.na(type)), scope=~income+education+type+women, dir='for')
+```
+
+Just to illustrate, we can also do this backwards:
+```{r backstep}
+cc.full <- lm(prestige ~ education+income+women+type, data=Prestige, subset=!is.na(type) )
+cc.back <- step(cc.full, dir='back')
+```
+Same result.
+
+## Diagnostics
+Let's look at some diagnostics.
+
+```{r diag}
+vif(l2)  # Looks OK
+
+ncvTest(l2)  # This looks OK
+
+spreadLevelPlot(l2) # Also looks OK
+
+crPlot(l2, 'education')  # Looks OK
+
+crPlot(l2, 'income')
+```
+
+There is some evidence of an issue with `income`, which isn't surprising.  Let's try a log transformation:
+
+```{r log}
+Prestige$log.income <- log(Prestige$income)
+
+l3 <- update(l2, . ~ . - income + log(income))
+summary(l3)
+```
+
+You can see this is a better fit by looking at the R^2^.  It's a bit more tricky to work out the effect of income, though. For a unit increase in log income we get a 10.5 increase in prestige. Let's look at an effect plot:
+
+```{r effect}
+plot(Effect(c('income', 'type'), l3), multiline=TRUE)
+```
+
+## Interaction effects
+Let's try an interaction between income and type:
+
+```{r inter}
+l4 <- update(l3, . ~ . + log(income):type)
+summary(l4)
+anova(l3, l4)
+```
+
+This is just about statistically significant.  Let's look at the effect plot again.
+
+```{r interplot}
+plot(Effect(c('income', 'type'), l4), multi=TRUE)
+```
+
+We can see that the effect of income on prestige is greater for blue collar occupations than it is for the other two.
+
+## Homework
+1. Load the data SLID in the `car` package.  
+2. Explore the data.
+3. Perform a regression using `wage` as the outcome variable and all the other variables in the data as explanatory variables.
+4. Test for normality of residuals.  If necessary, transform data and perform a new regression.
+5. Test for heterokedasticity.  Is any action needed? If so, what?
+6. Test for linearity of relationship between education and age and wages. Do either of these explanatory variable appear non-linear? If so, perform new regression as appropriate.
+7. Consider an interaction between education and sex. Does including this improve the model? If so, display graphically the estimated relationship between education and wage separately for men and women.

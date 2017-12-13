@@ -2,7 +2,7 @@
 title: "Further topics in linear regression"
 subtitle: "Part 1"
 author: "David Barron"
-date: "Hilary Term 2017"
+date: "Hilary Term 2018"
 fontsize: 10pt
 output: 
   beamer_presentation:
@@ -20,9 +20,10 @@ knitr::opts_chunk$set(comment =  '')
 options('show.signif.stars' = FALSE)
 options('digits' = 3)
 library(car)
-library(ggplot2)
-library(foreign)
+library(tidyverse)
+library(haven)
 library(effects)
+library(ggeffects)
 ```
 
 # Introduction
@@ -55,13 +56,21 @@ $\epsilon_i\sim \text{NID}(0,\sigma^2)$.
 
 **Fitted model**
 
-$$
-\hat{y}_i = b_0 + b_1 x_{1i} + b_2 x_{2i} + \dots + b_k x_{ki}
-+ e_i = \hat{y}_i + e_i,
-$$
 
+$$
+\hat{y}_i = b_0 + b_1 x_{1i} + b_2 x_{2i} + \dots + b_k x_{ki};
+$$
+$$
+ y_i = \hat{y}_i + e_i,
+$$
 where $b_j$ are estimates of the corresponding $\beta_j$, and the $e_i$
-are residuals.
+are residuals.  
+
+\emph{Ordinary Least Squares} (OLS) estimates of $b_j$ are those that minimize
+
+$$
+\sum_{i=1}^n (y_i - \hat{y}_i)^2 = \sum_{i=1}^n e_i^2
+$$
 
 # Modelling
 
@@ -86,7 +95,7 @@ We first perform a regression of $y$ on the continuous variable, $x_c$, only.
 ### Regression with continuous variable only
 
 ```{r, echo=FALSE}
-dta <- read.csv('dummyvars.csv')
+dta <- read_csv('dummyvars.csv')
 
 xfac <- ifelse(dta$x1 == 1,'A',
                ifelse(dta$x2 == 1,'B',
@@ -179,7 +188,10 @@ $$
 Data from the UK Labour Force Survey gives information about wages as well as age, gender, marital status and number of children.  Wages are tranformed to an hourly basis, and then logged because otherwise they would be very skewed.
 
 ```{r, echo=FALSE, message=FALSE, out.width='40%', warning=FALSE}
-lfs <- read.dta('C:\\Users\\dbarron\\Dropbox\\Teaching\\MSc teaching\\Advanced Quant\\data/lfs2002.dta')
+lfs <- read_dta('C:\\Users\\dbarron\\Dropbox\\Teaching\\MSc teaching\\Advanced Quant\\data/lfs2002.dta')
+
+lfs <- modify_if(lfs, is_character, factor)
+
 #summary(lfs)
 lfs$hourpay0 <- ifelse(lfs$hourpay <= 0, NA, lfs$hourpay)
 lfs$Loghourpay <- log(lfs$hourpay0)
