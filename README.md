@@ -1,5 +1,5 @@
 # Advanced-Quant
-Material associated with Advanced Quant class, January - March 2017
+Material associated with Advanced Quant class, 2018
 
 - Lecture 1: Linear Regression 1
 - Lecture 2: Linear Regression 2
