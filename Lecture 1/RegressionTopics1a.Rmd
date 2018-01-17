@@ -30,7 +30,14 @@ library(ggeffects)
 
 ### Introduction
 
-- Introduction to R
+This class will meet weekly for 16 weeks.  In odd-numbered weeks I will introduce a substantive topic in quantitative research methods in a 2-hour session.  In even-numbered weeks, I will run "labs", where the focus will be on putting the theory into practice using R.  These sessions will be 1 hour. 
+
+You can find the handouts (including the R code used to generate them) on my personal Weblearn site: https://weblearn.ox.ac.uk/x/MbYn1T.  Datasets that are used in demonstrations and in the labs are also here.  These should be available to anyone with an Oxford single sign on username and password, but let me know if you have any problems.
+
+The class will be assessed by means of an assignment, but that won't be due in until after the end of Trinity Term.  You will be required to carry out an analysis of a dataset of your choice using any of the methods that we have covered in the course.
+
+### Overview of weeks 1-4
+
 - Review of multiple regression
 - Modelling
     - Dummy variables
@@ -38,6 +45,7 @@ library(ggeffects)
 - Regression diagnostics
     - Normality of residuals
     - Collinearity
+    - Model selection
     - Outliers
     - Heteroskedasticity
     - Linearity
@@ -94,7 +102,7 @@ We first perform a regression of $y$ on the continuous variable, $x_c$, only.
 
 ### Regression with continuous variable only
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE}
 dta <- read_csv('dummyvars.csv')
 
 xfac <- ifelse(dta$x1 == 1,'A',
@@ -237,10 +245,10 @@ There are two additional parameter estimates, representing the interaction of se
 
 Category        |  No interaction           | With interaction
 ----------------|---------------------------|------------------------
-Unmarried men   | `r b1[1]`                 | `r b2[1]`
-Married men     | `r b1[1] + b1[5]`         | `r b2[1] + b2[5]`
-Unmarried women | `r b1[1] + b1[2]`         | `r b2[1] + b2[2]`
-Married women   | `r b1[1] + b1[2] + b1[5]` | `r b2[1] + b2[2] + b2[5] + b2[6]`
+Unmarried women | `r b1[1]`                 | `r b2[1]`
+Married women   | `r b1[1] + b1[5]`         | `r b2[1] + b2[5]`
+Unmarried men   | `r b1[1] + b1[2]`         | `r b2[1] + b2[2]`
+Married men     | `r b1[1] + b1[2] + b1[5]` | `r b2[1] + b2[2] + b2[5] + b2[6]`
 
 You can see that in the first column the difference between being married and unmarried is the same for men and women, but in the second column the differences are much bigger for men than for women.
 

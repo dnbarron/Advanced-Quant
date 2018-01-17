@@ -13,7 +13,7 @@ opts_chunk$set(comment=NA, tidy=TRUE)
 
 ## Introduction to R
 
-This is a brief introduction to basic R use. The document is also available at http://rpubs.com/DavidBarron/53541.
+This is a brief introduction to basic R use. The document is also available at https://weblearn.ox.ac.uk/x/MbYn1T.
 
 ### Arithmetic operators
 All the basic arithmetic operators work as you would expect:
