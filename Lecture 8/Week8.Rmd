@@ -58,7 +58,7 @@ houghtonFull.cor <-
                                      "app","bel","st","ima"))
 
 houghtonFull.cov <- 
- cor2cov(houghtonFull.cor, sds = c(0.939, 1.017, 0.937, 0.562, 0.760, 0.524, 0.585, 0.609, 
+ lavaan::cor2cov(houghtonFull.cor, sds = c(0.939, 1.017, 0.937, 0.562, 0.760, 0.524, 0.585, 0.609, 
                                    0.731, 0.711, 1.124, 1.001))
 print(houghtonFull.cov, digits = 1)
 ```
@@ -168,7 +168,7 @@ changFull.cor <-
  getCov(changLower.cor, names = c("aoc","coc","noc","apc","cpc","npc","orgti","occti"))
 
 changFull.cov <-
- cor2cov(changFull.cor, sds = c(1.04, 0.98, 0.97, 1.07, 0.78, 1.09, 1.40, 1.50))
+ lavaan::cor2cov(changFull.cor, sds = c(1.04, 0.98, 0.97, 1.07, 0.78, 1.09, 1.40, 1.50))
 changFull.cov
 
 # specify initial model with single indicators

@@ -36,7 +36,6 @@ library(dplyr)
 ### Outline
 
 - Count data methods
-    - Contingency tables
     - Poisson regression
     - Negative binomial regression
 - Event History Analysis
@@ -44,56 +43,13 @@ library(dplyr)
     - Continuous time models
     - Discrete time models
     
-# Contingency Tables
 
-### 2-dimensional contingency tables
-
-The simplest way of dealing with counts is to create a _contingency table_.  Here is a very simple example:
-
-\tiny
 ```{r}
 lfs <- haven::read_dta("C:/Users/dbarron/Dropbox/Teaching/MSc teaching/Advanced Quant/data/lfs2002.dta")
-lfs$numchild.a <- car::recode(lfs$numchild, "4:5=3")
+lfs$numchild.a <- car::recode(lfs$numchild, "4:5 = 3")
 lfs$ptime <- car::recode(lfs$ptime, "''=NA")
-
-CrossTable(lfs$ptime, lfs$numchild.a, expected = TRUE, 
-           prop.r = FALSE, prop.c = FALSE, prop.t = FALSE, chisq = TRUE,
-           dnn = c('Works part time', 'Number of children'))
 ```
 
-### Tests for association
-
-If there is no association between the two variables (i.e., they are independent), then the probability of a case falling into category row $i$ and category column $j$ is just determined by the probability of being in category $i$ multiplied by the probability of being in category $j$.
-$$
-\pi_{ij} = \pi_{i+}\pi_{+j}.
-$$
-
-### Testing independence
-
-We can convert this to a count by multiplying by the total number of cases in the table, $n.$ We can test the goodness of fit of this model, the null hypothesis being that any divergence from a perfect fit is due only to sampling error. Pearson's chi-squared statistic is:
-$$
-\chi^2 = \sum\sum \frac{(m_{ij} - \hat{m}_{ij})^2}{\hat{m}_{ij}},
-$$
-where $m_{ij}$ is the observed count in cell $ij$, and $\hat{m}_{ij}$ is the expected count under the null hypothesis.
-
-Alternatively, one can use a likelihood ratio chi-square ($G^2$):
-$$
-G^2 = 2 \sum\sum m_{ij} \log (m_{ij}/\hat{m}_{ij}).
-$$
-
-In both cases there are $(I-1)(J-1)$ degrees of freedom, where $I$ is the number of rows and $J$ is the number of columns in the table, respectively.
-
-
-### Extensions
-
-It is possible to extend this basic idea to higher dimensions of tables.  There are also methods that can be used for ordinal variables.  Graphical methods are often useful for showing more detail about the nature of the association.
-
-```{r, fig.asp=.7}
-xt2a <- xtabs(~ptime + numchild.a, lfs)
-
-mosaicplot(xt2a, shade=TRUE, main=NULL, xlab = 'Works part time', ylab = 'Number of children')
-
-```
 
 # Count regression methods
 
@@ -176,7 +132,7 @@ The Poisson model is based on quite stringent assumptions.  In our example, for 
 
 \tiny
 ```{r}
-n1 <- MASS::glm.nb(FND ~ poly(N, 2, raw = TRUE) + LAGF + AFL + NEWDEAL + TAFTH + AFLCIO + DEP, 
+n1 <- MASS::glm.nb(FND ~ poly(N, 2, raw = TRUE) + LAGF + AFL + NEWDEAL + TAFTH + AFLCIO + DEP,
                    data = union)
 summary(n1)
 ```

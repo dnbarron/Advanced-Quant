@@ -53,13 +53,19 @@ This uses update again, but this time I've used the `subset` option to restrict 
 ## Stepwise regression
 Does stepwise regression give us the same result? Yes!
 ```{r step}
-l.step <- step(lm(prestige~1, data=Prestige, subset=!is.na(type)), scope=~income+education+type+women, dir='for')
+l.step <- step(lm(prestige ~ 1, data = Prestige, 
+               subset = !is.na(type)), 
+               scope = ~ income + education + type + women, 
+               dir = 'for')
 ```
 
 Just to illustrate, we can also do this backwards:
 ```{r backstep}
-cc.full <- lm(prestige ~ education+income+women+type, data=Prestige, subset=!is.na(type) )
-cc.back <- step(cc.full, dir='back')
+cc.full <- lm(prestige ~ education + income + women + type, 
+              data=Prestige,
+              subset=!is.na(type) )
+
+cc.back <- step(cc.full, dir = 'back')
 ```
 Same result.
 
@@ -81,7 +87,7 @@ crPlot(l2, 'income')
 There is some evidence of an issue with `income`, which isn't surprising.  Let's try a log transformation:
 
 ```{r log}
-Prestige$log.income <- log(Prestige$income)
+#Prestige$log.income <- log(Prestige$income)
 
 l3 <- update(l2, . ~ . - income + log(income))
 summary(l3)

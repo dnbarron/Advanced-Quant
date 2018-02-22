@@ -1,7 +1,7 @@
 ---
 title: "Multilevel Models"
 author: "David Barron"
-date: "Hilary Term 2017"
+date: "Trinity Term 2018"
 fontsize: 10pt
 output: 
   beamer_presentation:
@@ -16,11 +16,11 @@ output:
 
 ```{r setup, echo=FALSE, message=FALSE, warning=FALSE}
 knitr::opts_knit$set(width = 100)
-knitr::opts_chunk$set(comment =  '', echo=FALSE)
-knitr::opts_chunk$set(fig.width = 6, fig.asp = 0.618, fig.align = 'center', out.width = '80%')
-options('show.signif.stars'=FALSE)
-options('digits' = 3)
-#options(scipen=5)
+knitr::opts_chunk$set(comment = "", echo = FALSE)
+knitr::opts_chunk$set(fig.width = 6, fig.asp = 0.618, fig.align = "center", out.width = "80%")
+options("show.signif.stars" = FALSE)
+options("digits" = 3)
+# options(scipen=5)
 ## You need to have these packages installed. New ones probably arm and merTools
 library(ggplot2)
 library(foreign)
@@ -45,16 +45,15 @@ For example, we might be interested in the relationship between the socio-econom
 ### Example data
 
 ```{r}
-#hsb <- haven::read_dta("C:\\Users\\dbarron\\Dropbox\\Teaching\\MSc teaching\\Advanced Quant\\data/hsb12.dta")
-hsb$gender <- factor(hsb$female, labels = c("male","female"))
+# hsb <- haven::read_dta("C:\\Users\\dbarron\\Dropbox\\Teaching\\MSc teaching\\Advanced Quant\\data/hsb12.dta")
+hsb$gender <- factor(hsb$female, labels = c("male", "female"))
 ix <- hsb$schid %in% c(1224, 3716, 4410, 5650, 5937, 9198)
 plot.dt <- subset(hsb, ix)
 
 # Plot on slide 3
 
-ggplot(plot.dt, aes(y = mathach, x = ses)) + geom_point(aes(colour = gender)) + 
+ggplot(plot.dt, aes(y = mathach, x = ses)) + geom_point(aes(colour = gender)) +
   geom_smooth(method = "lm") + facet_wrap(~ schid) + theme_bw()
-
 ```
 
 ### Levels of measurement
@@ -193,8 +192,8 @@ school mean socioeconomic status and school sector (level-2 variables).
 
 \footnotesize
 ```{r}
-m1 <- lmer(mathach ~ 1|schid, data = hsb)
-#lattice::dotplot(ranef(m1))
+m1 <- lmer(mathach ~ 1 | schid, data = hsb)
+# lattice::dotplot(ranef(m1))
 display(m1)
 ```
 
@@ -233,7 +232,7 @@ $$
 \footnotesize
 
 ```{r}
-m2 <- lmer(mathach ~ meanses + (1|schid), data = hsb)
+m2 <- lmer(mathach ~ meanses + (1 | schid), data = hsb)
 display(m2)
 ```
 
@@ -306,7 +305,7 @@ fit <- fitted(m3)
 fit.dta <- data.frame(model.frame(m3), fit)
 sub.fit <- filter(fit.dta, schid == 4511 | schid == 4523 | schid == 4530 | schid == 4642)
 gg <- ggplot(sub.fit, aes(x = cses, y = mathach)) + geom_point() + facet_wrap(~ schid)
-gg + geom_line(aes(x = cses, y = fit), colour = 'red')
+gg + geom_line(aes(x = cses, y = fit), colour = "red")
 ```
 
 ### Level-1 and Level-2 variables
@@ -350,7 +349,7 @@ As can be seen, there are five fixed effects and three random effects.
 
 
 ```{r}
-hsb$schtype <- factor(hsb$schtype, labels = c('public', 'private') )
+hsb$schtype <- factor(hsb$schtype, labels = c("public", "private"))
 
 m4 <- lmer(mathach ~ meanses * cses + schtype * cses + (1 + cses | schid), data = hsb)
 display(m4)
@@ -367,26 +366,30 @@ Multilevel models aren't restricted to linear regression; exactly the same logic
 ### Example
 
 ```{r}
-nurse <- foreign::read.dta('C:\\Users\\dbarron\\Dropbox\\Nurses survey\\allnursedata.dta')
+nurse <- foreign::read.dta("C:\\Users\\dbarron\\Dropbox\\Nurses survey\\allnursedata.dta")
 lv <- levels(nurse$P6)
 leave <- ifelse(nurse$P6 == lv[4], 0,
-            ifelse(nurse$P6 == lv[5], NA, 1))
-fam <- factor(ifelse(nurse$J6 == 'Yes', 'yes', 'no'))
-valued <- factor(ifelse(nurse$J2 == 'Sometimes'| nurse$J2 == 'No', 'Sometimes or no', 'yes'))
+  ifelse(nurse$P6 == lv[5], NA, 1)
+)
+fam <- factor(ifelse(nurse$J6 == "Yes", "yes", "no"))
+valued <- factor(ifelse(nurse$J2 == "Sometimes" | nurse$J2 == "No", "Sometimes or no", "yes"))
 age <- nurse$P2
-sex <- factor(ifelse(nurse$P1 == 1,'male', 'female'))
+sex <- factor(ifelse(nurse$P1 == 1, "male", "female"))
 
-g1 <- glmer(leave ~ fam + valued + age + sex + INN_OUT + (1|HOSPITAL), data = nurse, 
-             family = binomial, subset = age >= 18)
+g1 <- glmer(
+  leave ~ fam + valued + age + sex + INN_OUT + (1 | HOSPITAL), data = nurse,
+  family = binomial, subset = age >= 18
+)
 
 display(g1)
-
 ```
 
 
 ### Effect plot
 
 ```{r}
-plot(Effect('age', g1), rug = FALSE, ci.style = 'none', xlab = 'Age', 
-     ylab = 'Probability of leaving', main = 'Effect plot')
+plot(
+  Effect("age", g1), rug = FALSE, ci.style = "none", xlab = "Age",
+  ylab = "Probability of leaving", main = "Effect plot"
+)
 ```

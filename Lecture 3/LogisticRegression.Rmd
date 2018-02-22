@@ -12,6 +12,8 @@ output:
     keep_tex: false
     df_print: kable
     fig_caption: false
+ #   includes: 
+#      in_header: nup.tex
 ---
 
 
@@ -143,7 +145,7 @@ In this example, we can see that the effect of family income varies depending on
 
 ```{r}
 plot(Effect(c('k5', 'inc'), l1, xlevels = list(k5 = c(0, 1, 2, 3))), type = 'response', rug = FALSE,
-     ci.style = 'none', lines = c(1, 2, 6, 5),
+      lines = c(1, 2, 6, 5),
      main = 'Effect plot', xlab = 'Family income ($000s)', ylab = 'Probability of lfp',
      multiline = TRUE, x.var = 'inc',
      colors = c('black', 'red', 'green', 'blue'), lwd = 3)
@@ -241,11 +243,14 @@ $$
 \text{logit}(p_1) = 1 - (\eta(x) + \alpha_1 + \alpha_2 + \dots + \alpha_{m-2})
 \end{gathered}
 $$
-So, if we have an outcome variable with three categories, we first consider the log odds of being in the highest category against being in either of the other two categories, then the log odds of being in the middle category agains being in the lowest category.  The linear predictor is constrained to be the same in each case, with a threshold parameter (the $\alpha$s) being estimated for each one.
+So, if we have an outcome variable with three categories, we first consider the log odds of being in the highest category against being in either of the other two categories, then the log odds of being in the middle category against being in the lowest category.  The linear predictor is constrained to be the same in each case, with a threshold parameter (the $\alpha$s) being estimated for each one.
 
 ### Example
 
-Three level variable called _apply_, with levels "unlikely", "somewhat likely", and "very likely", coded 1, 2, and 3, respectively, that we will use as our outcome variable. Three explanatory variables: _pared_, dummy variable indicating whether at least one parent has a graduate degree; _public_, dummy variable indicating whether undergrad college is public or private, and _gpa_, student's grade point average. 
+Three level variable called _apply_, with levels "unlikely", "somewhat likely", and "very likely", coded 0, 1, and 2, respectively, that we will use as our outcome variable. Three explanatory variables: _pared_, dummy variable indicating whether at least one parent has a graduate degree; _public_, dummy variable indicating whether undergrad college is public or private, and _gpa_, student's grade point average. 
+
+
+### Scatterplot matrix
 
 ```{r}
 dat <- read_dta("https://stats.idre.ucla.edu/stat/data/ologit.dta")
@@ -261,6 +266,7 @@ ggplot(dat, aes(x = apply, y = gpa)) + theme_bw() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 ```
 
+
 ### Regression example
 
 \footnotesize
@@ -272,9 +278,10 @@ summary(o1)
 
 ### Effect plot
 
-```{r}
-plot(Effect(c('pared', 'gpa'), o1), rug = FALSE, ci.style = 'none', main = 'Effect plot',
-     lwd = 3, line = c(1, 2, 4))
+```{r, fig.width=7}
+plot(Effect(c('pared', 'gpa'), o1), confint = FALSE, main = '',
+     lines = list(multiline = TRUE, lwd = 3, lty = c(1, 2, 4)),
+     axes = list(x = list(rug = FALSE)))
 ```
 
 ### Test assumption
@@ -345,7 +352,9 @@ summary(test)
 
 ### Effect plot
 
-```{r}
-plot(Effect(c('ses', 'write'), test), rug = FALSE, ci.style = 'none', line = c(1, 2, 4),
-     main = 'Effect plot')
+```{r, fig.width = 8}
+plot(Effect(c('ses', 'write'), test), rug = FALSE, line = c(1, 2, 4),
+     main = '', confint = FALSE,
+     axes = list(x = list(rug = FALSE)),
+     lines = list(lwd = 3, lty = c(1, 2, 4)))
 ```

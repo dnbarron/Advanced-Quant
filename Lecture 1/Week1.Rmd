@@ -13,7 +13,7 @@ opts_chunk$set(comment=NA, tidy=TRUE)
 
 ## Introduction to R
 
-This is a brief introduction to basic R use. The document is also available at https://weblearn.ox.ac.uk/x/MbYn1T.
+This is a brief introduction to basic R use. The document is also available at http://users.ox.ac.uk/~jesu0073/.
 
 ### Arithmetic operators
 All the basic arithmetic operators work as you would expect:
@@ -194,7 +194,7 @@ summary(lm1)
 ```
 
 # Homework
-Data are in the `data` directory on Weblearn: https://weblearn.ox.ac.uk/x/MbYn1T.
+Data are in the `data` directory here: http://users.ox.ac.uk/~jesu0073/data/.
 
 1. Import the dataset PeruMicroWeek1.csv. Review the dataset by looking at its structure, header, and summary.
 2. Calculate the means and standard deviations of Average Loan Balance (avgloanbal) and Percentage of Female Borrowers (femaleperc) in the dataset. 

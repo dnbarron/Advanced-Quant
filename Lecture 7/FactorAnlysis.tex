@@ -8,17 +8,17 @@
 \usepackage{ifxetex,ifluatex}
 \usepackage{fixltx2e} % provides \textsubscript
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
 \else % if luatex or xelatex
-\ifxetex
-\usepackage{mathspec}
-\else
-\usepackage{fontspec}
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
 \fi
-\defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
-\fi
-\usetheme{Madrid}
+\usetheme[]{Madrid}
 % use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 % use microtype if available
@@ -27,6 +27,12 @@
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
 \newif\ifbibliography
+\hypersetup{
+            pdftitle={Exploratory Factor Analysis},
+            pdfauthor={David Barron},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
 \usepackage{longtable,booktabs}
 \usepackage{caption}
 % These lines are needed to make table captions work with longtable:
@@ -48,34 +54,34 @@
 \raggedbottom
 
 \AtBeginPart{
-\let\insertpartnumber\relax
-\let\partname\relax
-\frame{\partpage}
+  \let\insertpartnumber\relax
+  \let\partname\relax
+  \frame{\partpage}
 }
 \AtBeginSection{
-\ifbibliography
-\else
-\let\insertsectionnumber\relax
-\let\sectionname\relax
-\frame{\sectionpage}
-\fi
+  \ifbibliography
+  \else
+    \let\insertsectionnumber\relax
+    \let\sectionname\relax
+    \frame{\sectionpage}
+  \fi
 }
 \AtBeginSubsection{
-\let\insertsubsectionnumber\relax
-\let\subsectionname\relax
-\frame{\subsectionpage}
+  \let\insertsubsectionnumber\relax
+  \let\subsectionname\relax
+  \frame{\subsectionpage}
 }
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
 \providecommand{\tightlist}{%
-\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{0}
 
 \title{Exploratory Factor Analysis}
 \author{David Barron}
-\date{Hilary Term 2017}
+\date{Trinity Term 2018}
 
 \begin{document}
 \frame{\titlepage}
@@ -384,7 +390,7 @@ practice often performs quite well.
 
 \end{frame}
 
-\begin{frame}{Parallel analysis}
+\begin{frame}[fragile]{Parallel analysis}
 
 This method compares eigenvalues obtained from the sample correlation
 matrix with eigenvalues obtained from random data. Random data is
@@ -393,6 +399,26 @@ to obtain a correlation matrix. The random data eigenvalues are
 typically averages over a number of simulations. The number of
 eigenvalues from the sample data that are larger than the corresponding
 eigenvalues from random data is the number of common factors.
+
+\begin{verbatim}
+The estimated weights for the factor scores are probably incorrect.  Try a different factor extraction method.
+The estimated weights for the factor scores are probably incorrect.  Try a different factor extraction method.
+\end{verbatim}
+
+\begin{verbatim}
+Warning in fac(r = r, nfactors = nfactors, n.obs = n.obs, rotate =
+rotate, : A loading greater than abs(1) was detected. Examine the loadings
+carefully.
+\end{verbatim}
+
+\begin{verbatim}
+The estimated weights for the factor scores are probably incorrect.  Try a different factor extraction method.
+\end{verbatim}
+
+\begin{verbatim}
+Warning in fac(r = r, nfactors = nfactors, n.obs = n.obs, rotate =
+rotate, : An ultra-Heywood case was detected. Examine the results carefully
+\end{verbatim}
 
 \includegraphics[width=0.65\linewidth]{FactorAnlysis_files/figure-beamer/unnamed-chunk-4-1}
 
@@ -405,6 +431,7 @@ loadings, then it is possible to compare the goodness of fit of models
 with different numbers of common factors using a likelihood ratio test.
 
 \textbf{One-factor v. two-factor} \tiny
+<div class="kable-table">
 
 \begin{longtable}[]{@{}lrrrrrrrrrr@{}}
 \toprule
@@ -423,6 +450,7 @@ efa0 & 27 & 157.1 & 8 & 140 & 0 & 100.03 & 94.6 & 0 & 14.0 &
 \normalsize
 
 \textbf{Two-factor v. three-factor} \tiny
+<div class="kable-table">
 
 \begin{longtable}[]{@{}lrrrrrrrrrr@{}}
 \toprule
@@ -451,7 +479,7 @@ error of approximation):
 Number of factors & RMSEA\tabularnewline
 \midrule
 \endhead
-1 & 0.024\tabularnewline
+1 & 0.158\tabularnewline
 2 & 0\tabularnewline
 3 & 0\tabularnewline
 \bottomrule
@@ -553,14 +581,14 @@ The harmonic number of observations is  200 with the empirical chi square  5.47 
 The total number of observations was  200  with Likelihood Chi Square =  17.1  with prob <  0.58 
 
 Tucker Lewis Index of factoring reliability =  1
-RMSEA index =  0  and the 90 % confidence intervals are  NA 0.055
+RMSEA index =  0  and the 90 % confidence intervals are  0 0.056
 BIC =  -83.6
 Fit based upon off diagonal values = 1
 Measures of factor score adequacy             
-                                                ML1  ML2
-Correlation of scores with factors             0.95 0.92
-Multiple R square of scores with factors       0.91 0.86
-Minimum correlation of possible factor scores  0.81 0.71
+                                                   ML1  ML2
+Correlation of (regression) scores with factors   0.95 0.92
+Multiple R square of scores with factors          0.91 0.86
+Minimum correlation of possible factor scores     0.81 0.71
 \end{verbatim}
 
 \end{frame}
@@ -614,7 +642,7 @@ Proportion Var 0.157 0.116 0.113
 Cumulative Var 0.157 0.274 0.387
 \end{verbatim}
 
-RMSEA: 0.004
+RMSEA: 0.061
 
 \end{frame}
 

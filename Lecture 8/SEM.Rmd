@@ -1,7 +1,7 @@
 ---
 title: "Structural Equation Models"
 author: "David Barron"
-date: "Hilary Term 2017"
+date: "Trinity Term 2018"
 output:
   beamer_presentation:
     df_print: kable
@@ -70,7 +70,7 @@ kabcFull.cor <- getCov(kabcLower.cor, names = c("hm","nr","wo","gc","tr","sm","m
 # display the correlations
 #kabcFull.cor
 # add the standard deviations and convert to covariances
-kabcFull.cov <- cor2cov(kabcFull.cor, sds = c(3.40, 2.40, 2.90, 2.70, 2.70, 4.20, 2.80, 3.00))
+kabcFull.cov <- lavaan::cor2cov(kabcFull.cor, sds = c(3.40, 2.40, 2.90, 2.70, 2.70, 4.20, 2.80, 3.00))
 #kabcFull.cov
 
 kabc.model <- '

@@ -2,6 +2,7 @@
 ### Solutions to week 1 homework
 ################################################
 
+# Set working director to make it easier to load data
 setwd('C:\\Users\\dbarron\\Dropbox\\Advanced Quant')
 # Import data
 
@@ -31,20 +32,27 @@ with(peru, sd(femaleperc, na.rm = TRUE))
 
 library(dplyr)
 
-peru %>% summarise(mean(avgloanbal), sd(avgloanbal),
-                   mean(femaleperc, na.rm = TRUE), sd(femaleperc, na.rm = TRUE))
+peru %>% summarise_all(funs(mean, sd), na.rm = TRUE)
 
-#summarise(peru, mean(avgloanbal), sd(avgloanbal), mean(femaleperc, na.rm = TRUE), 
-#          sd(femaleperc, na.rm = TRUE))
 
 # Histogram
 
 hist(peru$avgloanbal, xlab = 'Average loan balance')
 
+lapply(peru, hist)
+
 # Scatter plot
 
 plot(selfsuff ~ I(avgloanbal / 10000), data = peru, ylim = c(0.7, 1.8))
 abline(lm(selfsuff ~ I(avgloanbal / 10000), data = peru))
+
+## Using ggplot2
+
+library(ggplot2)
+
+ggplot(peru, aes(x = avgloanbal, y = selfsuff)) +
+  geom_point() +
+  geom_smooth(method = 'lm')
 
 # Regression
 
@@ -53,3 +61,7 @@ summary(lm1)
 
 # avgloanbal is statistically significant
 # 
+library(car)
+car::vif(lm1)
+
+qqPlot(lm1)

@@ -8,17 +8,17 @@
 \usepackage{ifxetex,ifluatex}
 \usepackage{fixltx2e} % provides \textsubscript
 \ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
-\usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
 \else % if luatex or xelatex
-\ifxetex
-\usepackage{mathspec}
-\else
-\usepackage{fontspec}
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
 \fi
-\defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
-\fi
-\usetheme{Madrid}
+\usetheme[]{Madrid}
 % use upquote if available, for straight quotes in verbatim environments
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 % use microtype if available
@@ -27,6 +27,12 @@
 \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
 }{}
 \newif\ifbibliography
+\hypersetup{
+            pdftitle={Further topics in linear regression},
+            pdfauthor={David Barron},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
 \usepackage{color}
 \usepackage{fancyvrb}
 \newcommand{\VerbBar}{|}
@@ -36,37 +42,37 @@
 \usepackage{framed}
 \definecolor{shadecolor}{RGB}{248,248,248}
 \newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
-\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
-\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{{#1}}}
-\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
-\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
-\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{{#1}}}
-\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
-\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
-\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{{#1}}}
-\newcommand{\ImportTok}[1]{{#1}}
-\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
-\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{{#1}}}
-\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
-\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{{#1}}}
-\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{{#1}}}}
-\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{{#1}}}}
-\newcommand{\BuiltInTok}[1]{{#1}}
-\newcommand{\ExtensionTok}[1]{{#1}}
-\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{{#1}}}}
-\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{{#1}}}
-\newcommand{\RegionMarkerTok}[1]{{#1}}
-\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{{#1}}}}}
-\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{{#1}}}
-\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{{#1}}}}
-\newcommand{\NormalTok}[1]{{#1}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
 \usepackage{longtable,booktabs}
 \usepackage{caption}
 % These lines are needed to make table captions work with longtable:
@@ -88,35 +94,35 @@
 \raggedbottom
 
 \AtBeginPart{
-\let\insertpartnumber\relax
-\let\partname\relax
-\frame{\partpage}
+  \let\insertpartnumber\relax
+  \let\partname\relax
+  \frame{\partpage}
 }
 \AtBeginSection{
-\ifbibliography
-\else
-\let\insertsectionnumber\relax
-\let\sectionname\relax
-\frame{\sectionpage}
-\fi
+  \ifbibliography
+  \else
+    \let\insertsectionnumber\relax
+    \let\sectionname\relax
+    \frame{\sectionpage}
+  \fi
 }
 \AtBeginSubsection{
-\let\insertsubsectionnumber\relax
-\let\subsectionname\relax
-\frame{\subsectionpage}
+  \let\insertsubsectionnumber\relax
+  \let\subsectionname\relax
+  \frame{\subsectionpage}
 }
 
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{6pt plus 2pt minus 1pt}
 \setlength{\emergencystretch}{3em}  % prevent overfull lines
 \providecommand{\tightlist}{%
-\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 \setcounter{secnumdepth}{0}
 
 \title{Further topics in linear regression}
 \subtitle{Part 2}
 \author{David Barron}
-\date{Hilary Term 2017}
+\date{Hilary Term 2018}
 
 \begin{document}
 \frame{\titlepage}
@@ -449,7 +455,7 @@ R = \frac{\text{SSE}_2}{\text{SSE}_1}.
 
 \begin{Shaded}
 \begin{Highlighting}[]
-\KeywordTok{gqtest}\NormalTok{(inter1, }\DataTypeTok{order.by =} \NormalTok{int1.fit)}
+\KeywordTok{gqtest}\NormalTok{(inter1, }\DataTypeTok{order.by =}\NormalTok{ int1.fit)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -459,6 +465,7 @@ R = \frac{\text{SSE}_2}{\text{SSE}_1}.
 
 data:  inter1
 GQ = 4, df1 = 100, df2 = 100, p-value = 9e-13
+alternative hypothesis: variance increases from segment 1 to 2
 \end{verbatim}
 
 \end{frame}
@@ -739,7 +746,7 @@ z^*_i = w'_i \alpha + \epsilon_i.
 \begin{itemize}
 \tightlist
 \item
-  \(y_i =\) DV from outcome equation;
+  \(y_i =\) DV of outcome equation;
 \item
   \(x'_i =\) vector of covariates for unit \(i\) for outcome equation;
 \item
@@ -747,6 +754,10 @@ z^*_i = w'_i \alpha + \epsilon_i.
 \item
   \(u_i =\) random disturbance for unit \(i\) for outcome equation;
 \end{itemize}
+
+\[
+y_i = x'_i \beta + u_i
+\]
 
 \end{frame}
 
@@ -763,8 +774,8 @@ z_i = \left\{ \begin{aligned}
 \]
 
 So, we first estimate the probability that \(z_i = 1,\) and use a
-transformation of this predicted probability as an independent variable
-in the outcome equation.
+transformation of this predicted probability (known as the Mills ratio)
+as an independent variable in the outcome equation.
 
 \end{frame}
 
@@ -823,28 +834,27 @@ F-statistic:  201 on 2 and 1340 DF,  p-value: <2e-16
 \begin{verbatim}
 --------------------------------------------
 Tobit 2 model (sample selection model)
-Maximum Likelihood estimation
-Newton-Raphson maximisation, 5 iterations
-Return code 2: successive function values within tolerance limit
-Log-Likelihood: -1057 
+2-step Heckman / heckit estimation
 2000 observations (657 censored and 1343 observed)
-10 free parameters (df = 1990)
+11 free parameters (df = 1990)
 Probit selection equation:
-            Estimate Std. error t value Pr(> t)
-(Intercept) -2.48770    0.19248  -12.92 < 2e-16
-married      0.46293    0.07203    6.43 1.3e-10
-children     0.47002    0.02808   16.74 < 2e-16
-education    0.05465    0.01096    4.99 6.1e-07
-age          0.03504    0.00423    8.29 < 2e-16
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept) -2.46737    0.19256  -12.81  < 2e-16
+married      0.43086    0.07421    5.81  7.4e-09
+children     0.44732    0.02874   15.56  < 2e-16
+education    0.05836    0.01097    5.32  1.2e-07
+age          0.03472    0.00423    8.21  3.9e-16
 Outcome equation:
-            Estimate Std. error t value Pr(> t)
-(Intercept)  2.19621    0.04761   46.13  <2e-16
-education    0.04167    0.00238   17.51  <2e-16
-age          0.00836    0.00092    9.09  <2e-16
+            Estimate Std. Error t value Pr(>|t|)
+(Intercept)  2.10581    0.05781    36.4   <2e-16
+education    0.04303    0.00249    17.2   <2e-16
+age          0.00950    0.00102     9.3   <2e-16
+Multiple R-Squared:0.26,    Adjusted R-Squared:0.258
    Error terms:
-      Estimate Std. error t value Pr(> t)
-sigma  0.26192    0.00611   42.88  <2e-16
-rho    0.47822    0.05768    8.29  <2e-16
+              Estimate Std. Error t value Pr(>|t|)
+invMillsRatio    0.192      0.028    6.85  9.6e-12
+sigma            0.276         NA      NA       NA
+rho              0.696         NA      NA       NA
 --------------------------------------------
 \end{verbatim}
 

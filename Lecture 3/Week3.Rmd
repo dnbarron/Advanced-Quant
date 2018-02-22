@@ -1,7 +1,7 @@
 ---
 title: "Week 3 Practical Session"
 author: "David Barron"
-date: "Hilary Term 2017"
+date: "Hilary Term 2018"
 output: pdf_document
 ---
 
@@ -41,7 +41,9 @@ This can be done using an effect plot. Remember that the impact of any explanato
 
 The plots show the relatioship between household income and the probability of being in the labour force separately for the four different combinations of the two college education variables.
 ```{r effect}
-plot(Effect(c('inc', 'wc','hc'), b1, typical=median))
+plot(Effect(c('inc', 'wc','hc'), b1, typical=median), confint = FALSE,
+     multiline = TRUE,
+     axes = list(x = list(rug = TRUE)))
 ```
 
 ## Multinomial logit
@@ -65,8 +67,13 @@ m2 <- update(m1, . ~ . - region)
 
 summary(m2, Wald=TRUE)
 anova(m2,m1)
-plot(Effect('hincome', m2, xlevels=list(hincome=50)))
-plot(Effect('children',  m2))
+plot(Effect('hincome', m2, 
+            xlevels = list(hincome = 50)), confint = FALSE,
+     lines = list(multiline = TRUE),
+     axes = list(x = list(rug = FALSE)))
+plot(Effect('children',  m2), confint = FALSE,
+     lines = list(multiline = TRUE),
+     axes = list(x = list(rug = FALSE)))
 ```
 
 Compare to binary logit for full time, with part time treated as missing.
@@ -78,7 +85,8 @@ You can see that these are reasonably similar.  We could add an interaction.
 
 ```{r interact}
 m3 <- update(m2, . ~ . + hincome:children)
-plot(Effect(c('hincome','children'), m3, xlevels=list(hincome=50)))
+plot(Effect(c('hincome','children'), m3, xlevels = list(hincome = 50)), confint = FALSE,
+     axes = list(x = list(rug = FALSE)))
 Anova(m3)
 ```
 
@@ -91,10 +99,14 @@ Womenlf$partic <- ordered(Womenlf$partic,levels=c('not.work','parttime','fulltim
 o1 <- polr(partic ~ hincome + children, data=Womenlf, Hess = TRUE)
 
 summary(o1)
-plot(Effect('hincome', o1, xlevels=list(hincome=50)))
-plot(Effect('children', o1))
+plot(Effect('hincome', o1, xlevels=list(hincome = 50)), confint = FALSE,
+     axes = list(x = list(rug = FALSE)))
+plot(Effect('children', o1),  confint = FALSE,
+     axes = list(x = list(rug = FALSE)))
 o2 <- update(o1, . ~ . + hincome:children)
-plot(Effect(c('hincome','children'), o2, xlevels=list(hincome=50)))
+plot(Effect(c('hincome','children'), o2, xlevels = list(hincome = 50)),
+      confint = FALSE,
+     axes = list(x = list(rug = FALSE)))
 
 AIC(o1)
 AIC(m2)
