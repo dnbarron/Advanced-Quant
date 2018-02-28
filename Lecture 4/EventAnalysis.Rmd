@@ -12,6 +12,8 @@ output:
     keep_tex: false
     df_print: kable
     fig_caption: false
+#    includes: 
+#      in_header: nup.tex
 ---
 
 
