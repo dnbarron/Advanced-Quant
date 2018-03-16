@@ -1,0 +1,41 @@
+---
+title: "Advanced Quantitative Research Methods"
+author: "David Barron"
+date: "2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Hilary Term
+
+## Lecture 1
+
+* [Handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%201/RegressionTopics1a.pdf)
+* [Handout markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%201/RegressionTopics1a.Rmd)
+* [Exercises handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%201/Week1.pdf)
+* [Exercises markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%201/Week1.Rmd)
+
+## Lecture 2
+
+* [Handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%202/FurtherTopicsinRegression2.pdf)
+* [Handout markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%202/FurtherTopicsinRegression2.Rmd)
+* [Exercises handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%202/Week2.pdf)
+* [Exercises markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%202/Week2.Rmd)
+
+## Lecture 3
+
+* [Handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%203/LogisticRegression.pdf)
+* [Handout markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%203/LogisticRegression.Rmd)
+* [Exercises handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%203/Week3.pdf)
+* [Exercises markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%203/Week3.Rmd)
+
+
+## Lecture 4
+
+* [Handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%204/EventAnalysis.pdf)
+* [Handout markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%204/EventAnalysis.Rmd)
+* [Exercises handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%204/Week4.pdf)
+* [Exercises markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%204/Week4.Rmd)
