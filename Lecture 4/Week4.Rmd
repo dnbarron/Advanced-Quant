@@ -40,8 +40,10 @@ A variable like this could be analysed using linear regression, but it's not har
 
 ```{r poisson}
 p1 <- glm(interlocks ~ log(assets) + nation + sector, family = poisson, data = Ornstein)
+l1 <- lm(log(interlocks + 0.5) ~ log(assets) + nation + sector, data = Ornstein)
 summary(p1)
 Anova(p1)
+compareCoefs(p1, l1)
 
 plot(Effect('assets', p1, xlevels = list(assets = 50)), type = 'response')
 plot(Effect('nation', p1), type = 'response')
@@ -122,6 +124,9 @@ plot(r.surv, strata=Rossi.long$employed, fn = 'surv', conf = NULL)
 This suggests that people in employment are less likely to be arrested.  Let's try a regression.
 
 ```{r regressions}
+mod0 <- phreg(Surv(Rossi$week, Rossi$arrest) ~ age, Rossi, shape = 1)
+mod0L <- phreg(r.surv ~ age, Rossi.long, shape = 1)
+
 mod1 <- phreg(r.surv ~ employed, data = Rossi.long, shape = 1)
 summary(mod1)
 mod2  <- phreg(r.surv ~ strata(employed), data = Rossi.long)

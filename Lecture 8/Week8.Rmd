@@ -1,7 +1,7 @@
 ---
 title: "Week 8 Practical Session"
 author: "David Barron"
-date: "Hilary Term 2017"
+date: "Trinity Term 2018"
 output: pdf_document
 ---
 

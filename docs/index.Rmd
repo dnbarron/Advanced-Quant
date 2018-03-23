@@ -39,3 +39,31 @@ knitr::opts_chunk$set(echo = TRUE)
 * [Handout markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%204/EventAnalysis.Rmd)
 * [Exercises handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%204/Week4.pdf)
 * [Exercises markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%204/Week4.Rmd)
+
+## Lecture 5
+
+* [Handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%205/MultilevelModels.pdf)
+* [Handout markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%205/MultilevelModels.Rmd)
+* [Exercises handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%205/Week5.pdf)
+* [Exercises markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%205/Week5.Rmd)
+
+## Lecture 6
+
+* [Handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%206/LongitudinalAnalysis.pdf)
+* [Handout markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%206/LongitudinalAnalysis.Rmd)
+* [Exercises handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%206/Week6.pdf)
+* [Exercises markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%206/Week6.Rmd)
+
+## Lecture 7
+
+* [Handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%207/FactorAnlysis.pdf)
+* [Handout markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%207/FactorAnlysis.Rmd)
+* [Exercises handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%207/Week7.pdf)
+* [Exercises markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%207/Week7.Rmd)
+
+## Lecture 8
+
+* [Handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%208/SEM.pdf)
+* [Handout markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%208/SEM.Rmd)
+* [Exercises handout](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%208/Week8.pdf)
+* [Exercises markdown](https://github.com/dnbarron/Advanced-Quant/blob/master/Lecture%208/Week8.Rmd)
