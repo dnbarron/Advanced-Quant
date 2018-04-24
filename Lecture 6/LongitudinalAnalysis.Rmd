@@ -1,14 +1,14 @@
 ---
 title: "Longitudinal or Panel Analysis"
 author: "David Barron"
-date: "Hilary Term 2017"
+date: "Trinity Term 2018"
 fontsize: 10pt
 output: 
   beamer_presentation:
     theme: "Madrid"
     toc: false
     slide_level: 3
-    keep_tex: false
+    keep_tex: truel
     df_print: kable
     fig_caption: false
 ---
