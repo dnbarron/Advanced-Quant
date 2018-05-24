@@ -27,10 +27,10 @@ base <- lm(score ~ cohort90 + female + sclass, data = scot)
 summary(base)
 
 m1 <- lmer(score ~ 1|schoolid, data = scot)
-summary(m1)
+display(m1)
 
 m2 <- lmer(score ~ female + sclass + (1|schoolid), data = scot)
-summary(m2)
+display(m2)
 
 m3 <- lmer(score ~ cohort90 + female + sclass*schtype + (1 + sclass|schoolid), data = scot)
 display(m3)
@@ -38,8 +38,8 @@ display(m3)
 library(effects)
 plot(Effect(c('sclass','schtype'), m3))
 
-m4 <- lmer(score ~ cohort90 + female + sclass*schtype + (1 + sclass|schoolid), data = scot)
-display(m4)
+#m4 <- lmer(score ~ cohort90 + female + sclass * schtype + (1 + sclass|schoolid), data = scot)
+#display(m4)
 
 m5 <- lmer(score ~ cohort90 + female + schdenom + sclass + schtype + (1|schoolid) , data = scot)
 display(m5)

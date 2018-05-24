@@ -97,7 +97,7 @@ model1.alt <- sem(kabc.model.alt, sample.cov = kabcFull.cov, sample.nobs = 200)
 
 ### CFA example
 
-The Kaufman Assessment Battery for Children is an individually administeredd cognitive ability test for children.  The eight items are claimed to be measures of two factors: sequential processing and simultaneous processing.  The former require correct recall of auditory stimuli (nr: Number Recall, wo: Word Order) or visual stimuli (hm: Hand Movements) in a particular order.  The latter are intended to measure more holistic, less order-dependent reasoning (gc: Gestalt Closure, tr: Triangles, sm: Spatial Memory, ma: Matrix Analogies, ps: Photo Series).  We will perform a CFA using these tests on 200 children aged 10.  The covariance matrix is:
+The Kaufman Assessment Battery for Children is an individually administered cognitive ability test for children.  The eight items are claimed to be measures of two factors: sequential processing and simultaneous processing.  The former require correct recall of auditory stimuli (nr: Number Recall, wo: Word Order) or visual stimuli (hm: Hand Movements) in a particular order.  The latter are intended to measure more holistic, less order-dependent reasoning (gc: Gestalt Closure, tr: Triangles, sm: Spatial Memory, ma: Matrix Analogies, ps: Photo Series).  We will perform a CFA using these tests on 200 children aged 10.  The covariance matrix is:
 
 ```{r}
 kabcFull.cov
@@ -122,7 +122,7 @@ semPaths(model1, what = 'path', whatLabels = 'est', edge.label.cex = 1.2)
 \small
 
 - CFA (and more generally SEM) is fit using maximum likelihood estimation, so we obtain the log-likelihood that enable us to compare the relative fit of nested models. Here the log likelihood is `r unclass(logLik(model1))[[1]]`.
-- We can compare that to the log likelihood that would be obtained from a model that reproduces the data perfectly. THis is `r unname(fitmeasures(model1, 'unrestricted.logl'))`.  From these two figures, we can calculate the likelihood ratio $\chi^2$, which in this case is `r unname(fitmeasures(model1, 'chisq'))` with `r unname(fitmeasures(model1, 'df'))` degrees of freedom.
+- We can compare that to the log likelihood that would be obtained from a model that reproduces the data perfectly. This is `r unname(fitmeasures(model1, 'unrestricted.logl'))`.  From these two figures, we can calculate the likelihood ratio $\chi^2$, which in this case is `r unname(fitmeasures(model1, 'chisq'))` with `r unname(fitmeasures(model1, 'df'))` degrees of freedom.
 -  The number of degrees of freedom is the number of estimated parameters fewer in the estimated model than there are observed moments in the data.  There are always $k(k+1)/2$ observed second-order moments (ie, variances and covariances), where $k$ is the number of observed variables, so in this case that is $8 \times 9 \div 2 = 36.$  There are 17 estimated parameters: 6 regression parameters, 8 variances of measured variables, 2 variances and 1 covariance of unobserved factors.  That gives $36 - 17 = 19$ degrees of freedom.
 - Gives p-value of `r unname(fitmeasures(model1, 'pvalue'))`.  That means we would have to conclude this model does not fit the data.
 

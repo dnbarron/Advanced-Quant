@@ -8,9 +8,12 @@ output:
     theme: "Madrid"
     toc: false
     slide_level: 3
-    keep_tex: true
-    df_print: kable
+    keep_tex: false
     fig_caption: false
+    df_print: kable
+ #   includes:
+#      in_header: nup.tex
+    
 ---
 
 
@@ -116,9 +119,9 @@ $$
 
 Consider two specific cases:
 $$
-\rho_{11} = 1.00 = \Lambda_{11}\Lambda_{11} + \Lambda_{12}\Lambda_{12} + D_{\Psi_{11}}.
+\rho_{11} = 1.0 = \Lambda_{11}\Lambda_{11} + \Lambda_{12}\Lambda_{12} + D_{\Psi_{11}}.
 $$
-This implies that the variance of measureed variable 1 comes from three sources, and the first term in the sum corresponds to the proportion of the variance due to common factor 1, the second term to the proportion of the variance due to common factor 2 and the third term to that due to the unique factor.
+This implies that the variance of measured variable 1 comes from three sources, and the first term in the sum corresponds to the proportion of the variance due to common factor 1, the second term to the proportion of the variance due to common factor 2 and the third term to that due to the unique factor.
 
 $$
 \rho_{21} = \Lambda_{21}\Lambda_{11} + \Lambda_{22}\Lambda_{12}.
@@ -206,7 +209,7 @@ efa2 <- fa(efa.eg, 3, n.obs = 200, rotate = 'varimax', fm = 'ml')
 ### Parallel analysis
 
 This method compares eigenvalues obtained from the sample correlation matrix with eigenvalues obtained from random data.  Random data is generated with the same sample size and number of MVs and this is used to obtain a correlation matrix.  The random data eigenvalues are typically averages over a number of simulations.  The number of eigenvalues from the sample data that are larger than the corresponding eigenvalues from random data is the number of common factors.
-```{r, fig.keep = 'none', results = 'hide'}
+```{r, fig.keep = 'none', results = 'hide', message=FALSE, warning=FALSE}
 fap <- fa.parallel(efa.eg, fa = 'fa', n.obs = 200, main = '')
 ```
 ```{r, out.width="65%"}
@@ -279,7 +282,7 @@ fa.dta <- tidyr::separate(fa.dta, variable, c('Rotation', 'Common.factor'))
 fa.dta <- reshape2::dcast(fa.dta, ... ~ Common.factor)
 names(fa.dta) <- c('MV', 'Rotation', 'CF1', 'CF2')
 
-ggplot(fa.dta, aes(x = CF1, y = CF2, colour = Rotation, shape = Rotation)) + #geom_point() + 
+ggplot(fa.dta, aes(x = CF1, y = CF2, colour = Rotation, shape = Rotation)) + #geom_point() +
   theme_bw() + geom_hline(yintercept = 0) + geom_vline(xintercept = 0) + 
   geom_text(aes(label = MV)) + coord_equal()
 

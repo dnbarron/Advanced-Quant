@@ -2,7 +2,11 @@
 title: "Week 6 Practical Session"
 author: "David Barron"
 date: "Trinity Term 2018"
-output: pdf_document
+output:
+  pdf_document: 
+    keep_tex: true
+  html_document:
+    df_print: paged
 ---
 
 

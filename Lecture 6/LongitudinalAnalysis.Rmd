@@ -8,9 +8,10 @@ output:
     theme: "Madrid"
     toc: false
     slide_level: 3
-    keep_tex: truel
-    df_print: kable
+    keep_tex: false
     fig_caption: false
+#    includes:
+#      in_header: nup.tex
 ---
 
 

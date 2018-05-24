@@ -72,7 +72,7 @@ We are treating country as the level 2 variable.  Let's try a model with sex, ag
 
 ```{r mod1}
 require(arm)
-m1 <- lmer(Happy ~ Age + I(Age^2) + Marital + Sex + Gini + (1|cntry), data = ess)
+m1 <- lmer(Happy ~ Age + I(Age^2) + Marital + Sex + Gini + (1 + Gini| cntry), data = ess)
 display(m1)
 plot(Effect('Age', m1))
 ```
@@ -85,17 +85,19 @@ lattice::dotplot(ranef(m1, condVar = FALSE))
 
 Now try adding some more variables.
 ```{r mod2}
-m2 <- lmer(Happy ~ Age + I(Age^2/1000) + Marital2 + Sex + Gini + I(GDP/1000) + EDUyears + (1|cntry), 
-           data = ess)
-display(m2)
-```
+ess$GDPk <- ess$GDP/1000
 
-Apart from Gini, these are all statistically significant.  Let's see if the effect of, say, education, varies by country.
+m2 <- lmer(Happy ~ Age + I(Age^2/1000) + Marital2 + Sex + GDPk + EDUyears + 
+             (1 | cntry), data = ess)
+display(m2)
+``` 
+
+These are all statistically significant.  Let's see if the effect of, say, education, varies by country.
 
 ```{r mod3}
-ess$GDPk <- ess$GDP/1000
-m3 <- lmer(Happy ~ Age + I(Age^2/1000) + Marital2 + Sex + Gini + GDPk + EDUyears + (1 + EDUyears|cntry), 
-           data = ess)
+
+m3 <- lmer(Happy ~ Age + I(Age^2/1000) + Marital2 + Sex + GDPk + EDUyears + 
+             (1 + EDUyears|cntry), data = ess)
 display(m3)
 anova(m2, m3)
 lattice::dotplot(ranef(m3, condVar = TRUE))
